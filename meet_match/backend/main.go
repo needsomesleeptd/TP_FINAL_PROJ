@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -22,6 +23,10 @@ func card_page(w http.ResponseWriter, r *http.Request) {
 
 	test_card := Card{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg",
 		Card_name: "умный мужик", rating: 5}
+	
+	req := r.FormValue("request")
+	fmt.Println(req) // В req запрос
+
 	tpl.Execute(w, test_card)
 }
 
