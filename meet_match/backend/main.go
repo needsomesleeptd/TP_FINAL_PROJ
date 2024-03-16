@@ -22,12 +22,7 @@ func card_page(w http.ResponseWriter, r *http.Request) {
 
 	test_card := Card{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg",
 		Card_name: "умный мужик", rating: 5}
-
-	//fmt.Fprintf(w, r.Proto)
-	//buf := &bytes.Buffer{}
 	tpl.Execute(w, test_card)
-	//fmt.Printf("%s", buf)
-	//buf.WriteTo(w)
 }
 
 func index_page(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +40,7 @@ func neural_network(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	//temp = template.Must(template.ParseGlob("../frontend/*.html"))
 	http.HandleFunc("/", index_page)
-	http.HandleFunc("/card", card_page)
+	http.HandleFunc("/card/", card_page)
 	http.ListenAndServe(":8080", nil)
 }
