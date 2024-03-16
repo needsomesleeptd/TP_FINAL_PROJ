@@ -37,7 +37,9 @@ func cards_page(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(req) // В req запрос
 
 	tpl.Execute(w, array_of_cards[card])
-	card += 1
+	if card < len(array_of_cards){
+		card += 1
+	}
 }
 
 func card_page_like(w http.ResponseWriter, r *http.Request) {
@@ -45,12 +47,16 @@ func card_page_like(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Карта %d понравилась", card)
 	
 	tpl.Execute(w, array_of_cards[card])
-	card += 1
+	if card < len(array_of_cards){
+		card += 1
+	}
 }
 
 func card_page_dislike(w http.ResponseWriter, r *http.Request) {
 	tpl.Execute(w, array_of_cards[card])
-	card += 1
+	if card < len(array_of_cards){
+		card += 1
+	}
 }
 
 func index_page(w http.ResponseWriter, r *http.Request) {
