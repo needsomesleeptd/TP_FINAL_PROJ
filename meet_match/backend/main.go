@@ -66,7 +66,7 @@ func card_page(w http.ResponseWriter, r *http.Request) {
 	}
 
 	buffer := bytes.NewBuffer(json_req)
-	url := "http://*/rec"
+	url := "http://127.0.0.1:5000/rec"
 	json_resp, err := http.Post(url, "application/json", buffer)
 	if err != nil {
 		fmt.Errorf("%s", "Анлак, не получили ответ")
