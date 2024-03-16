@@ -18,16 +18,39 @@ type query struct {
 }
 
 var tpl = template.Must(template.ParseFiles("../frontend/card.html"))
+var card = 0
 
-func card_page(w http.ResponseWriter, r *http.Request) {
+var array_of_cards []Card
 
-	test_card := Card{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg",
-		Card_name: "умный мужик", rating: 5}
+
+func cards_page(w http.ResponseWriter, r *http.Request) {
+	card = 0
+	temp := []Card{{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg",
+	Card_name: "умный мужик", rating: 5}, 
+	{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg", Card_name: "умный мужик2", rating: 5},
+	{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg", Card_name: "умный мужик3", rating: 5},
+	{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg",
+	Card_name: "умный мужик4", rating: 5}}
+	array_of_cards = temp
 	
 	req := r.FormValue("request")
 	fmt.Println(req) // В req запрос
 
-	tpl.Execute(w, test_card)
+	tpl.Execute(w, array_of_cards[card])
+	card += 1
+}
+
+func card_page_like(w http.ResponseWriter, r *http.Request) {
+	
+	fmt.Printf("Карта %d понравилась", card)
+	
+	tpl.Execute(w, array_of_cards[card])
+	card += 1
+}
+
+func card_page_dislike(w http.ResponseWriter, r *http.Request) {
+	tpl.Execute(w, array_of_cards[card])
+	card += 1
 }
 
 func index_page(w http.ResponseWriter, r *http.Request) {
@@ -46,6 +69,8 @@ func neural_network(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", index_page)
-	http.HandleFunc("/card/", card_page)
+	http.HandleFunc("/cards/", cards_page)
+	http.HandleFunc("/card_like/", card_page_like)
+	http.HandleFunc("/card_dislike/", card_page_dislike)
 	http.ListenAndServe(":8080", nil)
 }
