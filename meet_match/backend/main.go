@@ -51,13 +51,16 @@ type nn_reqest struct {
 }
 
 var tpl = template.Must(template.ParseFiles("../frontend/card.html"))
+var card = 0
 
-func card_page(w http.ResponseWriter, r *http.Request) {
+var array_of_cards []Card
 
-	//test_card := Card{Img_url: "https://media.kudago.com/thumbs/xl/images/list/42/0c/420c5ac9b0836258f52c0b4ee131e6e1.jpg",
-	//Card_name: "умный мужик", rating: 5}
+
+func cards_page(w http.ResponseWriter, r *http.Request) {
+	card = 0
 
 	req := r.FormValue("request")
+	fmt.Println(req) // В req запрос
 
 	nn_req_struct := nn_reqest{Query: req, Label: "smth"}
 	json_req, err := json.Marshal(nn_req_struct)
@@ -66,20 +69,40 @@ func card_page(w http.ResponseWriter, r *http.Request) {
 	}
 
 	buffer := bytes.NewBuffer(json_req)
-	url := "http://*/rec"
+    url := "http://127.0.0.1:5000/rec"
 	json_resp, err := http.Post(url, "application/json", buffer)
 	if err != nil {
 		fmt.Errorf("%s", "Анлак, не получили ответ")
 	}
 	fmt.Println(json_resp)
-	var cards []Card
-
+	
 	defer json_resp.Body.Close()
 
-	json.NewDecoder(json_resp.Body).Decode(&cards)
+	json.NewDecoder(json_resp.Body).Decode(&array_of_cards)
+	
+	
 
-	tpl.Execute(w, cards[0])
+	tpl.Execute(w, array_of_cards[card])
+	if card < len(array_of_cards) - 1{
+		card += 1
+	}
+}
 
+func card_page_like(w http.ResponseWriter, r *http.Request) {
+	
+	fmt.Printf("Карта %d понравилась\n", card)
+	
+	tpl.Execute(w, array_of_cards[card])
+	if card < len(array_of_cards) - 1{
+		card += 1
+	}
+}
+
+func card_page_dislike(w http.ResponseWriter, r *http.Request) {
+	tpl.Execute(w, array_of_cards[card])
+	if card < len(array_of_cards) - 1{
+		card += 1
+	}
 }
 
 func index_page(w http.ResponseWriter, r *http.Request) {
@@ -113,9 +136,9 @@ func nn_page(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	//temp = template.Must(template.ParseGlob("../frontend/*.html"))
 	http.HandleFunc("/", index_page)
-	http.HandleFunc("/card/", card_page)
-	http.HandleFunc("/nn/", nn_page)
+	http.HandleFunc("/cards/", cards_page)
+	http.HandleFunc("/card_like/", card_page_like)
+	http.HandleFunc("/card_dislike/", card_page_dislike)
 	http.ListenAndServe(":8080", nil)
 }

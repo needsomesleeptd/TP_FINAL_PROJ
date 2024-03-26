@@ -63,13 +63,19 @@
 
     <div class="screen-wrap">
         <div class="card w-25">
-            <img src="{{ .Img_url }}"
-                alt="" class="rounded-top">
+            <img src="{{ .Img_url }}" alt="" class="rounded-top">
             <h3 class="text-center text-color-main">
                 {{ .Card_name }}
             </h3>
+            <form action="/card_like/">
+                <button type="submit" class="btn btn-light w-100">Like</button>
+            </form>
+
+            <form action="/card_dislike/">
+                <button type="submit" class="btn btn-light w-100">Dislike</button>
+            </form>
         </div>
-    </div>
+
 
 
 </body>
