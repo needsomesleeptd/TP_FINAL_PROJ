@@ -5,6 +5,7 @@ FROM golang:1.18
 WORKDIR /app
 
 # Copy the Go module files and download dependencies
+
 COPY backend/go.mod ./
 COPY backend/go.sum ./
 RUN go mod download
@@ -13,12 +14,11 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN cd backend
-RUN go build -o main .
-RUN cd ..
+RUN cd backend/cmd && go build -o main
+
 
 # Expose port 8080 to the outside world
-#EXPOSE 8080
+EXPOSE 8080
 
 # Command to run the executable
-CMD ["./main"]
+CMD ["/app/backend/cmd/main"]
