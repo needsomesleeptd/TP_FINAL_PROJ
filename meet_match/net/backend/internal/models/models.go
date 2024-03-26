@@ -9,9 +9,9 @@ type User struct {
 }
 
 type UserReq struct {
-	ID      uint64 `json:"ID"`
-	Name    string `json:"Name"`
-	Request string `json:"Request"`
+	ID      uint64 `json:"ID" redis:"ID"`
+	Name    string `json:"Name" redis:"Name"`
+	Request string `json:"Request" redis:"Request"`
 	//TODO:: add embeddings
 }
 

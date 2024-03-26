@@ -2,62 +2,93 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"test_backend_frontend/internal/http-server/handlers/cards"
+	"test_backend_frontend/internal/lib/api/response"
 	"test_backend_frontend/internal/model"
 	"test_backend_frontend/internal/models"
 	sessions "test_backend_frontend/internal/sessions"
 	"time"
 
+	resp "test_backend_frontend/internal/lib/api/response"
+
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 )
 
-type TempSessionData struct {
-	Session_id   uuid.UUID
-	People_count int
+type ResponseSessionID struct {
+	Response  resp.Response
+	SessionID uuid.UUID `json:"sessionID"`
+}
+
+type ResponseUsersReq struct {
+	Response  resp.Response
+	UsersReqs []models.UserReq
+}
+
+type RequestSessionUsers struct {
+	SessionID uuid.UUID `json:"sessionID"`
+}
+
+type RequestAddUser struct {
+	User      models.UserReq `json:"user"`
+	SessionID uuid.UUID      `json:"sessionID"`
 }
 
 var sessionManager *sessions.SessionManager
 
 func session_create_page(w http.ResponseWriter, r *http.Request) {
-	req := r.FormValue("request")
-	userReq := models.NewUserReq(2, "anyname", req)
+
+	userReq := models.NewUserReq(2, "anyname", "initializer of  a party")
 	sessionID, err := sessionManager.CreateSession(userReq)
 	if err != nil {
-		fmt.Errorf(err.Err().Error())
+		render.JSON(w, r, response.Error(err.Error()))
+		return
 	}
+	render.JSON(w, r, ResponseSessionID{
+		Response:  resp.OK(),
+		SessionID: sessionID,
+	})
 
-	var tpl_index = template.Must(template.ParseFiles("../frontend/create_session.html"))
-
-	tpl_index.Execute(w, nil)
-	s_path := fmt.Sprintf("/session/%u", sessionID)
-	http.Redirect(w, r, s_path, http.StatusFound)
 }
 
-func session_page(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var sessionID uuid.UUID
-	var err error
-	sessionID, err = uuid.Parse(vars["id"])
+func session_get_data(w http.ResponseWriter, r *http.Request) {
+	var req RequestSessionUsers
+	err := render.DecodeJSON(r.Body, &req)
 	if err != nil {
-		fmt.Print(err)
+		render.JSON(w, r, response.Error(err.Error()))
+		return
 	}
-	users, err := sessionManager.GetUsers(sessionID)
+	users, err := sessionManager.GetUsers(req.SessionID)
 	if err != nil {
-		fmt.Print(err)
+		render.JSON(w, r, response.Error(err.Error()))
+		return
 	}
-	var tpl_index = template.Must(template.ParseFiles("../frontend/sessions.html"))
-	data := TempSessionData{Session_id: sessionID, People_count: len(users)}
-	err = tpl_index.Execute(w, data)
+	render.JSON(w, r, ResponseUsersReq{
+		Response:  resp.OK(),
+		UsersReqs: users,
+	})
+
+}
+
+func session_add_user(w http.ResponseWriter, r *http.Request) {
+	var req RequestAddUser
+	err := render.DecodeJSON(r.Body, &req)
 	if err != nil {
-		fmt.Print(err)
+		render.JSON(w, r, response.Error(err.Error()))
+		return
 	}
+	err = sessionManager.AddUser(&req.User, req.SessionID)
+	if err != nil {
+		render.JSON(w, r, response.Error(err.Error()))
+		return
+	}
+	render.JSON(w, r, resp.OK())
+
 }
 
 func main() {
@@ -66,11 +97,17 @@ func main() {
 		fmt.Println("Error with model")
 		os.Exit(1)
 	}
+	sessionManager, err = sessions.NewSessionManager("localhost:6379", "", 0)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 	// TODO : add config
 	router := chi.NewRouter()
 	router.Get("/cards", cards.New(model))
-	router.Post("/session_create", session_create_page)
-	router.Get("/session/{id}", session_page)
+	router.Post("/sessions", session_create_page)
+	router.Get("/sessions/{id}", session_get_data)
+	router.Patch("/sessions/{id}", session_add_user)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
