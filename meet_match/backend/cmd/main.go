@@ -2,15 +2,14 @@ package main
 
 import (
 	"fmt"
-	"internal/http-server/handlers/cards"
-	"internal/model"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"test_backend_frontend/internal/http-server/handlers/cards"
+	"test_backend_frontend/internal/model"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 )
 
 func main() {
