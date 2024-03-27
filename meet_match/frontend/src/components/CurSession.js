@@ -1,11 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
-const CurSession = () => {
-  const [participants, setParticipants] = useState([
-    { id: 1, name: 'Вася', checked: false },
-    { id: 2, name: 'Петя', checked: false },
-    { id: 3, name: 'Гриша', checked: false },
-  ]);
+const CurSession = (props) => {
+  const { id } = useParams();
+  const [sessionId, setSessionId] = useState(id);
+  const [participants, setParticipants] = useState([]);
+
+  useEffect(() => {
+    getSession();
+    patchSession();
+  }, [sessionId]);
+
+  const getSession = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+          method: 'POST',
+          body: JSON.stringify({
+            'sessionID': sessionId
+          })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setParticipants(data.UsersReqs);
+      console.log(data.UsersReqs);
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
+  };
+
+  const patchSession = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+          method: 'FETCH',
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Origin': 'http://localhost:8080/sessions'
+          },
+          body: JSON.stringify({
+            'sessionID': sessionId,
+            'user': {
+              'ID': 100,
+              'Name': 'Sas',
+              'Request': 'Koko'
+            }
+          })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
+  };
 
   const [inputValue, setInputValue] = useState('');
 
@@ -29,7 +79,7 @@ const CurSession = () => {
         />
         <button onClick={handleReadyClick}>Готов</button>
       </div>
-      <p>Ссылка для приглашения: localhost:3000/session/fJy1F3j</p>
+      <p>Ссылка для приглашения: http://localhost:8080/sessions/{sessionId}</p>
       <p>Количество участников: {participants.length}</p>
       <table>
         <thead>
@@ -41,7 +91,7 @@ const CurSession = () => {
         <tbody>
           {participants.map((participant) => (
             <tr key={participant.id}>
-              <td>{participant.name}</td>
+              <td>{participant.Name}</td>
               <td>
                 <input type="checkbox" disabled />
               </td>

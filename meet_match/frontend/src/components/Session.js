@@ -4,19 +4,20 @@ import React, { useState } from 'react';
 function Session() {
 
   const createSession = async () => {
-    // const response = await fetch('https://localhost:3000/sessions', {
-    //     method: 'PUSH',
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     }
-    // });
-    // if (response.ok){
-        // const data = await response.json();
-        // const sessionId = data.id;
-        const sessionId = 1;
-        const sessionUrl = `http://localhost:3000/session/${sessionId}`;
-        window.location.href = sessionUrl;
-    // }
+    try {
+      const response = await fetch('http://localhost:8080/sessions', {
+          method: 'POST'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      const sessionId = data.sessionID;
+      const sessionUrl = `http://localhost:3000/session/${sessionId}`;
+      window.location.href = sessionUrl;
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
   };
   
   const joinSession = async () => {

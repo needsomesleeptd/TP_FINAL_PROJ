@@ -106,7 +106,7 @@ func main() {
 	router := chi.NewRouter()
 	router.Get("/cards", cards.New(model))
 	router.Post("/sessions", session_create_page)
-	router.Get("/sessions/{id}", session_get_data)
+	router.Post("/sessions/{id}", session_get_data)
 	router.Patch("/sessions/{id}", session_add_user)
 
 	done := make(chan os.Signal, 1)

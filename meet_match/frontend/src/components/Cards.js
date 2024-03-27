@@ -61,6 +61,8 @@ const Cards = () => {
             height: 400,
             background: "lightblue",
             borderRadius: 20,
+            border: "2px solid #000",
+            boxSizing: "border-box",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -72,6 +74,8 @@ const Cards = () => {
                 marginTop: "30px",
                 width: "200px",
                 height: "200px",
+                border: "2px solid #000",
+                boxSizing: "border-box",
                 objectFit: "cover",
                 borderRadius: "10%",
                 pointerEvents: "none"
