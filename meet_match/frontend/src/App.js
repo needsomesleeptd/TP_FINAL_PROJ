@@ -4,6 +4,7 @@ import Session from './components/Session'
 import CurSession from './components/CurSession'
 import Cards from './components/Cards'
 import NotFound from './components/NotFound'
+import './custom.css'
 
 function App() {
     return (
