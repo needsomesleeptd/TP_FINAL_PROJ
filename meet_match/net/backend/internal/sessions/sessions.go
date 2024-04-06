@@ -68,9 +68,37 @@ func (s *SessionManager) GetUsers(sessionID uuid.UUID) ([]models.UserReq, error)
 		}
 		users = append(users, user)
 	}
-	if err != nil {
-		return nil, err
-	}
 
 	return users, nil
+}
+
+func (s *SessionManager) ModifyUser(sessionID uuid.UUID, userModifyID uint64, user *models.UserReq) error {
+	marhsalledData, err := json.Marshal(*user)
+	if err != nil {
+		return errors.Join(fmt.Errorf("failed to marshall user"), err)
+	}
+	list, err := s.Client.LRange(context.TODO(), sessionID.String(), 0, -1).Result()
+	if err != nil {
+		return err
+	}
+	for i, item := range list {
+		var user models.UserReq
+		err := json.Unmarshal([]byte(item), &user) // Unmarshal Redis list item into struct
+		if err != nil {
+			return err
+		}
+
+		if user.ID == userModifyID {
+			var actionStr string
+			actionStr, err = s.Client.LSet(context.TODO(), sessionID.String(), int64(i), marhsalledData).Result()
+			fmt.Print(actionStr)
+			if err != nil {
+				return err
+			}
+			return nil
+
+		}
+	}
+
+	return fmt.Errorf("haven't found  users with this ID")
 }
