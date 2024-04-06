@@ -31,9 +31,10 @@ type RequestAddUser struct {
 }
 
 type RequestModifyUser struct {
-	User           models.UserReq `json:"user"`
-	SessionID      uuid.UUID      `json:"sessionID"`
-	UserIDToModify uint64         `json:"userIDToModify"` //the id of user to modify
+	NewName        string    `json:"newName"`
+	NewRequest     string    `json:"newRequest"`
+	SessionID      uuid.UUID `json:"sessionID"`
+	UserIDToModify uint64    `json:"userIDToModify"` //the id of user to modify
 }
 
 func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc {
@@ -93,12 +94,14 @@ func SessionAdduser(sessionManager *session.SessionManager) http.HandlerFunc {
 func SessionModifyuser(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestModifyUser
+
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
-		err = sessionManager.ModifyUser(req.SessionID, req.UserIDToModify, &req.User)
+		updateReq := models.NewUserReq(req.UserIDToModify, req.NewName, req.NewRequest)
+		err = sessionManager.ModifyUser(req.SessionID, req.UserIDToModify, updateReq)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
