@@ -6,6 +6,9 @@ type User struct {
 	Password string
 	Name     string
 	Surname  string
+	Age      int
+	Gender   bool // true is a man 0_0, false is women
+	//TODO:: think about adding a location
 }
 
 type UserReq struct {
