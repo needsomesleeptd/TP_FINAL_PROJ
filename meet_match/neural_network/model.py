@@ -1,59 +1,69 @@
+import torch
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import pandas as pd
-import pickle
-from data_prepare import preprocess_all_texts, preprocess_text
-import json
+import torch.nn.functional as F
 
-TOKEN_PATTERN = "[a-zA-Zа-яА-ЯёЁ]+"
+from torch import Tensor
+from transformers import AutoTokenizer, AutoModel
 
 
-def train(csv_file, vectorizer_file, vectorized_matrix_file):
-    df = pd.read_csv(csv_file)
-    df_descr = (
-        df["tags"].fillna("")
-        + "         "
-        + df["description"].fillna("")
-        + "         "
-        + df["body_text"].fillna("")
+tokenizer = AutoTokenizer.from_pretrained("intfloat/multilingual-e5-large-instruct")
+model = AutoModel.from_pretrained("intfloat/multilingual-e5-large-instruct")
+
+
+def average_pool(last_hidden_states: Tensor, attention_mask: Tensor) -> Tensor:
+    last_hidden = last_hidden_states.masked_fill(~attention_mask[..., None].bool(), 0.0)
+    return last_hidden.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
+
+
+def get_detailed_instruct(task_description: str, query: str) -> str:
+    return f"Instruct: {task_description}\nQuery: {query}"
+
+
+def search_places(
+    queries: list[str],
+    passages: list[torch.Tensor],
+    from_place: int,
+    number_of_places: int,
+) -> list[list[tuple[int, float]]]:
+    task = "Represent this sentence for searching relevant passages: "
+    queries_detailed = [get_detailed_instruct(task, query) for query in queries]
+
+    queries_tokenized = tokenizer(
+        queries_detailed,
+        max_length=512,
+        padding=True,
+        truncation=True,
+        return_tensors="pt",
     )
-    descr_lemm = preprocess_all_texts(df_descr, TOKEN_PATTERN)
-    vectorizer = TfidfVectorizer(min_df=2, norm=None, ngram_range=(1, 5))
-    vectorized_matrix = vectorizer.fit_transform(descr_lemm)
-    with open(vectorizer_file, "wb") as file:
-        pickle.dump(vectorizer, file)
-    with open(vectorized_matrix_file, "wb") as file:
-        pickle.dump(vectorized_matrix, file)
+    with torch.no_grad():
+        outputs = model(**queries_tokenized)
 
+    embeddings = average_pool(
+        outputs.last_hidden_state, queries_tokenized["attention_mask"]
+    )
+    query_embeddings = F.normalize(embeddings, p=2, dim=1)
+    scores = (query_embeddings @ passages.T) * 100
 
-def load(vectorizer_file, vectorized_matrix_file):
-    with open(vectorizer_file, "rb") as file:
-        vectorizer = pickle.load(file)
-    with open(vectorized_matrix_file, "rb") as file:
-        vectorized_matrix = pickle.load(file)
-    return vectorizer, vectorized_matrix
+    sorted_scores, sorted_indices = torch.sort(scores, descending=True)
 
+    passages_for_queries = []
+    for i in range(len(queries)):
 
-def predict(
-    csv_file, vectorizer, vectorized_matrix, sample_quary, slice_from, slice_to
-):
-    sample_query = preprocess_text(sample_quary, TOKEN_PATTERN)
-    qery_tdidf = vectorizer.transform([sample_query])
-    cosine_similarities = cosine_similarity(qery_tdidf, vectorized_matrix)
-    top_indices = cosine_similarities.argsort()[0][::-1][slice_from:slice_to]
-    res = []
-    df = pd.read_csv(csv_file)
-    for idx in top_indices:
-        res.append(
-            {
-                "idx": int(idx),
-                "title": df["title"][idx],
-                "image": json.loads(df["images"][idx].replace("'", '"'))[0]["image"],
-                "cosine_similarities": cosine_similarities[0][idx],
-            }
+        top_scores = sorted_scores[i][from_place : from_place + number_of_places]
+        top_indices = sorted_indices[i][from_place : from_place + number_of_places]
+        passages_for_queries.append(
+            [
+                (index.item(), score.item())
+                for index, score in zip(top_indices, top_scores)
+            ]
         )
-    return res
+
+    return passages_for_queries
 
 
-# train('dist.csv', 'vectorizer.pkl', 'vectorized_matrix.pkl')
+def predict(csv_file, text_embeddings, query, from_line, to_line):
+    list_res = search_places(
+        query.split(), text_embeddings, from_line, to_line - from_line + 1
+    )
+
+    return list_res
