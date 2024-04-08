@@ -2,6 +2,7 @@ package models_da
 
 import (
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"test_backend_frontend/internal/models"
 )
 
@@ -25,14 +26,17 @@ func ToPostgresFactScrolled(scrolled *models.FactScrolled) *FactScrolled {
 	}
 }
 
-func ToModelFactScrolled(scrolled *FactScrolled) *models.FactScrolled {
+func ToModelFactScrolled(scrolled *FactScrolled) (*models.FactScrolled, error) {
 	// TODO: ой-ой-ой подумать
-	session_id, _ := uuid.Parse(scrolled.SessionID)
+	session_id, err := uuid.Parse(scrolled.SessionID)
+	if err != nil {
+		return nil, errors.Wrap(err, "ToModelFactScrolled parse error")
+	}
 
 	return &models.FactScrolled{
 		SessionId: session_id,
 		UserId:    scrolled.UserID,
 		PlacesId:  scrolled.PlacesID,
 		IsLiked:   scrolled.IsLiked,
-	}
+	}, nil
 }
