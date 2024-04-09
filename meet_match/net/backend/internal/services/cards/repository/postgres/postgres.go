@@ -5,10 +5,15 @@ import (
 	"gorm.io/gorm"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_da"
+	"test_backend_frontend/internal/services/cards/repository"
 )
 
 type cardRepository struct {
 	db *gorm.DB
+}
+
+func NewCardRepo(db *gorm.DB) repository.CardRepository {
+	return &cardRepository{db: db}
 }
 
 func (c cardRepository) GetCard(id uint64) (*models.Card, error) {

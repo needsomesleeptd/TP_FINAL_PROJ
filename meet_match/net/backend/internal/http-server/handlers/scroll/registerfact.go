@@ -29,7 +29,11 @@ type TokenParser interface {
 	ParseToken(tokenString string, key string) (*auth_utils.Payload, error)
 }
 
-func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer TokenParser) http.HandlerFunc {
+type PlaceProvider interface {
+	GetCard(id uint64) (*models.Card, error)
+}
+
+func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer TokenParser, cardProv PlaceProvider) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req ScrollFactRegistrateRequest
 		err := render.DecodeJSON(r.Body, &req)
@@ -82,13 +86,13 @@ func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer
 
 		var places []*models_dto.Card
 		if is_match {
-			// TODO: fill the gaps
-			places = append(places, &models_dto.Card{
-				Id:       fact.PlacesId,
-				ImgUrl:   "",
-				CardName: "",
-				Rating:   0,
-			})
+			place, err := cardProv.GetCard(fact.PlacesId)
+			if err != nil {
+				render.JSON(w, r, resp.Error("place get issue"))
+				return
+			}
+
+			places = append(places, models_dto.ToDTOCard(place))
 		}
 
 		render.JSON(w, r, Response{
