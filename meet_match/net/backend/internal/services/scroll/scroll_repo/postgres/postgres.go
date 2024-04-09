@@ -19,6 +19,7 @@ func NewScrollRepository(db *gorm.DB) scroll_repo.ScrollRepository {
 	return &scrollRepository{db: db}
 }
 
+// TODO: add timestamp to table
 func (s scrollRepository) AddScrollFact(fact *models.FactScrolled) error {
 	pgFact := models_da.ToPostgresFactScrolled(fact)
 	tx := s.db.Create(&pgFact)

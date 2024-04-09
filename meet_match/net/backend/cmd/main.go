@@ -8,12 +8,15 @@ import (
 	"syscall"
 	auth_handler "test_backend_frontend/internal/http-server/handlers/auth"
 	"test_backend_frontend/internal/http-server/handlers/cards"
+	scroll2 "test_backend_frontend/internal/http-server/handlers/scroll"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
 	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/model"
 	"test_backend_frontend/internal/models/models_da"
 	auth_service "test_backend_frontend/internal/services/auth"
 	repo_adapter "test_backend_frontend/internal/services/auth/user_repo/user_repo_ad"
+	"test_backend_frontend/internal/services/scroll"
+	postgres2 "test_backend_frontend/internal/services/scroll/scroll_repo/postgres"
 	sessions "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
 	"time"
@@ -50,6 +53,10 @@ func main() {
 	}
 	// TODO : add config
 
+	// Scroll service
+	scrollRepo := postgres2.NewScrollRepository(db)
+	scrollManager := scroll.NewScrollUseCase(scrollRepo)
+
 	//auth service
 	userRepo := repo_adapter.NewUserRepositoryAdapter(db)
 	hasher := auth_utils.NewPasswordHashCrypto()
@@ -67,6 +74,7 @@ func main() {
 		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
+		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 	})
 
 	//auth
