@@ -46,12 +46,12 @@ func main() {
 		os.Exit(1)
 	}
 	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
-	db.AutoMigrate(models_da.User{}) //TODO:: this is a hack, fix this
+	db.AutoMigrate(models_da.User{}) //TODO: this is a hack, fix this
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	// TODO : add config
+	// TODO: add config
 
 	//auth service
 	userRepo := repo_adapter.NewUserRepositoryAdapter(db)
