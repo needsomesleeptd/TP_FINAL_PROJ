@@ -83,6 +83,7 @@ func (serv *AuthService) SignIn(candidate *models.User) (tokenStr string, err er
 	if err != nil {
 		return "", errors.Join(ErrHashPasswdMatch, err)
 	}
+	candidate.ID = user.ID
 	tokenStr, err = serv.tokenizer.GenerateToken(*candidate, serv.key)
 	if err != nil {
 		return "", errors.Join(ErrGeneratingToken, err)

@@ -10,7 +10,6 @@ import (
 	"test_backend_frontend/internal/http-server/handlers/cards"
 	scroll2 "test_backend_frontend/internal/http-server/handlers/scroll"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
-	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/model"
 	"test_backend_frontend/internal/models/models_da"
 	auth_service "test_backend_frontend/internal/services/auth"
@@ -65,11 +64,11 @@ func main() {
 	scrollRepo := postgres2.NewScrollRepository(db)
 	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager)
 
-	authMiddleware := (func(h http.Handler) http.Handler {
+	/*authMiddleware := (func(h http.Handler) http.Handler {
 		return auth_middleware.JwtAuthMiddleware(h, auth_service.SECRET, tokenHandler)
-	})
+	})*/
 	router.Group(func(r chi.Router) { //group for which auth middleware is required
-		r.Use(authMiddleware)
+		//r.Use(authMiddleware)
 		r.Get("/cards", cards.New(model))
 		r.Post("/sessions", sessions_handler.SessionCreatePage(sessionManager))
 		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
@@ -77,6 +76,7 @@ func main() {
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
 		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
 		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
+
 	})
 
 	//auth

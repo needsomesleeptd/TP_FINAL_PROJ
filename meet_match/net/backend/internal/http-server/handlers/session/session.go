@@ -8,6 +8,7 @@ import (
 	"test_backend_frontend/internal/models"
 	session "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
+	"time"
 
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
@@ -25,6 +26,12 @@ type ResponseUsersReq struct {
 
 type RequestSessionUsers struct {
 	SessionID uuid.UUID `json:"sessionID"`
+}
+
+type RequestCreateSession struct {
+	SessionName      string `json:"sessionName"`
+	SessionPeopleCap int    `json:"sessionPeopleCap"`
+	//TODO:: add duration
 }
 
 type RequestAddUser struct {
@@ -50,23 +57,28 @@ type ResponseGetAllSessionsByUser struct {
 
 func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		//userReq := models.NewUserReq(2, "anyname", "initializer of  a party")
+		var req RequestCreateSession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
 		var payload *auth_utils.Payload
 		cookie, err := r.Cookie(auth_handler.COOKIE_NAME)
 		if err != nil {
 			render.JSON(w, r, response.Error("Error with cookie"))
 			return
 		}
-		//fmt.Print(cookie.Value)
+
 		payload, err = sessionManager.TokenHandler.ParseToken(cookie.Value, sessionManager.Secret)
 		if err != nil {
 			render.JSON(w, r, response.Error("Error getting data"))
 			return
 		}
 
-		var sessionName = "session Name"
 		userReq := models.UserReq{ID: payload.ID, Name: payload.Login, Request: "fill me!"}
-		sessionID, err := sessionManager.CreateSession(&userReq, sessionName)
+		var duration time.Duration = 1e9
+		sessionID, err := sessionManager.CreateSession(&userReq, req.SessionName, req.SessionPeopleCap, duration)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
