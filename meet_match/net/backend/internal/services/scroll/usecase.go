@@ -6,6 +6,7 @@ import (
 	"slices"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/services/scroll/scroll_repo"
+	session "test_backend_frontend/internal/sessions"
 )
 
 type ScrollUseCase interface {
@@ -15,11 +16,12 @@ type ScrollUseCase interface {
 }
 
 type useсase struct {
-	repo scroll_repo.ScrollRepository
+	repo        scroll_repo.ScrollRepository
+	sessionServ *session.SessionManager
 }
 
-func NewScrollUseCase(repository scroll_repo.ScrollRepository) ScrollUseCase {
-	return &useсase{repo: repository}
+func NewScrollUseCase(repository scroll_repo.ScrollRepository, sessMgr *session.SessionManager) ScrollUseCase {
+	return &useсase{repo: repository, sessionServ: sessMgr}
 }
 
 func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
@@ -53,6 +55,15 @@ func (u *useсase) IsMatchHappened(scrolled *models.FactScrolled) (bool, error) 
 		}
 	}
 
+	getUsers, err := u.sessionServ.GetUsers(scrolled.SessionId)
+	if err != nil {
+		return false, errors.Wrap(err, "scroll.GetMatchCards error")
+	}
+
+	if len(userIds) < len(getUsers) {
+		return false, nil
+	}
+
 	return isMatched, nil
 }
 
@@ -75,6 +86,15 @@ func (u *useсase) GetMatchCards(session_id uuid.UUID) ([]*models.Card, error) {
 	}
 
 	if len(likesForAll) <= 0 {
+		return nil, nil
+	}
+
+	getUsers, err := u.sessionServ.GetUsers(session_id)
+	if err != nil {
+		return nil, errors.Wrap(err, "scroll.GetMatchCards error")
+	}
+
+	if len(likesForAll) < len(getUsers) {
 		return nil, nil
 	}
 

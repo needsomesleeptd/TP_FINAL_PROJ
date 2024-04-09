@@ -53,16 +53,16 @@ func main() {
 	}
 	// TODO : add config
 
-	// Scroll service
-	scrollRepo := postgres2.NewScrollRepository(db)
-	scrollManager := scroll.NewScrollUseCase(scrollRepo)
-
 	//auth service
 	userRepo := repo_adapter.NewUserRepositoryAdapter(db)
 	hasher := auth_utils.NewPasswordHashCrypto()
 	tokenHandler := auth_utils.NewJWTTokenHandler()
 	userService := auth_service.NewAuthService(userRepo, hasher, tokenHandler, auth_service.SECRET)
 	router := chi.NewRouter()
+
+	// Scroll service
+	scrollRepo := postgres2.NewScrollRepository(db)
+	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager)
 
 	authMiddleware := (func(h http.Handler) http.Handler {
 		return auth_middleware.JwtAuthMiddleware(h, auth_service.SECRET, tokenHandler)
