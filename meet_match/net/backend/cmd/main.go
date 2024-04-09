@@ -75,6 +75,7 @@ func main() {
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
 		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
+		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler))
 	})
 
 	//auth

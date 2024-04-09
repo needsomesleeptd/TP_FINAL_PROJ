@@ -11,9 +11,8 @@ import (
 )
 
 type Payload struct {
-	Expires time.Duration
-	Login   string
-	ID      uint64
+	Login string
+	ID    uint64
 }
 
 type ITokenHandler interface {
@@ -77,9 +76,8 @@ func (hasher JWTTokenHandler) ParseToken(tokenString string, key string) (*Paylo
 	}
 
 	payload := &Payload{
-		Expires: claims["exprires"].(time.Duration),
-		Login:   claims["login"].(string),
-		ID:      claims["ID"].(uint64),
+		Login: claims["login"].(string),
+		ID:    uint64(claims["ID"].(float64)),
 	}
 
 	return payload, nil
