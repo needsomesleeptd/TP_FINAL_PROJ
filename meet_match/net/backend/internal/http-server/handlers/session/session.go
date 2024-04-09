@@ -37,10 +37,20 @@ type RequestModifyUser struct {
 	UserIDToModify uint64    `json:"userIDToModify"` //the id of user to modify
 }
 
+type RequestGetAllSessionsByUser struct {
+	UserID uint64 `json:"userID"`
+}
+
+type ResponseGetAllSessionsByUser struct {
+	Response resp.Response
+	Sessions []session.Session `json:"sessions"`
+}
+
 func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userReq := models.NewUserReq(2, "anyname", "initializer of  a party")
-		sessionID, err := sessionManager.CreateSession(userReq)
+		var sessionName = "session Name"
+		sessionID, err := sessionManager.CreateSession(userReq, sessionName)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
@@ -108,5 +118,26 @@ func SessionModifyuser(sessionManager *session.SessionManager) http.HandlerFunc 
 		}
 		render.JSON(w, r, resp.OK())
 
+	}
+}
+
+func SessionGetUserSessions(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestGetAllSessionsByUser
+		var sessions []session.Session
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		sessions, err = sessionManager.GetUserSessions(req.UserID)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		render.JSON(w, r, ResponseGetAllSessionsByUser{
+			Response: resp.OK(),
+			Sessions: sessions,
+		})
 	}
 }

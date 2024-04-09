@@ -24,6 +24,7 @@ func JwtAuthMiddleware(next http.Handler, secret string, tokenHandler auth_utils
 			render.Status(r, http.StatusBadRequest)
 			return
 		}
+
 		err = tokenHandler.ValidateToken(cookie.Value, auth_service.SECRET)
 		if err != nil {
 			if err == auth_utils.ErrParsingToken {

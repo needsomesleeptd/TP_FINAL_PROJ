@@ -30,6 +30,21 @@ func (repo *UserRepositoryAdapter) GetUserByID(id uint64) (*models.User, error) 
 	return &user, nil
 }
 
+func (repo *UserRepositoryAdapter) GetUsersByIDs(ids []uint64) ([]models.User, error) {
+	var user_das []models_da.User
+	tx := repo.db.Where("id IN ?", ids).Find(&user_das)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "Error getting user by ID")
+	}
+	var users []models.User
+
+	for _, user_da := range user_das {
+		user := models_da.FromDaUser(&user_da)
+		users = append(users, user)
+	}
+	return users, nil
+}
+
 func (repo *UserRepositoryAdapter) GetUserByLogin(login string) (*models.User, error) {
 	var user_da models_da.User
 	tx := repo.db.Where("login = ?", login).First(&user_da)

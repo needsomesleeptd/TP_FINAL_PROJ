@@ -67,6 +67,7 @@ func main() {
 		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
+		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
 	})
 
 	//auth

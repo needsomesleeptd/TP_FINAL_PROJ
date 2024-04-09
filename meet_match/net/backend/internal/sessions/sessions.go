@@ -6,13 +6,21 @@ import (
 	"errors"
 	"fmt"
 	"test_backend_frontend/internal/models"
+	"test_backend_frontend/internal/services/auth/user_repo"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
+type Session struct {
+	SessionID   uuid.UUID        `json:"sessionID"`
+	SessionName string           `json:"sessionName"`
+	Users       []models.UserReq `json:"users"`
+}
+
 type SessionManager struct {
 	Client     *redis.Client
+	UserRepo   user_repo.IUserRepository
 	SessionIDs []uuid.UUID
 }
 
@@ -29,8 +37,9 @@ func NewSessionManager(addr, password string, db int) (*SessionManager, error) {
 	return &SessionManager{Client: client}, nil
 }
 
-func (s *SessionManager) CreateSession(creator *models.UserReq) (uuid.UUID, error) {
+func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName string) (uuid.UUID, error) {
 	newSessionID := uuid.New()
+
 	s.SessionIDs = append(s.SessionIDs, newSessionID)
 	marhsalledData, err := json.Marshal(*creator)
 	if err != nil {
@@ -41,6 +50,14 @@ func (s *SessionManager) CreateSession(creator *models.UserReq) (uuid.UUID, erro
 	if err != nil {
 		return uuid.Max, err
 	}
+	//var expireDuration time.Duration
+	//expireDuration = 1e9
+
+	//err = s.Client.Set(context.TODO(), newSessionID.String(), sessionName, expireDuration).Err()
+	if err != nil {
+		return uuid.Max, err
+	}
+
 	return newSessionID, err
 }
 
@@ -99,6 +116,49 @@ func (s *SessionManager) ModifyUser(sessionID uuid.UUID, userModifyID uint64, us
 
 		}
 	}
-
 	return fmt.Errorf("haven't found  users with this ID")
 }
+
+func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
+
+	var err error
+	var validSessions []uuid.UUID
+	var users []models.UserReq
+	var sessions []Session
+	var sessionName string
+	for _, sessionID := range s.SessionIDs {
+		//fmt.Println(sessionID)
+		users, err = s.GetUsers(sessionID)
+		//fmt.Println(users)
+		for _, candidate := range users {
+			if candidate.ID == userID {
+
+				if err != nil && err != redis.Nil {
+					return nil, err
+				}
+				if err == nil {
+					validSessions = append(validSessions, sessionID)
+					/*sessionName, err = s.Client.Get(context.TODO(), sessionID.String()).Result()
+					if err != nil && err != redis.Nil {
+						return nil, err
+					}*/
+					sessionName = "someName"
+
+					session := Session{
+						SessionID:   sessionID,
+						SessionName: sessionName,
+						Users:       users,
+					}
+					sessions = append(sessions, session)
+				}
+			}
+		}
+	}
+	s.SessionIDs = validSessions
+
+	return sessions, nil
+}
+
+//Личный кабинет пользователя
+// Хранить в сессии число людей для начала
+// Хранить флаг началась сессия/ не началась сессия
