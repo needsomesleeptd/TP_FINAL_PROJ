@@ -144,17 +144,21 @@ func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
 	var session Session
 	var sessions []Session
 	for _, sessionID := range keys {
-		fmt.Print(sessionID)
+
 		sessionMarshalled, err := s.Client.Get(context.TODO(), sessionID).Result()
 		if err != nil && err != redis.Nil {
 			return nil, errors.Join(errors.New("getting session error"), err)
 		}
-		fmt.Print("after")
 		err = json.Unmarshal([]byte(sessionMarshalled), &session)
 		if err != nil {
 			return nil, errors.Join(errors.New("getting session error"), err)
 		}
-		sessions = append(sessions, session)
+		for _, user := range session.Users {
+			if userID == user.ID {
+				sessions = append(sessions, session)
+				break
+			}
+		}
 	}
 	return sessions, nil
 }
