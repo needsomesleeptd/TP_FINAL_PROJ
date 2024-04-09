@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"test_backend_frontend/internal/models"
-	"test_backend_frontend/internal/services/auth/user_repo"
+	"test_backend_frontend/pkg/auth_utils"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -16,15 +16,18 @@ type Session struct {
 	SessionID   uuid.UUID        `json:"sessionID"`
 	SessionName string           `json:"sessionName"`
 	Users       []models.UserReq `json:"users"`
+	MaxPeople   int              `json:"maxPeople"`
+	HasStarted  bool             `json:"hasStarted"`
 }
 
 type SessionManager struct {
-	Client     *redis.Client
-	UserRepo   user_repo.IUserRepository
-	SessionIDs []uuid.UUID
+	Client       *redis.Client
+	Secret       string
+	TokenHandler auth_utils.ITokenHandler
+	SessionIDs   []uuid.UUID
 }
 
-func NewSessionManager(addr, password string, db int) (*SessionManager, error) {
+func NewSessionManager(addr, password string, db int, tokenHandler auth_utils.ITokenHandler, secret string) (*SessionManager, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
@@ -34,7 +37,7 @@ func NewSessionManager(addr, password string, db int) (*SessionManager, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &SessionManager{Client: client}, nil
+	return &SessionManager{Client: client, Secret: secret, TokenHandler: tokenHandler}, nil
 }
 
 func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName string) (uuid.UUID, error) {

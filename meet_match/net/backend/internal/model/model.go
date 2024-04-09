@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// TODO: Remove card from here to dto + add Id to it
+
 type Card struct {
 	ImgUrl   string `json:"image"`
 	CardName string `json:"title,card_name"`

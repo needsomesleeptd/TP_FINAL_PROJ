@@ -21,3 +21,4 @@
 go.work
 **__pycache__
 .idea
+venv
