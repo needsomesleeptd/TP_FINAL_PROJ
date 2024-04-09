@@ -6,13 +6,18 @@ import (
 	"gorm.io/gorm"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_da"
+	"test_backend_frontend/internal/services/scroll/scroll_repo"
 )
+
+const MAX_LIMIT = 100
 
 type scrollRepository struct {
 	db *gorm.DB
 }
 
-const MAX_LIMIT = 100
+func NewScrollRepository(db *gorm.DB) scroll_repo.ScrollRepository {
+	return &scrollRepository{db: db}
+}
 
 func (s scrollRepository) AddScrollFact(fact *models.FactScrolled) error {
 	pgFact := models_da.ToPostgresFactScrolled(fact)

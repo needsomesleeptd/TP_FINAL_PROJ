@@ -16,6 +16,10 @@ type usecase struct {
 	repo scroll_repo.ScrollRepository
 }
 
+func NewScrollUseCase(repository scroll_repo.ScrollRepository) ScrollUseCase {
+	return &usecase{repo: repository}
+}
+
 func (u *usecase) RegisterFact(scrolled *models.FactScrolled) error {
 	err := u.repo.AddScrollFact(scrolled)
 	if err != nil {
