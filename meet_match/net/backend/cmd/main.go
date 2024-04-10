@@ -59,8 +59,8 @@ func main() {
 	router := chi.NewRouter()
 
 	// Scroll service
-	//scrollRepo := postgres2.NewScrollRepository(db)
-	//scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager)
+	/*scrollRepo := postgres2.NewScrollRepository(db)
+	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager)*/
 
 	authMiddleware := (func(h http.Handler) http.Handler {
 		return auth_middleware.JwtAuthMiddleware(h, auth_service.SECRET, tokenHandler)
@@ -73,6 +73,7 @@ func main() {
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
 		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
+
 		//r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 
 	})

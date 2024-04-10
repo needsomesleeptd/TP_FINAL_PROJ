@@ -24,7 +24,12 @@ type ResponseUsersReq struct {
 	UsersReqs []models.UserReq
 }
 
-type RequestSessionUsers struct {
+type ResponseSession struct {
+	Response resp.Response
+	Session  session.Session `json:"session"`
+}
+
+type RequestSession struct {
 	SessionID uuid.UUID `json:"sessionID"`
 }
 
@@ -87,9 +92,30 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 	}
 }
 
+func SessionsGetSessionData(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestSession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		session, err := sessionManager.GetSession(req.SessionID)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		render.JSON(w, r, ResponseSession{
+			Response: resp.OK(),
+			Session:  *session,
+		})
+
+	}
+}
+
 func SessionGetData(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req RequestSessionUsers
+		var req RequestSession
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
