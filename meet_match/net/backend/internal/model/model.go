@@ -10,6 +10,7 @@ import (
 // TODO: Remove card from here to dto + add Id to it
 
 type Card struct {
+	Idx      uint64 `json:"idx,omitempty"`
 	ImgUrl   string `json:"image"`
 	CardName string `json:"title,card_name"`
 	Rating   int    `json:"rating,omitempty"`
