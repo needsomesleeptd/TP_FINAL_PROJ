@@ -114,10 +114,10 @@ func (s *SessionManager) ModifyUser(sessionID uuid.UUID, userModifyID uint64, us
 	if err != nil {
 		return errors.Join(errors.New("modify user error"), err)
 	}
-	for i, user := range session.Users {
+	for i, userSession := range session.Users {
 
-		if user.ID == userModifyID {
-			session.Users[i] = user
+		if userSession.ID == userModifyID {
+			session.Users[i] = *user
 			marhsalledData, err := json.Marshal(session)
 			if err != nil {
 				return errors.New("failed to marshall Session")
