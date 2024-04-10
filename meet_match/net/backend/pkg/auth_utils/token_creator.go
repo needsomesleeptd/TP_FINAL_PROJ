@@ -3,9 +3,10 @@ package auth_utils
 import (
 	"errors"
 	"fmt"
-	errors2 "github.com/pkg/errors"
 	"test_backend_frontend/internal/models"
 	"time"
+
+	errors2 "github.com/pkg/errors"
 
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -41,7 +42,6 @@ func (hasher JWTTokenHandler) GenerateToken(credentials models.User, key string)
 			"login":    credentials.Login,
 			"ID":       credentials.ID,
 		})
-
 	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {
 		return "", fmt.Errorf("creating token err: %w", err)

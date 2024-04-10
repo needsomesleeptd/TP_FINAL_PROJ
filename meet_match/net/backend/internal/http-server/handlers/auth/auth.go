@@ -6,7 +6,6 @@ import (
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_dto"
 	auth_service "test_backend_frontend/internal/services/auth"
-	"time"
 
 	"github.com/go-chi/render"
 )
@@ -21,6 +20,12 @@ type RequestSignUp struct {
 type RequestSignIn struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
+}
+
+type ResponseSignIn struct {
+	Response response.Response
+	Jwt      string `json:"jwt"`
+	ID       uint64 `json:"userID"`
 }
 
 func SignUp(authService auth_service.IAuthService) http.HandlerFunc {
@@ -59,14 +64,9 @@ func SignIn(authService auth_service.IAuthService) http.HandlerFunc {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
-		cookie := http.Cookie{
-			Name:     COOKIE_NAME,
-			Value:    tokenStr,
-			Expires:  time.Now().Add(time.Hour * 24),
-			HttpOnly: true, // Ilya, change this if you want to access cookie
-			Path:     "/",
-		}
-		http.SetCookie(w, &cookie)
-		render.JSON(w, r, response.OK())
+
+		resp := ResponseSignIn{Response: response.OK(), Jwt: tokenStr, ID: candidate.ID}
+
+		render.JSON(w, r, resp)
 	}
 }

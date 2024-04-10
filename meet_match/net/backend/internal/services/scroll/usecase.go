@@ -1,13 +1,14 @@
 package scroll
 
 import (
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"slices"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/services/cards/repository"
 	"test_backend_frontend/internal/services/scroll/scroll_repo"
 	session "test_backend_frontend/internal/sessions"
+
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type ScrollUseCase interface {
