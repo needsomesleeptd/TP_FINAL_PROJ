@@ -25,6 +25,7 @@ type RequestSignIn struct {
 type ResponseSignIn struct {
 	Response response.Response
 	Jwt      string `json:"jwt"`
+	ID       uint64 `json:"userID"`
 }
 
 func SignUp(authService auth_service.IAuthService) http.HandlerFunc {
@@ -63,7 +64,8 @@ func SignIn(authService auth_service.IAuthService) http.HandlerFunc {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
-		resp := ResponseSignIn{Response: response.OK(), Jwt: tokenStr}
+
+		resp := ResponseSignIn{Response: response.OK(), Jwt: tokenStr, ID: candidate.ID}
 
 		render.JSON(w, r, resp)
 	}

@@ -82,7 +82,7 @@ func (s *SessionManager) AddUser(user *models.UserReq, sessionID uuid.UUID) erro
 	if err != nil {
 		return errors.New("failed to marshall Session")
 	}
-	err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, session.TimeDuration).Err()
+	err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err() //TODO:: add duration here
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (s *SessionManager) ModifyUser(sessionID uuid.UUID, userModifyID uint64, us
 			if err != nil {
 				return errors.New("failed to marshall Session")
 			}
-			err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, session.TimeDuration).Err()
+			err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err() //add session TimeHere
 			if err != nil {
 				return err
 			}
@@ -162,7 +162,3 @@ func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
 	}
 	return sessions, nil
 }
-
-//Личный кабинет пользователя
-// Хранить в сессии число людей для начала
-// Хранить флаг началась сессия/ не началась сессия
