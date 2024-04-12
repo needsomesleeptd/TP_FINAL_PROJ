@@ -14,9 +14,13 @@ import (
 	"test_backend_frontend/internal/models/models_da"
 	auth_service "test_backend_frontend/internal/services/auth"
 	repo_adapter "test_backend_frontend/internal/services/auth/user_repo/user_repo_ad"
+	"test_backend_frontend/internal/services/scroll"
 	sessions "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
 	"time"
+
+	scroll2 "test_backend_frontend/internal/http-server/handlers/scroll"
+	postgres2 "test_backend_frontend/internal/services/scroll/scroll_repo/postgres"
 
 	"github.com/go-chi/chi/v5"
 	"gorm.io/driver/postgres"
@@ -58,9 +62,9 @@ func main() {
 	userService := auth_service.NewAuthService(userRepo, hasher, tokenHandler, auth_service.SECRET)
 	router := chi.NewRouter()
 
-	// Scroll service
-	/*scrollRepo := postgres2.NewScrollRepository(db)
-	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager)*/
+	//	Scroll service
+	scrollRepo := postgres2.NewScrollRepository(db)
+	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager)
 
 	authMiddleware := (func(h http.Handler) http.Handler {
 		return auth_middleware.JwtAuthMiddleware(h, auth_service.SECRET, tokenHandler)
@@ -73,8 +77,8 @@ func main() {
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
 		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
-
-		//r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
+		r.Get("/sessions/getSession", sessions_handler.SessionsGetSessionData(sessionManager))
+		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 
 	})
 
