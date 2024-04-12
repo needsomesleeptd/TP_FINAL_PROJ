@@ -38,11 +38,6 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 			return
 		}
 
-		if err != nil {
-			render.JSON(w, r, resp.Error("failed to get cards"))
-			return
-		}
-
 		uid, err := uuid.Parse(req.SessionID)
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to parse uuid"))

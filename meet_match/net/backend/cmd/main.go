@@ -14,6 +14,7 @@ import (
 	"test_backend_frontend/internal/models/models_da"
 	auth_service "test_backend_frontend/internal/services/auth"
 	repo_adapter "test_backend_frontend/internal/services/auth/user_repo/user_repo_ad"
+	postgres3 "test_backend_frontend/internal/services/cards/repository/postgres"
 	"test_backend_frontend/internal/services/scroll"
 	sessions "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
@@ -48,12 +49,12 @@ func main() {
 		os.Exit(1)
 	}
 	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
-	db.AutoMigrate(models_da.User{}) //TODO:: this is a hack, fix this
+	db.AutoMigrate(models_da.User{}) //TODO: this is a hack, fix this
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	// TODO : add config
+	// TODO: add config
 
 	//auth service
 	userRepo := repo_adapter.NewUserRepositoryAdapter(db)
@@ -63,8 +64,9 @@ func main() {
 	router := chi.NewRouter()
 
 	//	Scroll service
+	cardRepo := postgres3.NewCardRepo(db)
 	scrollRepo := postgres2.NewScrollRepository(db)
-	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager)
+	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo)
 
 	authMiddleware := (func(h http.Handler) http.Handler {
 		return auth_middleware.JwtAuthMiddleware(h, auth_service.SECRET, tokenHandler)
@@ -79,7 +81,7 @@ func main() {
 		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
 		r.Get("/sessions/getSession", sessions_handler.SessionsGetSessionData(sessionManager))
 		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
-
+		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 	})
 
 	//auth

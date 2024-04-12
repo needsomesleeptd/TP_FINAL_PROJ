@@ -3,6 +3,7 @@ package scroll
 import (
 	"slices"
 	"test_backend_frontend/internal/models"
+	"test_backend_frontend/internal/services/cards/repository"
 	"test_backend_frontend/internal/services/scroll/scroll_repo"
 	session "test_backend_frontend/internal/sessions"
 
@@ -19,10 +20,11 @@ type ScrollUseCase interface {
 type useсase struct {
 	repo        scroll_repo.ScrollRepository
 	sessionServ *session.SessionManager
+	cardRepo    repository.CardRepository
 }
 
-func NewScrollUseCase(repository scroll_repo.ScrollRepository, sessMgr *session.SessionManager) ScrollUseCase {
-	return &useсase{repo: repository, sessionServ: sessMgr}
+func NewScrollUseCase(repository scroll_repo.ScrollRepository, sessMgr *session.SessionManager, cardRepo repository.CardRepository) ScrollUseCase {
+	return &useсase{repo: repository, sessionServ: sessMgr, cardRepo: cardRepo}
 }
 
 func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
@@ -114,15 +116,14 @@ func (u *useсase) GetMatchCards(session_id uuid.UUID) ([]*models.Card, error) {
 		}
 	}
 
-	// TODO: fill all gaps add repo
 	var retCards []*models.Card
 	for _, v := range matchedIds {
-		retCards = append(retCards, &models.Card{
-			Id:       v,
-			ImgUrl:   "",
-			CardName: "",
-			Rating:   0,
-		})
+		card, err := u.cardRepo.GetCard(v)
+		if err != nil {
+			return nil, errors.Wrap(err, "scroll.GetMatchCards error")
+		}
+
+		retCards = append(retCards, card)
 	}
 
 	return retCards, nil
