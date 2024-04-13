@@ -19,6 +19,8 @@ type CardsMatchChecker interface {
 	GetMatchCards(session_id uuid.UUID) ([]*models.Card, error)
 }
 
+// TODO: one card
+// TODO: jwt in header
 type Response struct {
 	resp.Response
 	IsMatched bool               `json:"is_matched"`

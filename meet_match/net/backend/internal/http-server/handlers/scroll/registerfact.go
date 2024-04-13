@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
-	auth_handler "test_backend_frontend/internal/http-server/handlers/auth"
+	"strings"
 	resp "test_backend_frontend/internal/lib/api/response"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_dto"
@@ -53,15 +53,16 @@ func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer
 			return
 		}
 
-		cookie, err := r.Cookie(auth_handler.COOKIE_NAME)
-		if err != nil {
-			render.JSON(w, r, resp.Error("failed to get cookie"))
+		token := r.Header.Get("Authorization")
+		if token == "" {
+			render.JSON(w, r, resp.Error("failed to get auth token"))
 			return
 		}
+		token = strings.TrimPrefix(token, "Bearer ")
 
-		userId, err := tokenizer.ParseToken(cookie.Value, auth_service.SECRET)
+		userId, err := tokenizer.ParseToken(token, auth_service.SECRET)
 		if err != nil {
-			render.JSON(w, r, resp.Error("failed to parse cookie"))
+			render.JSON(w, r, resp.Error("failed to parse token"))
 			return
 		}
 
