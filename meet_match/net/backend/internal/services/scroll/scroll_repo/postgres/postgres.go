@@ -34,7 +34,7 @@ func (s scrollRepository) GetAllLikedPlaces(session_id uuid.UUID, user_id uint64
 
 	tx := s.db.Limit(MAX_LIMIT).
 		Model(&models_da.FactScrolled{}).
-		Select("places_id").
+		Select("place_id").
 		Where("session_id = ? AND user_id = ? AND is_liked = true", session_id.String(), user_id).
 		Find(&ids)
 

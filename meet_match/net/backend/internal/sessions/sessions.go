@@ -21,7 +21,7 @@ type Session struct {
 	MaxPeople    int                  `json:"maxPeople"  redis:"maxPeople"`
 	Status       models.SessionStatus `json:"status" redis:"status"`
 	TimeDuration time.Duration        `json:"duration" redis:"duration"`
-	Description  string               `json:"descrition" redis:"description"`
+	Description  string               `json:"description" redis:"description"`
 }
 
 type SessionManager struct {
@@ -198,6 +198,30 @@ func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
 		}
 	}
 	return sessions, nil
+}
+
+func (s *SessionManager) ChangeSessionStatus(sessionID uuid.UUID, status models.SessionStatus) error {
+	var session Session
+	sessionMarshalled, err := s.Client.Get(context.TODO(), sessionID.String()).Result()
+	if err != nil {
+		return errors.Join(errors.New("changing user status error"), err)
+	}
+	err = json.Unmarshal([]byte(sessionMarshalled), &session)
+	if err != nil {
+		return errors.Join(errors.New("changing user status error"), err)
+	}
+
+	session.Status = status
+
+	marhsalledData, err := json.Marshal(session)
+	if err != nil {
+		return errors.New("failed to marshall Session")
+	}
+	err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err() //TODO:: add duration here
+	if err != nil {
+		return errors.Join(errors.New("changing user status error"), err)
+	}
+	return nil
 }
 
 func (s *SessionManager) DeletePersonFromSession(sessionID uuid.UUID, userID uint64) error {

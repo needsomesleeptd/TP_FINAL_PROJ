@@ -8,10 +8,10 @@ import (
 )
 
 type FactScrolled struct {
-	SessionID string    `grom:"column:session_id"`
-	UserID    uint64    `grom:"column:user_id"`
-	PlacesID  uint64    `grom:"column:places_id"`
-	IsLiked   bool      `grom:"column:is_liked"`
+	SessionID string    `gorm:"column:session_id"`
+	UserID    uint64    `gorm:"column:user_id"`
+	PlacesID  uint64    `gorm:"column:place_id"`
+	IsLiked   bool      `gorm:"column:is_liked"`
 	DateTime  time.Time `gorm:"column:datetime"`
 }
 

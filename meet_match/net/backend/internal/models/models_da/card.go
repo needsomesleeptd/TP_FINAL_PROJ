@@ -3,9 +3,10 @@ package models_da
 import "test_backend_frontend/internal/models"
 
 type Card struct {
-	ID    uint64 `grom:"column:id"`
-	Url   string `grom:"column:url"`
-	Title string `grom:"column:title"`
+	ID          uint64 `gorm:"column:place_id"`
+	Url         string `gorm:"column:url"`
+	Title       string `gorm:"column:title"`
+	Description string `gorm:"column:description"`
 }
 
 func (Card) TableName() string {
