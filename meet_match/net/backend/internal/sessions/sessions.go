@@ -199,3 +199,39 @@ func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
 	}
 	return sessions, nil
 }
+
+func (s *SessionManager) DeletePersonFromSession(sessionID uuid.UUID, userID uint64) error {
+	var session Session
+	sessionMarshalled, err := s.Client.Get(context.TODO(), sessionID.String()).Result()
+	if err != nil {
+		return errors.Join(errors.New("deleting user error"), err)
+	}
+	err = json.Unmarshal([]byte(sessionMarshalled), &session)
+	if err != nil {
+		return errors.Join(errors.New("deleting user error"), err)
+	}
+	index := slices.IndexFunc(session.Users, func(userInSession models.UserReq) bool {
+		return userInSession.ID == userID
+	})
+
+	// we haven't found a person
+	if index == -1 {
+		return errors.New("the person doesn't exist in this session")
+	}
+	//deleting a person
+	session.Users = slices.Delete(session.Users, index, index+1)
+
+	marhsalledData, err := json.Marshal(session)
+	if err != nil {
+		return errors.New("failed to marshall Session")
+	}
+	if len(session.Users) > 0 {
+		err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err() //TODO:: add duration here
+	} else {
+		err = s.Client.Del(context.Background(), sessionID.String()).Err()
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
