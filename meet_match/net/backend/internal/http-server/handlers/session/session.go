@@ -2,7 +2,7 @@ package sessions_handler
 
 import (
 	"net/http"
-	auth_handler "test_backend_frontend/internal/http-server/handlers/auth"
+	"strings"
 	"test_backend_frontend/internal/lib/api/response"
 	resp "test_backend_frontend/internal/lib/api/response"
 	"test_backend_frontend/internal/models"
@@ -24,19 +24,24 @@ type ResponseUsersReq struct {
 	UsersReqs []models.UserReq
 }
 
-type RequestSessionUsers struct {
+type ResponseSession struct {
+	Response resp.Response
+	Session  session.Session `json:"session"`
+}
+
+type RequestSession struct {
 	SessionID uuid.UUID `json:"sessionID"`
 }
 
 type RequestCreateSession struct {
 	SessionName      string `json:"sessionName"`
 	SessionPeopleCap int    `json:"sessionPeopleCap"`
-	//TODO:: add duration
+	SessionOwner     string `json:"sessonOwner"`
 }
 
 type RequestAddUser struct {
-	User      models.UserReq `json:"user"`
-	SessionID uuid.UUID      `json:"sessionID"`
+	Jwt       string    `json:"jwt"`
+	SessionID uuid.UUID `json:"sessionID"`
 }
 
 type RequestModifyUser struct {
@@ -64,19 +69,16 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 			return
 		}
 		var payload *auth_utils.Payload
-		cookie, err := r.Cookie(auth_handler.COOKIE_NAME)
-		if err != nil {
-			render.JSON(w, r, response.Error("Error with cookie"))
-			return
-		}
+		token := r.Header.Get("Authorization")
+		token = strings.TrimPrefix(token, "Bearer ")
 
-		payload, err = sessionManager.TokenHandler.ParseToken(cookie.Value, sessionManager.Secret)
+		payload, err = sessionManager.TokenHandler.ParseToken(token, sessionManager.Secret)
 		if err != nil {
 			render.JSON(w, r, response.Error("Error getting data"))
 			return
 		}
 
-		userReq := models.UserReq{ID: payload.ID, Name: payload.Login, Request: "fill me!"}
+		userReq := models.UserReq{ID: payload.ID, Name: payload.Login, Request: ""}
 		var duration time.Duration = 1e9
 		sessionID, err := sessionManager.CreateSession(&userReq, req.SessionName, req.SessionPeopleCap, duration)
 		if err != nil {
@@ -90,9 +92,30 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 	}
 }
 
+func SessionsGetSessionData(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestSession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		session, err := sessionManager.GetSession(req.SessionID)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		render.JSON(w, r, ResponseSession{
+			Response: resp.OK(),
+			Session:  *session,
+		})
+
+	}
+}
+
 func SessionGetData(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req RequestSessionUsers
+		var req RequestSession
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
@@ -119,7 +142,10 @@ func SessionAdduser(sessionManager *session.SessionManager) http.HandlerFunc {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
-		err = sessionManager.AddUser(&req.User, req.SessionID)
+		var payload *auth_utils.Payload
+		payload, err = sessionManager.TokenHandler.ParseToken(req.Jwt, sessionManager.Secret)
+		user := models.UserReq{ID: payload.ID, Name: payload.Login}
+		err = sessionManager.AddUser(&user, req.SessionID)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
 			return

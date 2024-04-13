@@ -103,6 +103,20 @@ func (s *SessionManager) GetUsers(sessionID uuid.UUID) ([]models.UserReq, error)
 	return session.Users, nil
 }
 
+func (s *SessionManager) GetSession(sessionID uuid.UUID) (*Session, error) {
+	var session Session
+	sessionMarshalled, err := s.Client.Get(context.TODO(), sessionID.String()).Result()
+	if err != nil {
+		return nil, errors.Join(errors.New("get session error"), err)
+	}
+	err = json.Unmarshal([]byte(sessionMarshalled), &session)
+	if err != nil {
+		return nil, errors.Join(errors.New("get session error"), err)
+	}
+
+	return &session, nil
+}
+
 func (s *SessionManager) ModifyUser(sessionID uuid.UUID, userModifyID uint64, user *models.UserReq) error {
 	var session Session
 	sessionMarshalled, err := s.Client.Get(context.TODO(), sessionID.String()).Result()
