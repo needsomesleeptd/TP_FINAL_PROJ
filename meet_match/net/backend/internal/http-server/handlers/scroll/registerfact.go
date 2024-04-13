@@ -78,11 +78,14 @@ func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer
 			render.JSON(w, r, resp.Error("failed to save fact"))
 			return
 		}
+		is_match := false
 
-		is_match, err := registrator.IsMatchHappened(fact)
-		if err != nil {
-			render.JSON(w, r, resp.Error("match check issue"))
-			return
+		if req.IsLiked {
+			is_match, err = registrator.IsMatchHappened(fact)
+			if err != nil {
+				render.JSON(w, r, resp.Error("match check issue"))
+				return
+			}
 		}
 
 		var places []*models_dto.Card
