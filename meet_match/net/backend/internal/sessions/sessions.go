@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/pkg/auth_utils"
 	"time"
@@ -14,12 +15,13 @@ import (
 )
 
 type Session struct {
-	SessionID    uuid.UUID        `json:"sessionID" redis:"SessionID"`
-	SessionName  string           `json:"sessionName" redis:"sessionName"`
-	Users        []models.UserReq `json:"users" redis:"users"`
-	MaxPeople    int              `json:"maxPeople"  redis:"maxPeople"`
-	HasStarted   bool             `json:"hasStarted" redis:"hasStarted"`
-	TimeDuration time.Duration    `json:"duration" redis:"duration"`
+	SessionID    uuid.UUID            `json:"sessionID" redis:"SessionID"`
+	SessionName  string               `json:"sessionName" redis:"sessionName"`
+	Users        []models.UserReq     `json:"users" redis:"users"`
+	MaxPeople    int                  `json:"maxPeople"  redis:"maxPeople"`
+	Status       models.SessionStatus `json:"hasStarted" redis:"hasStarted"`
+	TimeDuration time.Duration        `json:"duration" redis:"duration"`
+	Description  string               `json:"descrition" redis:"description"`
 }
 
 type SessionManager struct {
@@ -52,7 +54,7 @@ func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName stri
 		Users:        []models.UserReq{*creator},
 		MaxPeople:    peopleCap,
 		TimeDuration: timeDur,
-		HasStarted:   false,
+		Status:       models.Waiting,
 	}
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
@@ -77,7 +79,22 @@ func (s *SessionManager) AddUser(user *models.UserReq, sessionID uuid.UUID) erro
 		return errors.Join(errors.New("add user error"), err)
 	}
 
+	if session.Status != models.Waiting {
+		return errors.New("session has already started")
+	}
+
+	isPresentInSession := slices.ContainsFunc(session.Users, func(userInSession models.UserReq) bool {
+		return userInSession.ID == user.ID
+	})
+
+	if isPresentInSession {
+		return errors.Join(errors.New("user is already present in session"))
+	}
 	session.Users = append(session.Users, *user)
+	if len(session.Users) >= session.MaxPeople {
+		session.Status = models.Scrolling
+	}
+
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
 		return errors.New("failed to marshall Session")

@@ -18,6 +18,14 @@ type UserReq struct {
 	//TODO:: add embeddings
 }
 
+type SessionStatus int
+
+const (
+	Waiting SessionStatus = iota // Role check depends on the order
+	Scrolling
+	Ended
+)
+
 func NewUserReq(id uint64, name string, text string) *UserReq {
 	req := UserReq{
 		ID:      id,
