@@ -36,7 +36,9 @@ var (
 )
 
 func main() {
-	model, err := model.New(MODEL_ROUTE)
+	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
+	cardRepo := postgres3.NewCardRepo(db)
+	model, err := model.New(MODEL_ROUTE, cardRepo)
 	if err != nil {
 		fmt.Println("Error with model")
 		os.Exit(1)
@@ -48,7 +50,6 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
 	db.AutoMigrate(models_da.User{}) //TODO: this is a hack, fix this
 	if err != nil {
 		fmt.Println(err.Error())
@@ -64,7 +65,6 @@ func main() {
 	router := chi.NewRouter()
 
 	//	Scroll service
-	cardRepo := postgres3.NewCardRepo(db)
 	scrollRepo := postgres2.NewScrollRepository(db)
 	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo)
 
@@ -73,7 +73,7 @@ func main() {
 	})
 	router.Group(func(r chi.Router) { //group for which auth middleware is required
 		r.Use(authMiddleware)
-		r.Get("/cards", cards.New(model))
+		r.Get("/cards", cards.New(model, tokenHandler))
 		r.Post("/sessions", sessions_handler.SessionCreatePage(sessionManager))
 		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))

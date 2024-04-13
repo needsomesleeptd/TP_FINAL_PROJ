@@ -5,15 +5,17 @@ import (
 	"github.com/go-chi/render"
 	"io"
 	"net/http"
+	"strings"
+	auth_service "test_backend_frontend/internal/services/auth"
+	"test_backend_frontend/pkg/auth_utils"
 
 	resp "test_backend_frontend/internal/lib/api/response"
 	"test_backend_frontend/internal/model"
 )
 
 type Request struct {
-	Prompt       string `json:"prompt"`
-	Page         int    `json:"page"`
-	CardsPerPage int    `json:"cardsPerPage"`
+	Prompt    string `json:"prompt"`
+	SessionID string `json:"sessionID"`
 }
 
 type Response struct {
@@ -21,11 +23,15 @@ type Response struct {
 	Cards []model.Card `json:"cards"`
 }
 
-type CardsSearcher interface {
-	CardsSearch(prompt string, fromLine int, toLine int) ([]model.Card, error)
+type TokenParser interface {
+	ParseToken(tokenString string, key string) (*auth_utils.Payload, error)
 }
 
-func New(searcher CardsSearcher) http.HandlerFunc {
+type CardsSearcher interface {
+	CardsSearch(prompt string, sessionId string, userId uint64) ([]model.Card, error)
+}
+
+func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req Request
 		err := render.DecodeJSON(r.Body, &req)
@@ -38,18 +44,20 @@ func New(searcher CardsSearcher) http.HandlerFunc {
 			return
 		}
 
-		if req.Page <= 0 {
-			render.JSON(w, r, resp.Error("wrong page"))
+		token := r.Header.Get("Authorization")
+		if token == "" {
+			render.JSON(w, r, resp.Error("failed to get auth token"))
 			return
 		}
-		if req.CardsPerPage <= 0 {
-			render.JSON(w, r, resp.Error("wrong cards count"))
+		token = strings.TrimPrefix(token, "Bearer ")
+
+		payload, err := tokenizer.ParseToken(token, auth_service.SECRET)
+		if err != nil {
+			render.JSON(w, r, resp.Error("failed to parse token"))
 			return
 		}
 
-		fromLine := (req.Page - 1) * req.CardsPerPage
-		toLine := req.Page * req.CardsPerPage
-		cards, err := searcher.CardsSearch(req.Prompt, fromLine, toLine)
+		cards, err := searcher.CardsSearch(req.Prompt, req.SessionID, payload.ID)
 
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to get cards"))

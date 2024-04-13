@@ -18,7 +18,7 @@ func NewCardRepo(db *gorm.DB) repository.CardRepository {
 
 func (c cardRepository) GetCard(id uint64) (*models.Card, error) {
 	var pgCard *models_da.Card
-	tx := c.db.First(&pgCard, "id = ?", id)
+	tx := c.db.First(&pgCard, "place_id = ?", id)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "card.repository.GetCard error")
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"test_backend_frontend/internal/services/cards/repository"
 )
 
 // TODO: Remove card from here to dto + add Id to it
@@ -16,27 +17,36 @@ type Card struct {
 	Rating   int    `json:"rating,omitempty"`
 }
 
+type ModelResponse struct {
+	Recs []uint64 `json:"recs"`
+}
+
 type ModelRequest struct {
-	Query    string `json:"query"`
-	Label    string `json:"label"`
-	FromLine int    `json:"from_line"`
-	ToLine   int    `json:"to_line"`
+	Query     string `json:"query"`
+	SessionID string `json:"session_id"`
+	UserID    uint64 `json:"user_id"`
 }
 
 type RecSys struct {
-	Url string
+	Url     string
+	cardRep repository.CardRepository
 }
 
-func New(urlRecSys string) (*RecSys, error) {
+func New(urlRecSys string, cardRepository repository.CardRepository) (*RecSys, error) {
 	if urlRecSys == "" {
 		return &RecSys{}, fmt.Errorf("empty url")
 	}
 
-	return &RecSys{Url: urlRecSys}, nil
+	return &RecSys{Url: urlRecSys, cardRep: cardRepository}, nil
 }
 
-func (r *RecSys) CardsSearch(prompt string, fromLine int, toLine int) ([]Card, error) {
-	req := ModelRequest{Query: prompt, Label: "smth", FromLine: fromLine, ToLine: toLine}
+// TODO: refactor
+func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]Card, error) {
+	req := ModelRequest{
+		Query:     prompt,
+		SessionID: sessionId,
+		UserID:    userId,
+	}
 	jsonReq, err := json.Marshal(req)
 	if err != nil {
 		panic(err.Error())
@@ -50,8 +60,23 @@ func (r *RecSys) CardsSearch(prompt string, fromLine int, toLine int) ([]Card, e
 	fmt.Println(json_resp)
 	defer json_resp.Body.Close()
 
-	var arr []Card
+	var arr ModelResponse
 	json.NewDecoder(json_resp.Body).Decode(&arr)
 
-	return arr, nil
+	var cards []Card
+	for _, v := range arr.Recs {
+		card, err := r.cardRep.GetCard(v)
+		if err != nil {
+			return []Card{}, fmt.Errorf("%s", "Post to model failure")
+		}
+
+		cards = append(cards, Card{
+			Idx:      card.Id,
+			ImgUrl:   card.ImgUrl,
+			CardName: card.CardName,
+			Rating:   card.Rating,
+		})
+	}
+
+	return cards, nil
 }
