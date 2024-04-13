@@ -17,7 +17,7 @@ const Cards = (props) => {
 
   const cardsFeedback = async (idx, direction) => {
     try {
-      const response = await fetch('http://localhost:8080/cards', {
+      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/scroll`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -25,7 +25,6 @@ const Cards = (props) => {
           },
           body: JSON.stringify({
             'sessionID': sessionId,
-            'userIDToModify': Number(cookies.UserId),
             'placeID': idx,
             'isLiked': direction === "right" ? true : false
           })

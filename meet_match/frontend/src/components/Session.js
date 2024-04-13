@@ -35,7 +35,7 @@ const Session = (props) => {
           setInputValue(participant.Request);
           setReady(true);
         }
-        if (participants.length === 1 && data.UsersReqs.every(item => item.Request !== ''))
+        if (participants.length === 2 && data.UsersReqs.every(item => item.Request !== ''))
         {
           const sessionUrl = `http://localhost:3000/session/${sessionId}/cards`;
           window.location.href = sessionUrl; 

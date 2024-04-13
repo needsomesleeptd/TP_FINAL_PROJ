@@ -89,9 +89,9 @@ func main() {
 		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
-		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
-		r.Get("/sessions/getSession", sessions_handler.SessionsGetSessionData(sessionManager))
-		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
+		r.Post("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
+		r.Post("/sessions/getSession", sessions_handler.SessionsGetSessionData(sessionManager))
+		r.Post("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 	})
 
