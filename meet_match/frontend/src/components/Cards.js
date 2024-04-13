@@ -15,6 +15,29 @@ const Cards = (props) => {
   const [cards, setCards] = useState([]);
   const sessionId = id;
 
+  useEffect(() => {
+    const getMatch = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${cookies.AccessToken}`
+            },
+            body: JSON.stringify({
+              'sessionID': sessionId
+            })
+        });
+        const data = await response.json();
+      } catch (error) {
+        console.error('Error creating session:', error);
+      }
+    };
+
+    // const pollingInterval = setInterval(getMatch, 100);
+
+    // return () => clearInterval(pollingInterval);
+  }, [cookies]);
+
   const cardsFeedback = async (idx, direction) => {
     try {
       const response = await fetch(`http://localhost:8080/sessions/${sessionId}/scroll`, {

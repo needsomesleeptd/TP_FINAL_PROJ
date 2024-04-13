@@ -31,11 +31,11 @@ const Session = (props) => {
         const data = await response.json();
         setParticipants(data.UsersReqs ?? []);
         const participant = data.UsersReqs.find(participant => participant.ID == Number(cookies.UserId));
-        if (participant.Request !== "") {
+        if (participant.Request !== "") { 
           setInputValue(participant.Request);
           setReady(true);
         }
-        if (participants.length === 2 && data.UsersReqs.every(item => item.Request !== ''))
+        if (participants.length === 1 && data.UsersReqs.every(item => item.Request !== ''))
         {
           const sessionUrl = `http://localhost:3000/session/${sessionId}/cards`;
           window.location.href = sessionUrl; 
