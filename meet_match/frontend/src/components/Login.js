@@ -11,10 +11,14 @@ const Login = ({ setShowLogin }) => {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    const data = await LoginRequest(login, password);
-    setCookie('AccessToken', data.jwt, { path: '/' });
-    setCookie('UserId', data.userID, { path: '/' });
-    window.location.href = '/';
+      const data = await LoginRequest(login, password);
+      if (data.status === "Error") {
+        alert('Неверные данные');
+      }
+      else {
+        setCookie('AccessToken', data.jwt, { path: '/' });
+        setCookie('UserId', data.userID, { path: '/' });
+      }
   };
 
   const handleRegistrationRedirect = (event) => {

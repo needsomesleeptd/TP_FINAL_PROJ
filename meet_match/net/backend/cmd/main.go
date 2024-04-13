@@ -8,19 +8,22 @@ import (
 	"syscall"
 	auth_handler "test_backend_frontend/internal/http-server/handlers/auth"
 	"test_backend_frontend/internal/http-server/handlers/cards"
-	scroll2 "test_backend_frontend/internal/http-server/handlers/scroll"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
+	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/model"
 	"test_backend_frontend/internal/models/models_da"
 	auth_service "test_backend_frontend/internal/services/auth"
 	repo_adapter "test_backend_frontend/internal/services/auth/user_repo/user_repo_ad"
 	postgres3 "test_backend_frontend/internal/services/cards/repository/postgres"
 	"test_backend_frontend/internal/services/scroll"
-	postgres2 "test_backend_frontend/internal/services/scroll/scroll_repo/postgres"
 	sessions "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
 	"time"
 
+	scroll2 "test_backend_frontend/internal/http-server/handlers/scroll"
+	postgres2 "test_backend_frontend/internal/services/scroll/scroll_repo/postgres"
+
+	"github.com/go-chi/cors"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -61,22 +64,33 @@ func main() {
 	userService := auth_service.NewAuthService(userRepo, hasher, tokenHandler, auth_service.SECRET)
 	router := chi.NewRouter()
 
-	// Scroll service
+	//	Scroll service
 	cardRepo := postgres3.NewCardRepo(db)
 	scrollRepo := postgres2.NewScrollRepository(db)
 	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo)
 
-	/*authMiddleware := (func(h http.Handler) http.Handler {
+	cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	})
+
+	router.Use(cors.Handler)
+
+	authMiddleware := (func(h http.Handler) http.Handler {
 		return auth_middleware.JwtAuthMiddleware(h, auth_service.SECRET, tokenHandler)
-	})*/
+	})
 	router.Group(func(r chi.Router) { //group for which auth middleware is required
-		//r.Use(authMiddleware)
-		r.Get("/cards", cards.New(model))
+		r.Use(authMiddleware)
+		r.Post("/cards", cards.New(model))
 		r.Post("/sessions", sessions_handler.SessionCreatePage(sessionManager))
 		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
-		//r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
+		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
+		r.Get("/sessions/getSession", sessions_handler.SessionsGetSessionData(sessionManager))
 		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 	})

@@ -7,14 +7,13 @@ import './Session.css'
 const Session = (props) => {
   const { id } = useParams();
   const [participants, setParticipants] = useState([]);
-  const [cookies, setCookie] = useCookies(['UserId']);
+  const [cookies] = useCookies(['AccessToken', 'UserId']);
   const [inputValue, setInputValue] = useState('');
-  const [name, setName] = useState('');
   const [ready, setReady] = useState(false);
   const sessionId = id;
 
   const handleSubmit = () => {
-    patchSession(localStorage.getItem('userID'), name);
+    patchSession(cookies.UserId);
   };
 
   useEffect(() => {
@@ -23,18 +22,22 @@ const Session = (props) => {
         const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+              'Authorization': `Bearer ${cookies.AccessToken}`
             },
             body: JSON.stringify({
               'sessionID': sessionId
             })
         });
         const data = await response.json();
-        console.log(data);
         setParticipants(data.UsersReqs ?? []);
-        if (data.UsersReqs.every(item => item.Request !== ''))
+        const participant = data.UsersReqs.find(participant => participant.ID == Number(cookies.UserId));
+        if (participant.Request !== "") {
+          setInputValue(participant.Request);
+          setReady(true);
+        }
+        if (participants.length === 1 && data.UsersReqs.every(item => item.Request !== ''))
         {
-          const sessionUrl = `http://localhost:3000/cards`;
+          const sessionUrl = `http://localhost:3000/session/${sessionId}/cards`;
           window.location.href = sessionUrl; 
         }
       } catch (error) {
@@ -47,29 +50,23 @@ const Session = (props) => {
     return () => clearInterval(pollingInterval);
   }, [cookies]);
 
-  const patchSession = async (id, name) => {
+  const patchSession = async (id) => {
     try {
       const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            'Authorization': `Bearer ${cookies.AccessToken}`
           },
           body: JSON.stringify({
             'sessionID': sessionId,
-            'jwt': localStorage.getItem('jwt')
+            'jwt': cookies.AccessToken
           })
       });
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      if (!cookies.meetmatchid || cookies.meetmatchsession !== sessionId) {
-        console.log("Set coockies");
-        setCookie('meetmatchid', id, { path: '/' });
-        setCookie('meetmatchsession', sessionId, { path: '/' });
-      }
-      setCookie('meetmatchrequest', ready ? '' : inputValue.toString(), { path: '/' });
 
       console.log(data);
     } catch (error) {
@@ -77,18 +74,19 @@ const Session = (props) => {
     }
   };
 
-  const putSession = async (id, name) => {
+  const putSession = async (id) => {
+    const participant = participants.find(participant => participant.ID == Number(cookies.UserId));
     try {
       const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            'Authorization': `Bearer ${cookies.AccessToken}`
           },
           body: JSON.stringify({
             'sessionID': sessionId,
-            'userIDToModify': Number(localStorage.getItem('userID')),
-            'newName': name,
+            'userIDToModify': Number(cookies.UserId),
+            'newName': participant.Name,
             'newRequest': ready ? '' : inputValue.toString()
           })
       });
@@ -96,12 +94,6 @@ const Session = (props) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      if (!cookies.meetmatchid || cookies.meetmatchsession !== sessionId) {
-        console.log("Set coockies");
-        setCookie('meetmatchid', id, { path: '/' });
-        setCookie('meetmatchsession', sessionId, { path: '/' });
-      }
-      setCookie('meetmatchrequest', ready ? '' : inputValue.toString(), { path: '/' });
 
       console.log(data);
     } catch (error) {
@@ -114,17 +106,12 @@ const Session = (props) => {
   };
 
   const handleReadyClick = () => {
-    const participant = participants.find(participant => participant.ID == Number(cookies.UserId));
-    
-    putSession(cookies.meetmatchid, participant.Name);
+    putSession(cookies.meetmatchid);
     setReady(!ready);
   };
 
-  const handleNameChange = (event) => {
-    setName(event.target.value); 
-  };
-
-  if (!participants.length > 0 && participants.find(participant => participant.ID === Number(cookies.UserId))) {
+  console.log()
+  if (participants.length > 0 && !participants.find(participant => participant.ID === Number(cookies.UserId))) {
     return (
       <div className="create-session-container">
       <h1>Вход в сессию</h1>

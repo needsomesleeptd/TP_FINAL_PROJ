@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 
 const swipeVariants = {
@@ -8,22 +9,24 @@ const swipeVariants = {
   dragRight: { x: 300, opacity: 0 },
 };
 
-const Cards = () => {
-  const [cookies, setCookie] = useCookies(['meetmatchname', 'meetmatchsession', 'meetmatchrequest']);
+const Cards = (props) => {
+  const { id } = useParams();
+  const [cookies] = useCookies(['AccessToken', 'UserId']);
   const [cards, setCards] = useState([]);
+  const sessionId = id;
 
-  const cardsFeedback = async (direction) => {
+  const cardsFeedback = async (idx, direction) => {
     try {
       const response = await fetch('http://localhost:8080/cards', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            'Authorization': `Bearer ${cookies.AccessToken}`
           },
           body: JSON.stringify({
-            'sessionID': cookies.meetmatchsession,
-            'userIDToModify': Number(localStorage.getItem('userID')),
-            'placeID': 0,
+            'sessionID': sessionId,
+            'userIDToModify': Number(cookies.UserId),
+            'placeID': idx,
             'isLiked': direction === "right" ? true : false
           })
       });
@@ -38,25 +41,26 @@ const Cards = () => {
 
   useEffect(() => {
     const getCards = async () => {
-      var response = await fetch('http://localhost:8080/sessions/'+ cookies.meetmatchsession, {
+      var response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            'Authorization': `Bearer ${cookies.AccessToken}`
           },
           body: JSON.stringify({
-            'sessionID': cookies.meetmatchsession
+            'sessionID': sessionId
           })
       });
       var data = await response.json();
+      const participant = data.UsersReqs.find(participant => participant.ID == Number(cookies.UserId));
       response = await fetch('http://localhost:8080/cards', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            'Authorization': `Bearer ${cookies.AccessToken}`
           },
           body: JSON.stringify({
-            "prompt" : cookies.meetmatchrequest,
+            "prompt" : participant.Request,
             "page" : 1,
             "cardsPerPage" : 10
           })
@@ -87,9 +91,8 @@ const Cards = () => {
   };
 
   const swipeCard = (direction) => {
-    cardsFeedback(direction);
-    console.log(cards);
-    console.log(swipeCard);
+    cardsFeedback(cards[0].idx, direction);
+    console.log(cards[0].idx, direction);
     setSwipedCard(cards[0]);
     setCards(cards.slice(1));
   };

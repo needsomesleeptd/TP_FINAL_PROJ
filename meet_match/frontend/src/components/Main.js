@@ -41,7 +41,7 @@ function Main() {
           }
   
           const data = await response.json();
-          setSessionsData(data.sessions);
+          setSessionsData(data.sessions ?? []);
   
       } catch (error) {
           alert(error.message);
@@ -198,7 +198,7 @@ function Main() {
               status={session.hasStarted ? "Просмотр карточек" : "Ожидание участников"}
             />
           ))}
-        </div> ) : (<p>Нет сессий</p>)}
+        </div> ) : (<p style={{marginLeft: "20px"}}>Нет сессий</p>)}
       </div>
       {isModalOpen && <CreateSessionModal onCloseModal={closeModal} />}
     </div>

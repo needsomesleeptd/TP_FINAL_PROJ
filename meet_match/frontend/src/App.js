@@ -38,7 +38,7 @@ function App() {
           element={requireAuth(<Session />)}
         />
         <Route
-          path="/cards"
+          path="/session/:id/cards"
           element={requireAuth(<Cards />)}
         />
         <Route

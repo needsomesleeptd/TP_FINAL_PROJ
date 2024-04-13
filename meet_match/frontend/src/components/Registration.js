@@ -14,9 +14,9 @@ const Registration = ({ setShowLogin }) => {
   const handleRegistration = async (event) => {
     event.preventDefault();
     RegisterRequest(name, Number(age), gender, login, password);
-    const jwt = await LoginRequest(login, password);
-    setCookie('AccessToken', jwt, { path: '/' });
-    window.location.href = '/';
+    const data = await LoginRequest(login, password);
+    setCookie('AccessToken', data.jwt, { path: '/' });
+    setCookie('UserId', data.userID, { path: '/' });
   };
 
   const handleButtonClick = (button, event) => {
