@@ -4,13 +4,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"test_backend_frontend/internal/models"
+	"time"
 )
 
 type FactScrolled struct {
-	SessionID string `grom:"column:session_id"`
-	UserID    uint64 `grom:"column:user_id"`
-	PlacesID  uint64 `grom:"column:places_id"`
-	IsLiked   bool   `grom:"column:is_liked"`
+	SessionID string    `grom:"column:session_id"`
+	UserID    uint64    `grom:"column:user_id"`
+	PlacesID  uint64    `grom:"column:places_id"`
+	IsLiked   bool      `grom:"column:is_liked"`
+	DateTime  time.Time `gorm:"column:datetime"`
 }
 
 func (FactScrolled) TableName() string {
@@ -23,6 +25,7 @@ func ToPostgresFactScrolled(scrolled *models.FactScrolled) *FactScrolled {
 		UserID:    scrolled.UserId,
 		PlacesID:  scrolled.PlacesId,
 		IsLiked:   scrolled.IsLiked,
+		DateTime:  time.Now(),
 	}
 }
 
