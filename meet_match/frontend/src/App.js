@@ -11,12 +11,13 @@ import NotFound from './components/NotFound'
 import './custom.css'
 
 function App() {
-  const [cookies] = useCookies(['AccessToken']);
+  const [cookies] = useCookies(['AccessToken', 'UserId']);
   const isLoggedIn = !!cookies.AccessToken;
+  const hasUserId = !!cookies.UserId;
   const [showLogin, setShowLogin] = useState(true);
 
   const requireAuth = (element) => {
-    return isLoggedIn ? element : <Navigate to="/auth" />;
+    return (isLoggedIn && hasUserId) ? element : <Navigate to="/auth" />;
   };
 
   return (
@@ -28,7 +29,7 @@ function App() {
         />
         <Route
           path="/auth"
-          element={isLoggedIn ?
+          element={(isLoggedIn && hasUserId) ?
                     <Navigate to="/" /> :
                     showLogin ?
                       <Login setShowLogin={setShowLogin} /> :

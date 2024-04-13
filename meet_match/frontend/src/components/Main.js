@@ -17,8 +17,8 @@ function Main() {
   };
 
   const userProfile = {
-    username: 'Тубро Разработчик',
-    avatar: 'https://w7.pngwing.com/pngs/832/44/png-transparent-advertising-service-blog-internet-avatar-woman-face-black-hair-service-thumbnail.png'
+    username: 'Meet Match',
+    avatar: 'https://cdn.icon-icons.com/icons2/38/PNG/512/search_4883.png'
   };
 
   useEffect(() => {
@@ -195,7 +195,7 @@ function Main() {
               description={session.description}
               maxParticipants={session.maxPeople}
               participants={session.users.length}
-              status={session.hasStarted ? "Просмотр карточек" : "Ожидание участников"}
+              status={session.status === 1 ? "Просмотр карточек" : "Ожидание участников"}
             />
           ))}
         </div> ) : (<p style={{marginLeft: "20px"}}>Нет сессий</p>)}

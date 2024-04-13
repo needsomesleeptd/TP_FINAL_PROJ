@@ -35,11 +35,11 @@ const Session = (props) => {
         setSessionName(data.sessionName);
         setMaxParticipants(data.maxPeople);
         const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
-        if (participant.Request !== "") {
+        if (participant.Request !== '') {
           setInputValue(participant.Request);
           setReady(true);
         }
-        if (data.users.every(item => item.Request !== ''))
+        if (data.status === 1)
         {
           const sessionUrl = `http://localhost:3000/session/${sessionId}/cards`;
           window.location.href = sessionUrl; 
@@ -52,7 +52,7 @@ const Session = (props) => {
     const pollingInterval = setInterval(getSession, 100);
 
     return () => clearInterval(pollingInterval);
-  }, [cookies]);
+  }, [cookies, sessionId]);
 
   const patchSession = async (id) => {
     try {

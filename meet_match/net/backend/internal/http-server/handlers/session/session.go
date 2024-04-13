@@ -1,7 +1,6 @@
 package sessions_handler
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"test_backend_frontend/internal/lib/api/response"
@@ -10,7 +9,6 @@ import (
 	session "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
 	"time"
-	"fmt"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
 )
@@ -73,11 +71,7 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 		var payload *auth_utils.Payload
 		token := r.Header.Get("Authorization")
 		token = strings.TrimPrefix(token, "Bearer ")
-<<<<<<< HEAD
-		fmt.Println(token)
-=======
-		fmt.Print(token)
->>>>>>> 0a5ff263e326ddfeb3b3008f6e8d758647271266
+
 		payload, err = sessionManager.TokenHandler.ParseToken(token, sessionManager.Secret)
 		if err != nil {
 			render.JSON(w, r, response.Error("Error getting data"))

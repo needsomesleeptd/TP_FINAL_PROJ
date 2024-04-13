@@ -35,7 +35,7 @@ const Match = (props) => {
   };
 
   cardsFeedback();
- }, []);
+ }, [cookies, sessionId]);
 
 
  return (
@@ -61,7 +61,7 @@ const Match = (props) => {
            }}
          >
            <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-             <img src={card.image} style={{
+             <img src={card.image} alt="" style={{
                  marginTop: "30px",
                  width: "200px",
                  height: "200px",

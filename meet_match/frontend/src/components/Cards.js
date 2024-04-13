@@ -51,7 +51,7 @@ const Cards = (props) => {
           })
       });
       var data = (await response.json()).session;
-      const participant = data.users.find(participant => participant.ID == Number(cookies.UserId));
+      const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
       response = await fetch('http://localhost:8080/cards', {
           method: 'POST',
           headers: {
@@ -70,7 +70,7 @@ const Cards = (props) => {
     };
 
     getCards();
-  }, []);
+  }, [cookies, sessionId]);
 
   // const getMatch = async () => {
   //   try {
@@ -94,7 +94,6 @@ const Cards = (props) => {
   // return () => clearInterval(pollingInterval);
 // }, [cookies]);
 
-  const [swipedCard, setSwipedCard] = useState(null);
   const [xOffset, setXOffset] = useState(0);
 
   const handleDrag = (event, info) => {
@@ -114,7 +113,6 @@ const Cards = (props) => {
   const swipeCard = (direction) => {
     cardsFeedback(cards[0].idx, direction);
     console.log(cards[0].idx, direction);
-    setSwipedCard(cards[0]);
     setCards(cards.slice(1));
   };
 
@@ -133,7 +131,7 @@ const Cards = (props) => {
           dragMomentum={false}
           variants={swipeVariants}
           initial="initial"
-          animate={index + 1 != cards.length ? "initial" : xOffset < -200 ? "dragLeft" : xOffset > 200 ? "dragRight" : "initial"}
+          animate={index + 1 !== cards.length ? "initial" : xOffset < -200 ? "dragLeft" : xOffset > 200 ? "dragRight" : "initial"}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           style={{
@@ -150,7 +148,7 @@ const Cards = (props) => {
           }}
         >
           <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-            <img src={card.image} style={{
+            <img src={card.image} alt="" style={{
                 marginTop: "30px",
                 width: "200px",
                 height: "200px",
