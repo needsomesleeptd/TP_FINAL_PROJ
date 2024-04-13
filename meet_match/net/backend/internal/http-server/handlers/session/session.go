@@ -1,6 +1,7 @@
 package sessions_handler
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"test_backend_frontend/internal/lib/api/response"
@@ -37,10 +38,11 @@ type RequestCreateSession struct {
 	SessionName      string `json:"sessionName"`
 	SessionPeopleCap int    `json:"sessionPeopleCap"`
 	SessionOwner     string `json:"sessonOwner"`
+	Description      string `json:"description"`
 }
 
 type RequestAddUser struct {
-	Jwt       string    `json:"jwt"`
+	//Jwt       string    `json:"jwt"`
 	SessionID uuid.UUID `json:"sessionID"`
 }
 
@@ -71,7 +73,7 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 		var payload *auth_utils.Payload
 		token := r.Header.Get("Authorization")
 		token = strings.TrimPrefix(token, "Bearer ")
-
+		fmt.Print(token)
 		payload, err = sessionManager.TokenHandler.ParseToken(token, sessionManager.Secret)
 		if err != nil {
 			render.JSON(w, r, response.Error("Error getting data"))
@@ -80,7 +82,7 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 
 		userReq := models.UserReq{ID: payload.ID, Name: payload.Login, Request: ""}
 		var duration time.Duration = 1e9
-		sessionID, err := sessionManager.CreateSession(&userReq, req.SessionName, req.SessionPeopleCap, duration)
+		sessionID, err := sessionManager.CreateSession(&userReq, req.SessionName, req.SessionPeopleCap, duration, req.Description)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
@@ -142,8 +144,18 @@ func SessionAdduser(sessionManager *session.SessionManager) http.HandlerFunc {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
+		token := r.Header.Get("Authorization")
+		if token == "" {
+			render.JSON(w, r, response.Error("Error in parsing token"))
+			render.Status(r, http.StatusBadRequest)
+			return
+		}
+		token = strings.TrimPrefix(token, "Bearer ")
 		var payload *auth_utils.Payload
-		payload, err = sessionManager.TokenHandler.ParseToken(req.Jwt, sessionManager.Secret)
+		payload, err = sessionManager.TokenHandler.ParseToken(token, sessionManager.Secret)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+		}
 		user := models.UserReq{ID: payload.ID, Name: payload.Login}
 		err = sessionManager.AddUser(&user, req.SessionID)
 		if err != nil {
@@ -179,6 +191,7 @@ func SessionGetUserSessions(sessionManager *session.SessionManager) http.Handler
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestGetAllSessionsByUser
 		var sessions []session.Session
+
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
