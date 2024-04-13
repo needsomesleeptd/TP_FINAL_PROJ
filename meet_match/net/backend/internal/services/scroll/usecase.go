@@ -67,6 +67,13 @@ func (u *useсase) IsMatchHappened(scrolled *models.FactScrolled) (bool, error) 
 		return false, nil
 	}
 
+	if isMatched {
+		err := u.sessionServ.ChangeSessionStatus(scrolled.SessionId, models.Ended)
+		if err != nil {
+			return false, errors.Wrap(err, "scroll.GetMatchCards session status change error")
+		}
+	}
+
 	return isMatched, nil
 }
 
