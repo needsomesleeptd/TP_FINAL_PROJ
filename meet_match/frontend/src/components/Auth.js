@@ -20,6 +20,8 @@ const RegisterRequest = async (name, age, gender, login, password) => {
           const errorMessage = await response.text();
           throw new Error(errorMessage);
         }
+
+        return await response.json();
   
       } catch (error) {
           alert(error.message);

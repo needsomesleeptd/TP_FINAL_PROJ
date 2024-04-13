@@ -15,29 +15,6 @@ const Cards = (props) => {
   const [cards, setCards] = useState([]);
   const sessionId = id;
 
-  useEffect(() => {
-    const getMatch = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${cookies.AccessToken}`
-            },
-            body: JSON.stringify({
-              'sessionID': sessionId
-            })
-        });
-        const data = await response.json();
-      } catch (error) {
-        console.error('Error creating session:', error);
-      }
-    };
-
-    // const pollingInterval = setInterval(getMatch, 100);
-
-    // return () => clearInterval(pollingInterval);
-  }, [cookies]);
-
   const cardsFeedback = async (idx, direction) => {
     try {
       const response = await fetch(`http://localhost:8080/sessions/${sessionId}/scroll`, {
@@ -49,7 +26,7 @@ const Cards = (props) => {
           body: JSON.stringify({
             'sessionID': sessionId,
             'placeID': idx,
-            'isLiked': direction === "right" ? true : false
+            'is_liked': direction === "right" ? true : false
           })
       });
       if (!response.ok) {
@@ -73,8 +50,8 @@ const Cards = (props) => {
             'sessionID': sessionId
           })
       });
-      var data = await response.json();
-      const participant = data.UsersReqs.find(participant => participant.ID == Number(cookies.UserId));
+      var data = (await response.json()).session;
+      const participant = data.users.find(participant => participant.ID == Number(cookies.UserId));
       response = await fetch('http://localhost:8080/cards', {
           method: 'POST',
           headers: {
@@ -94,6 +71,28 @@ const Cards = (props) => {
 
     getCards();
   }, []);
+
+  // const getMatch = async () => {
+  //   try {
+  //     const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+  //         method: 'POST',
+  //         headers: {
+  //           'Authorization': `Bearer ${cookies.AccessToken}`
+  //         },
+  //         body: JSON.stringify({
+  //           'sessionID': sessionId
+  //         })
+  //     });
+  //     const data = await response.json();
+  //   } catch (error) {
+  //     console.error('Error creating session:', error);
+  //   }
+  // };
+
+  // const pollingInterval = setInterval(getMatch, 100);
+
+  // return () => clearInterval(pollingInterval);
+// }, [cookies]);
 
   const [swipedCard, setSwipedCard] = useState(null);
   const [xOffset, setXOffset] = useState(0);

@@ -13,10 +13,15 @@ const Registration = ({ setShowLogin }) => {
   
   const handleRegistration = async (event) => {
     event.preventDefault();
-    RegisterRequest(name, Number(age), gender, login, password);
-    const data = await LoginRequest(login, password);
-    setCookie('AccessToken', data.jwt, { path: '/' });
-    setCookie('UserId', data.userID, { path: '/' });
+    const data = await RegisterRequest(name, Number(age), gender, login, password);
+    if (data.status === "Error") {
+      alert('Неверные данные');
+    }
+    else {
+      const data2 = await LoginRequest(login, password);
+      setCookie('AccessToken', data2.jwt, { path: '/' });
+      setCookie('UserId', data2.userID, { path: '/' });
+    } 
   };
 
   const handleButtonClick = (button, event) => {

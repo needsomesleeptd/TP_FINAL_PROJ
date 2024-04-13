@@ -168,6 +168,7 @@ func (s *SessionManager) ModifyUser(sessionID uuid.UUID, userModifyID uint64, us
 // Не забудтьте отчистить хранилище реддис
 
 func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
+	// s.Client.FlushAll(context.TODO())
 	keys, err := s.Client.Keys(context.TODO(), "*").Result()
 	if err != nil {
 		return nil, errors.Join(errors.New("getting keys"), err)

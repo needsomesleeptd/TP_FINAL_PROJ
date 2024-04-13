@@ -58,7 +58,7 @@ function Main() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            'Authorization': `Bearer ${cookies.AccessToken}`
           },
           body: JSON.stringify({
               "sessionName" : title,

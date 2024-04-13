@@ -6,6 +6,7 @@ import Login from './components/Login'
 import Main from './components/Main'
 import Session from './components/Session'
 import Cards from './components/Cards'
+import Match from './components/Match'
 import NotFound from './components/NotFound'
 import './custom.css'
 
@@ -40,6 +41,10 @@ function App() {
         <Route
           path="/session/:id/cards"
           element={requireAuth(<Cards />)}
+        />
+        <Route
+          path="/session/:id/match"
+          element={requireAuth(<Match />)}
         />
         <Route
           path="*"

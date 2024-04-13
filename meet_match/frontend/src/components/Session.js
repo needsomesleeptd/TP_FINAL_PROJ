@@ -6,6 +6,8 @@ import './Session.css'
 
 const Session = (props) => {
   const { id } = useParams();
+  const [sessionName, setSessionName] = useState([]);
+  const [maxParticipants, setMaxParticipants] = useState(0);
   const [participants, setParticipants] = useState([]);
   const [cookies] = useCookies(['AccessToken', 'UserId']);
   const [inputValue, setInputValue] = useState('');
@@ -28,14 +30,16 @@ const Session = (props) => {
               'sessionID': sessionId
             })
         });
-        const data = await response.json();
-        setParticipants(data.UsersReqs ?? []);
-        const participant = data.UsersReqs.find(participant => participant.ID == Number(cookies.UserId));
+        const data = (await response.json()).session;
+        setParticipants(data.users ?? []);
+        setSessionName(data.sessionName);
+        setMaxParticipants(data.maxPeople);
+        const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
         if (participant.Request !== "") {
           setInputValue(participant.Request);
           setReady(true);
         }
-        if (participants.length === 2 && data.UsersReqs.every(item => item.Request !== ''))
+        if (data.users.every(item => item.Request !== ''))
         {
           const sessionUrl = `http://localhost:3000/session/${sessionId}/cards`;
           window.location.href = sessionUrl; 
@@ -75,7 +79,7 @@ const Session = (props) => {
   };
 
   const putSession = async (id) => {
-    const participant = participants.find(participant => participant.ID == Number(cookies.UserId));
+    const participant = participants.find(participant => participant.ID === Number(cookies.UserId));
     try {
       const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
           method: 'PUT',
@@ -122,7 +126,7 @@ const Session = (props) => {
 
   return (
     <div class="container">
-      <h2>Сессия</h2>
+      <h2>Сессия {sessionName}</h2>
       <div class="input-container">
         <input
           type="text"
@@ -133,10 +137,10 @@ const Session = (props) => {
         />
         <button onClick={handleReadyClick}>{ready ? "Не готов" : "Готов"}</button>
       </div>
-      <p class="invite-link">Ссылка для приглашения: http://localhost:8080/sessions/{sessionId}</p>
+      <p class="invite-link">Ссылка для приглашения: http://localhost:3000/session/{sessionId}</p>
       {participants.length > 0 ? (
         <div>
-          <p class="participants-count">Количество участников: {participants.length} / 2</p>
+          <p class="participants-count">Количество участников: {participants.length} / {maxParticipants}</p>
           <table class="participants-table">
             <thead>
               <tr>
