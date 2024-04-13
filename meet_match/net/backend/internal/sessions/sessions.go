@@ -19,7 +19,7 @@ type Session struct {
 	SessionName  string               `json:"sessionName" redis:"sessionName"`
 	Users        []models.UserReq     `json:"users" redis:"users"`
 	MaxPeople    int                  `json:"maxPeople"  redis:"maxPeople"`
-	Status       models.SessionStatus `json:"hasStarted" redis:"hasStarted"`
+	Status       models.SessionStatus `json:"status" redis:"status"`
 	TimeDuration time.Duration        `json:"duration" redis:"duration"`
 	Description  string               `json:"descrition" redis:"description"`
 }
@@ -44,7 +44,7 @@ func NewSessionManager(addr, password string, db int, tokenHandler auth_utils.IT
 	return &SessionManager{Client: client, Secret: secret, TokenHandler: tokenHandler}, nil
 }
 
-func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName string, peopleCap int, timeDur time.Duration) (uuid.UUID, error) {
+func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName string, peopleCap int, timeDur time.Duration, description string) (uuid.UUID, error) {
 	newSessionID := uuid.New()
 
 	s.SessionIDs = append(s.SessionIDs, newSessionID)
@@ -55,6 +55,7 @@ func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName stri
 		MaxPeople:    peopleCap,
 		TimeDuration: timeDur,
 		Status:       models.Waiting,
+		Description:  description,
 	}
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
@@ -86,14 +87,10 @@ func (s *SessionManager) AddUser(user *models.UserReq, sessionID uuid.UUID) erro
 	isPresentInSession := slices.ContainsFunc(session.Users, func(userInSession models.UserReq) bool {
 		return userInSession.ID == user.ID
 	})
-
 	if isPresentInSession {
 		return errors.Join(errors.New("user is already present in session"))
 	}
 	session.Users = append(session.Users, *user)
-	if len(session.Users) >= session.MaxPeople {
-		session.Status = models.Scrolling
-	}
 
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
@@ -145,10 +142,18 @@ func (s *SessionManager) ModifyUser(sessionID uuid.UUID, userModifyID uint64, us
 	if err != nil {
 		return errors.Join(errors.New("modify user error"), err)
 	}
+
 	for i, userSession := range session.Users {
 
 		if userSession.ID == userModifyID {
 			session.Users[i] = *user
+
+			someoneNotEnteredReq := slices.ContainsFunc(session.Users, func(userInSession models.UserReq) bool {
+				return userInSession.Request == ""
+			})
+			if len(session.Users) >= session.MaxPeople && !someoneNotEnteredReq {
+				session.Status = models.Scrolling
+			}
 			marhsalledData, err := json.Marshal(session)
 			if err != nil {
 				return errors.New("failed to marshall Session")
