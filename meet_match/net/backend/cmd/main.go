@@ -91,6 +91,8 @@ func main() {
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
 		r.Post("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
 		r.Post("/sessions/getSessionUsers", sessions_handler.SessionGetData(sessionManager))
+		r.Delete("/sessions/{id}", sessions_handler.SessionDeleteUser(sessionManager))
+
 		r.Post("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 	})

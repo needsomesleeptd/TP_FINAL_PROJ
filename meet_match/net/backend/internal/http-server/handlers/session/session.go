@@ -1,7 +1,6 @@
 package sessions_handler
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"test_backend_frontend/internal/lib/api/response"
@@ -73,7 +72,6 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 		var payload *auth_utils.Payload
 		token := r.Header.Get("Authorization")
 		token = strings.TrimPrefix(token, "Bearer ")
-		fmt.Print(token)
 		payload, err = sessionManager.TokenHandler.ParseToken(token, sessionManager.Secret)
 		if err != nil {
 			render.JSON(w, r, response.Error("Error getting data"))
@@ -206,5 +204,32 @@ func SessionGetUserSessions(sessionManager *session.SessionManager) http.Handler
 			Response: resp.OK(),
 			Sessions: sessions,
 		})
+	}
+}
+
+func SessionDeleteUser(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestSession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+
+		var payload *auth_utils.Payload
+		token := r.Header.Get("Authorization")
+		token = strings.TrimPrefix(token, "Bearer ")
+		payload, err = sessionManager.TokenHandler.ParseToken(token, sessionManager.Secret)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+		}
+
+		err = sessionManager.DeletePersonFromSession(req.SessionID, payload.ID)
+		if err != nil {
+			render.JSON(w, r, resp.Error(err.Error()))
+			return
+		}
+
+		render.JSON(w, r, resp.OK())
 	}
 }
