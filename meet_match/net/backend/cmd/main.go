@@ -23,8 +23,8 @@ import (
 	scroll2 "test_backend_frontend/internal/http-server/handlers/scroll"
 	postgres2 "test_backend_frontend/internal/services/scroll/scroll_repo/postgres"
 
-	"github.com/go-chi/cors"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -86,11 +86,11 @@ func main() {
 		r.Use(authMiddleware)
 		r.Post("/cards", cards.New(model))
 		r.Post("/sessions", sessions_handler.SessionCreatePage(sessionManager))
-		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
+		r.Post("/sessions/{id}", sessions_handler.SessionsGetSessionData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
 		r.Post("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
-		r.Post("/sessions/getSession", sessions_handler.SessionsGetSessionData(sessionManager))
+		r.Post("/sessions/getSessionUsers", sessions_handler.SessionGetData(sessionManager))
 		r.Post("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 	})
