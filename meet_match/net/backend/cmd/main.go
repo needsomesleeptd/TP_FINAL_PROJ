@@ -24,6 +24,7 @@ import (
 	postgres2 "test_backend_frontend/internal/services/scroll/scroll_repo/postgres"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -50,6 +51,7 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
 	db.AutoMigrate(models_da.User{}) //TODO: this is a hack, fix this
 	if err != nil {
 		fmt.Println(err.Error())
@@ -65,22 +67,35 @@ func main() {
 	router := chi.NewRouter()
 
 	//	Scroll service
+	cardRepo := postgres3.NewCardRepo(db)
 	scrollRepo := postgres2.NewScrollRepository(db)
 	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo)
+
+	cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	})
+
+	router.Use(cors.Handler)
 
 	authMiddleware := (func(h http.Handler) http.Handler {
 		return auth_middleware.JwtAuthMiddleware(h, auth_service.SECRET, tokenHandler)
 	})
 	router.Group(func(r chi.Router) { //group for which auth middleware is required
 		r.Use(authMiddleware)
-		r.Get("/cards", cards.New(model, tokenHandler))
+		r.Post("/cards", cards.New(model))
 		r.Post("/sessions", sessions_handler.SessionCreatePage(sessionManager))
-		r.Post("/sessions/{id}", sessions_handler.SessionGetData(sessionManager))
+		r.Post("/sessions/{id}", sessions_handler.SessionsGetSessionData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
 		r.Put("/sessions/{id}", sessions_handler.SessionModifyuser(sessionManager))
-		r.Get("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
-		r.Get("/sessions/getSession", sessions_handler.SessionsGetSessionData(sessionManager))
-		r.Get("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
+		r.Post("/sessions/getUser", sessions_handler.SessionGetUserSessions(sessionManager))
+		r.Post("/sessions/getSessionUsers", sessions_handler.SessionGetData(sessionManager))
+		r.Delete("/sessions/{id}", sessions_handler.SessionDeleteUser(sessionManager))
+
+		r.Post("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 	})
 

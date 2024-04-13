@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useParams } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 const swipeVariants = {
   initial: { x: 0 },
@@ -7,12 +9,68 @@ const swipeVariants = {
   dragRight: { x: 300, opacity: 0 },
 };
 
-const Cards = () => {
-  const [cards, setCards] = useState([
-    { id: 1, imageUrl: 'https://avatars.mds.yandex.net/i?id=8baa27866533b4b9ad9cd4e3d7bde320b7d9d298-10411335-images-thumbs&n=13', caption: 'Школьный снюсоед' },
-    { id: 2, imageUrl: 'https://avatars.mds.yandex.net/i?id=076385ea095bdedb124098355087d0c6429db46f-4409557-images-thumbs&n=13', caption: 'Забивной снюсоед' },
-    { id: 3, imageUrl: 'https://www.meme-arsenal.com/memes/b6f8b1ec5533277508251f186163454e.jpg', caption: 'Домашний снюсоед' },
-  ]);
+const Cards = (props) => {
+  const { id } = useParams();
+  const [cookies] = useCookies(['AccessToken', 'UserId']);
+  const [cards, setCards] = useState([]);
+  const sessionId = id;
+
+  const cardsFeedback = async (idx, direction) => {
+    try {
+      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/scroll`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cookies.AccessToken}`
+          },
+          body: JSON.stringify({
+            'sessionID': sessionId,
+            'placeID': idx,
+            'isLiked': direction === "right" ? true : false
+          })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
+  };
+
+  useEffect(() => {
+    const getCards = async () => {
+      var response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cookies.AccessToken}`
+          },
+          body: JSON.stringify({
+            'sessionID': sessionId
+          })
+      });
+      var data = await response.json();
+      const participant = data.UsersReqs.find(participant => participant.ID == Number(cookies.UserId));
+      response = await fetch('http://localhost:8080/cards', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cookies.AccessToken}`
+          },
+          body: JSON.stringify({
+            "prompt" : participant.Request,
+            "page" : 1,
+            "cardsPerPage" : 10
+          })
+      });
+      data = await response.json();
+      console.log(data.cards);
+      setCards(data.cards);
+    };
+
+    getCards();
+  }, []);
 
   const [swipedCard, setSwipedCard] = useState(null);
   const [xOffset, setXOffset] = useState(0);
@@ -32,8 +90,8 @@ const Cards = () => {
   };
 
   const swipeCard = (direction) => {
-    console.log(cards);
-    console.log(swipeCard);
+    cardsFeedback(cards[0].idx, direction);
+    console.log(cards[0].idx, direction);
     setSwipedCard(cards[0]);
     setCards(cards.slice(1));
   };
@@ -70,7 +128,7 @@ const Cards = () => {
           }}
         >
           <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-            <img src={card.imageUrl} style={{
+            <img src={card.image} style={{
                 marginTop: "30px",
                 width: "200px",
                 height: "200px",
@@ -80,7 +138,7 @@ const Cards = () => {
                 borderRadius: "10%",
                 pointerEvents: "none"
                 }} />
-            <p style={{textAlign: "center" }}>{card.caption}</p>
+            <p style={{textAlign: "center" }}>{card.title}</p>
           </div>
           <p style={{ position: "absolute", top: 0, left: 20 }}>Не нравится</p>
           <p style={{ position: "absolute", top: 0, right: 20 }}>Нравится</p>

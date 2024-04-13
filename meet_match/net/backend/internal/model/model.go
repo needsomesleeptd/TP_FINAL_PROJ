@@ -57,7 +57,6 @@ func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]
 	if err != nil {
 		return []Card{}, fmt.Errorf("%s", "Post to model failure")
 	}
-	fmt.Println(json_resp)
 	defer json_resp.Body.Close()
 
 	var arr ModelResponse

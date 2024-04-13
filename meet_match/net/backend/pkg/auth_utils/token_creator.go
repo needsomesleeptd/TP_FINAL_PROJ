@@ -14,6 +14,7 @@ import (
 type Payload struct {
 	Login string
 	ID    uint64
+	Exp   time.Duration
 }
 
 type ITokenHandler interface {
@@ -35,13 +36,13 @@ func NewJWTTokenHandler() ITokenHandler {
 }
 
 func (hasher JWTTokenHandler) GenerateToken(credentials models.User, key string) (string, error) {
-	token := jwt.NewWithClaims(
-		jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"exprires": time.Now().Add(time.Hour * 24),
-			"login":    credentials.Login,
-			"ID":       credentials.ID,
-		})
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["login"] = credentials.Login
+	claims["id"] = credentials.ID
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+
 	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {
 		return "", fmt.Errorf("creating token err: %w", err)
@@ -51,7 +52,8 @@ func (hasher JWTTokenHandler) GenerateToken(credentials models.User, key string)
 }
 
 func (hasher JWTTokenHandler) ValidateToken(tokenString string, key string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	claims := jwt.MapClaims{}
+	jwtToken, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(key), nil
 	})
 
@@ -59,7 +61,7 @@ func (hasher JWTTokenHandler) ValidateToken(tokenString string, key string) erro
 		return ErrParsingToken
 	}
 
-	if !token.Valid {
+	if !jwtToken.Valid {
 		return ErrInvalidToken
 	}
 
@@ -72,12 +74,13 @@ func (hasher JWTTokenHandler) ParseToken(tokenString string, key string) (*Paylo
 		return []byte(key), nil
 	})
 	if err != nil {
-		return nil, errors2.Wrap(err, "auth.tokenhelper.GetRole error in parse")
+		return nil, errors2.Wrap(err, "auth.tokenhelper.ParseToken error in parse")
 	}
 
 	payload := &Payload{
 		Login: claims["login"].(string),
-		ID:    uint64(claims["ID"].(float64)),
+		ID:    uint64(claims["id"].(float64)),
+		Exp:   time.Duration(claims["exp"].(float64)),
 	}
 
 	return payload, nil

@@ -1,23 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
+import Registration from './components/Registration'
+import Login from './components/Login'
+import Main from './components/Main'
 import Session from './components/Session'
-import CurSession from './components/CurSession'
 import Cards from './components/Cards'
 import NotFound from './components/NotFound'
 import './custom.css'
 
 function App() {
-    return (
-      <Router>
-        <Routes>
-          <Route path='/session' element={<Session />} />
-          <Route path='/session/:id' element={<CurSession />} />
-          <Route path='/cards' element={<Cards />} />
-          <Route path='/' element={<Navigate replace to="/session" />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    );
-  }
+  const [cookies] = useCookies(['AccessToken']);
+  const isLoggedIn = !!cookies.AccessToken;
+  const [showLogin, setShowLogin] = useState(true);
 
-export default App
+  const requireAuth = (element) => {
+    return isLoggedIn ? element : <Navigate to="/auth" />;
+  };
+
+  return (
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={requireAuth(<Main />)}
+        />
+        <Route
+          path="/auth"
+          element={isLoggedIn ?
+                    <Navigate to="/" /> :
+                    showLogin ?
+                      <Login setShowLogin={setShowLogin} /> :
+                      <Registration setShowLogin={setShowLogin} />}
+        />
+        <Route
+          path="/session/:id"
+          element={requireAuth(<Session />)}
+        />
+        <Route
+          path="/session/:id/cards"
+          element={requireAuth(<Cards />)}
+        />
+        <Route
+          path="*"
+          element={requireAuth(<NotFound />)}
+        />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
