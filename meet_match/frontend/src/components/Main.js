@@ -62,7 +62,8 @@ function Main() {
           },
           body: JSON.stringify({
               "sessionName" : title,
-              "sessionPeopleCap" : Number(participantsCount)
+              "sessionPeopleCap" : Number(participantsCount),
+              "description" : description
           })
       });
       if (!response.ok) {
@@ -107,6 +108,26 @@ function Main() {
     const sessionUrl = `http://localhost:3000/session/${sessionId}`;
     window.location.href = sessionUrl;
   };
+  
+  const leaveSession = async (sessionId) => {
+    try {
+        const response = await fetch(`http://localhost:8080/sessions/${sessionId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${cookies.AccessToken}`
+            },
+            body: JSON.stringify({
+                "sessionId" : sessionId
+            })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Error creating session:', error);
+      }
+    };
 
   const CreateSessionModal = ({ onCloseModal }) => {
     return (
@@ -175,7 +196,7 @@ function Main() {
           <span>{`Статус: ${status}`}</span>
         </div> 
         <button onClick={() => joinSession(id)}>Войти</button>
-        <button>Покинуть</button>
+        <button onClick={() => leaveSession(id)}>Покинуть</button>
       </div>
     );
   };
@@ -192,7 +213,7 @@ function Main() {
               key={index}
               id={session.sessionID}
               title={session.sessionName}
-              description={session.description}
+              description={session.descrition}
               maxParticipants={session.maxPeople}
               participants={session.users.length}
               status={session.status === 1 ? "Просмотр карточек" : "Ожидание участников"}

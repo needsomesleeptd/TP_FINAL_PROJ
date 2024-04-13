@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { useParams } from 'react-router-dom';
 import Registration from './components/Registration'
 import Login from './components/Login'
 import Main from './components/Main'
@@ -20,6 +21,51 @@ function App() {
     return (isLoggedIn && hasUserId) ? element : <Navigate to="/auth" />;
   };
 
+  const DataFetcher = ({ sessionId }) => {
+    const { id } = useParams();
+    const [status, setStatus] = useState('');
+
+    useEffect(() => {
+      const CheckSession = async (sessionId) => {
+        try {
+          const response = await fetch('http://localhost:8080/sessions/'+ id, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${cookies.AccessToken}`
+              },
+              body: JSON.stringify({
+                'sessionID': id
+              })
+          });
+          const data = await response.json();
+          if (data.Response.status === "OK") {
+            setStatus(data.session.status);
+          }
+          else {
+            setStatus(-1);
+          }
+        } catch (error) {
+          console.error('Error creating session:', error);
+        }
+      };
+  
+      CheckSession();
+    }, [sessionId]);
+  
+    if (status === 0) {
+      return <Session />;
+    } else if (status === 1) {
+      return <Cards />;
+    } else if (status === 2) {
+      return <Match />;
+    } else if (status === -1) {
+      return <NotFound />;
+    } else {
+      return <div></div>;
+    }
+  };
+
+
   return (
     <Router>
       <Routes>
@@ -37,15 +83,7 @@ function App() {
         />
         <Route
           path="/session/:id"
-          element={requireAuth(<Session />)}
-        />
-        <Route
-          path="/session/:id/cards"
-          element={requireAuth(<Cards />)}
-        />
-        <Route
-          path="/session/:id/match"
-          element={requireAuth(<Match />)}
+          element={<DataFetcher />}
         />
         <Route
           path="*"
