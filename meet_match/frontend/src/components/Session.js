@@ -7,6 +7,7 @@ import './Session.css'
 const Session = (props) => {
   const { id } = useParams();
   const [sessionName, setSessionName] = useState([]);
+  const [sessionDesc, setSessionDesc] = useState([]); 
   const [maxParticipants, setMaxParticipants] = useState(0);
   const [participants, setParticipants] = useState([]);
   const [cookies] = useCookies(['AccessToken', 'UserId']);
@@ -33,6 +34,7 @@ const Session = (props) => {
         const data = (await response.json()).session;
         setParticipants(data.users ?? []);
         setSessionName(data.sessionName);
+        setSessionDesc(data.description);
         setMaxParticipants(data.maxPeople);
         const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
         if (participant.Request !== '') {
@@ -41,8 +43,7 @@ const Session = (props) => {
         }
         if (data.status === 1)
         {
-          const sessionUrl = `http://localhost:3000/session/${sessionId}/cards`;
-          window.location.href = sessionUrl; 
+          window.location.reload();
         }
       } catch (error) {
         console.error('Error creating session:', error);
@@ -118,21 +119,25 @@ const Session = (props) => {
   if (participants.length > 0 && !participants.find(participant => participant.ID === Number(cookies.UserId))) {
     return (
       <div className="create-session-container">
-      <h1>Вход в сессию</h1>
-      <button class="session-button" onClick={handleSubmit}>Продолжить</button>
+      <h1>Вы присоединяетесь к встрече "{sessionName}"</h1>
+      <p>{sessionDesc}</p>
+      <div class="input-container turbo-button">
+        <button class="session-button turbo-button" onClick={handleSubmit}>Продолжить</button>
+      </div>
       </div>
     );
   }
 
   return (
     <div class="container">
-      <h2>Сессия {sessionName}</h2>
+      <h2>{sessionName}</h2>
+      <p>{sessionDesc}</p>
       <div class="input-container">
         <input
           type="text"
           value={inputValue}
           onChange={handleInputChange}
-          placeholder="Введите запрос..."
+          placeholder="Введите ваши пожелания..."
           disabled={ready}
         />
         <button onClick={handleReadyClick}>{ready ? "Не готов" : "Готов"}</button>

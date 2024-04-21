@@ -38,61 +38,67 @@ const Cards = (props) => {
     }
   };
 
+  const getCards = async () => {
+    var response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookies.AccessToken}`
+        },
+        body: JSON.stringify({
+          'sessionID': sessionId
+        })
+    });
+    var data = (await response.json()).session;
+    const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
+    response = await fetch('http://localhost:8080/cards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookies.AccessToken}`
+        },
+        body: JSON.stringify({
+          "prompt" : participant.Request,
+          'sessionID': sessionId
+        })
+    });
+    data = await response.json();
+    console.log(data.cards);
+    setCards(data.cards ?? []);
+  };
+
   useEffect(() => {
-    const getCards = async () => {
-      var response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${cookies.AccessToken}`
-          },
-          body: JSON.stringify({
-            'sessionID': sessionId
-          })
-      });
-      var data = (await response.json()).session;
-      const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
-      response = await fetch('http://localhost:8080/cards', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${cookies.AccessToken}`
-          },
-          body: JSON.stringify({
-            "prompt" : participant.Request,
-            "page" : 1,
-            "cardsPerPage" : 10
-          })
-      });
-      data = await response.json();
-      console.log(data.cards);
-      setCards(data.cards);
+
+    const cardsFeedback = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/sessions/${sessionId}/check_match`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${cookies.AccessToken}`
+            },
+            body: JSON.stringify({
+              'sessionID': sessionId
+            })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        if (data.is_matched) {
+          window.location.reload();
+        }
+    
+      } catch (error) {
+        console.error('Error creating session:', error);
+      }
     };
 
     getCards();
-  }, [cookies, sessionId]);
-
-  // const getMatch = async () => {
-  //   try {
-  //     const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
-  //         method: 'POST',
-  //         headers: {
-  //           'Authorization': `Bearer ${cookies.AccessToken}`
-  //         },
-  //         body: JSON.stringify({
-  //           'sessionID': sessionId
-  //         })
-  //     });
-  //     const data = await response.json();
-  //   } catch (error) {
-  //     console.error('Error creating session:', error);
-  //   }
-  // };
-
-  // const pollingInterval = setInterval(getMatch, 100);
-
-  // return () => clearInterval(pollingInterval);
-// }, [cookies]);
+    const pollingInterval = setInterval(cardsFeedback, 500);
+    return () => clearInterval(pollingInterval);
+   }, [cookies, sessionId]);
 
   const [xOffset, setXOffset] = useState(0);
 
@@ -114,12 +120,17 @@ const Cards = (props) => {
     cardsFeedback(cards[0].idx, direction);
     console.log(cards[0].idx, direction);
     setCards(cards.slice(1));
+    if (cards.length == 0) {
+      getCards();
+    }
   };
 
   return (
     <div>
       <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <p style={{ fontSize: "24px", fontWeight: "bold" }}>Свайпай карточки влево или вправо</p>
+        <p style={{ fontSize: "24px", fontWeight: "bold" }}>Давай подберём подходящее место для вашей встречи</p>
+        <p style={{ fontSize: "24px", fontWeight: "bold" }}>Для этого просто листни карточку влево, если место тебе не нравится</p>
+        <p style={{ fontSize: "24px", fontWeight: "bold" }}>Или же листни карточку вправо, если место тебе понравилось</p>
       </div>
       <div style={{height: "80vh", display: "flex", alignItems: "center", justifyContent: "center"}}>
       {cards.slice().reverse().map((card, index) => (

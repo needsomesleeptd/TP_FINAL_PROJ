@@ -76,6 +76,11 @@ const Match = (props) => {
          </div>
        ))}
      </div>
+     <div style={{ textAlign: "center", marginTop: 20 }}>
+     <a href="/" style={{ textDecoration: "none" }}>
+        <button style={{ marginBottom: "40px", padding: "10px 20px", fontSize: "16px", backgroundColor: "lightblue", border: "2px solid #000", borderRadius: "5px", cursor: "pointer" }}>Вернуться на главную страницу</button>
+      </a>
+    </div>
    </div>
  );
 };

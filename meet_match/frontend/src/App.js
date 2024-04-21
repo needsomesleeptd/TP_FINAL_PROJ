@@ -45,6 +45,7 @@ function App() {
             setStatus(-1);
           }
         } catch (error) {
+          setStatus(-1);
           console.error('Error creating session:', error);
         }
       };

@@ -39,6 +39,12 @@
     font-size: 16px;
 }
 
+.turbo-button {
+    display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .input-container button:hover {
     background-color: #0056b3;
 }

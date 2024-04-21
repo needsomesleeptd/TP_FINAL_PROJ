@@ -21,32 +21,33 @@ function Main() {
     avatar: 'https://cdn.icon-icons.com/icons2/38/PNG/512/search_4883.png'
   };
 
-  useEffect(() => {
-    const UserInfoRequest = async () => {
-      try {
-          const response = await fetch('http://localhost:8080/sessions/getUser', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + cookies.AccessToken
-              },
-              body: JSON.stringify({
-                'userID' : cookies.UserId
-              })
-          });
-  
-          if (!response.ok) {
-            const errorMessage = await response.text();
-            throw new Error(errorMessage);
-          }
-  
-          const data = await response.json();
-          setSessionsData(data.sessions ?? []);
-  
-      } catch (error) {
-          alert(error.message);
-      }
+  const UserInfoRequest = async () => {
+    try {
+        const response = await fetch('http://localhost:8080/sessions/getUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + cookies.AccessToken
+            },
+            body: JSON.stringify({
+              'userID' : cookies.UserId
+            })
+        });
+
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        setSessionsData(data.sessions ?? []);
+
+    } catch (error) {
+        alert(error.message);
     }
+  }
+
+  useEffect(() => {
 
     UserInfoRequest();
 
@@ -124,17 +125,18 @@ function Main() {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      } catch (error) {
-        console.error('Error creating session:', error);
-      }
-    };
+        UserInfoRequest();
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
+  };
 
   const CreateSessionModal = ({ onCloseModal }) => {
     return (
       <div className="modal" style={{ display: 'block' }}>
         <div className="create-session-container modal-content">
           <span className="close" onClick={onCloseModal}>&times;</span>
-          <h1>Создание сессии</h1>
+          <h1>Создание встречи</h1>
           <div className="input-group">
             <input
               className="session-input"
@@ -179,7 +181,7 @@ function Main() {
         </div>
         {console.log("ff")}
         <div style={{display: "flex", gap: "10px"}}>
-          <button className="profile-button" onClick={onOpenModal}>Создать сессию</button>
+          <button className="profile-button" onClick={onOpenModal}>Создать встречу</button>
           <button className="profile-button" style={{marginRight: "50px"}} onClick={handleLogOut}>Выйти</button>
         </div>
       </div>
@@ -196,7 +198,7 @@ function Main() {
           <span>{`Статус: ${status}`}</span>
         </div> 
         <button onClick={() => joinSession(id)}>Войти</button>
-        <button onClick={() => leaveSession(id)}>Покинуть</button>
+        <button onClick={() => leaveSession(id)}>Удалить</button>
       </div>
     );
   };
@@ -206,20 +208,21 @@ function Main() {
       {console.log("fff")}
       <ProfileHeader username={userProfile.username} avatar={userProfile.avatar} onOpenModal={openModal} />
       <div className="profile-content">
-        <p className="profile-title">Ваши сессии</p>
+        <p className="profile-title">Ваши встречи</p>
         {sessionsData.length > 0 ? ( <div className="profile-sessions">
           {sessionsData.map((session, index) => (
             <ProfileSession
               key={index}
               id={session.sessionID}
               title={session.sessionName}
-              description={session.descrition}
+              description={session.description}
               maxParticipants={session.maxPeople}
               participants={session.users.length}
-              status={session.status === 1 ? "Просмотр карточек" : "Ожидание участников"}
+              status={session.status === 0 ? "Ожидание участников" :
+                  (session.status == 1 ? "Просмотр карточек" : "Завершен")}
             />
           ))}
-        </div> ) : (<p style={{marginLeft: "20px"}}>Нет сессий</p>)}
+        </div> ) : (<p style={{marginLeft: "20px"}}>Нет встреч</p>)}
       </div>
       {isModalOpen && <CreateSessionModal onCloseModal={closeModal} />}
     </div>
