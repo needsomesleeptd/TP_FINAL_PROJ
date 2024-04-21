@@ -3,14 +3,14 @@ version: "3.8"
 services:
   redis-db:
     image: redis:alpine
-    ports:
-      - 6379:6379
     container_name: redis-db
+    ports:
+      - "6379:6379"
 
   postgres:
     container_name: proj_bd
     image: postgres:13.3
-    command:
+    command: 
       - "postgres"
       - "-c"
       - "max_connections=50"
@@ -76,31 +76,43 @@ services:
     networks:
       - postgres
 
+  redis-go-server:
+    build:
+      context: ./net
+    environment:
+      - REDIS_DB_URL=redis-db:6379
+      - REDIS_DB_PASSWORD=
+      - REDIS_DB=0
+    ports:
+      - "8080:8080"
+    container_name: redis-go-server
+    depends_on:
+      - redis-db
+    networks:
+      - postgres
+
+  python-flask-app:
+    build:
+      context: ./neural_network
+    ports:
+      - "5000:5000"
+    container_name: python-flask-app
+    networks:
+      - postgres
+  
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    container_name: frontend
+    networks:
+      - postgres
+
 volumes:
-  habrdb-data:
   pgadmin-data:
+  redis-data:
 
 networks:
   postgres:
     driver: bridge
-
-
-  # redis-go-server:
-  #   build:
-  #     context: ./net
-  #   environment:
-  #     - REDIS_DB_URL=redis-db:6379
-  #     - REDIS_DB_PASSWORD=
-  #     - REDIS_DB=0
-  #   ports:
-  #     - 8080:8080
-  #   depends_on:
-  #     - redis-db
-  #   container_name: redis-go-server
-
-  # python-flask-app:
-  #   build:
-  #     context: ./neural_network
-  #   ports:
-  #     - 5000:5000
-  #   container_name: python-flask-app
