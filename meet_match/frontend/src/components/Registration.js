@@ -36,17 +36,19 @@ const Registration = ({ setShowLogin }) => {
 
   return (
     <div class="container-auth">
-      <div class="wrapper">
+      <div class="wrapper" style={{marginTop: "120px"}}>
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'></link>
         <h1>Регистрация</h1>
         <form onSubmit={handleRegistration}>
-          <div class="input-box">
-            <input type="text" placeholder="Имя" value={name} onChange={(e) => setName(e.target.value)} required />
-            <i class='bx bx-text'></i>
-          </div>
-          <div class="input-box">
-            <input type="text" placeholder="Возраст" value={age} onChange={(e) => setAge(e.target.value)} required />
-            <i class='bx bx-calendar' ></i>
+          <div style={{display: "flex"}}>
+            <div class="input-box">
+              <input class="half-button" type="text" placeholder="Имя" value={name} onChange={(e) => setName(e.target.value)} required />
+              <i class='bx bx-text'></i>
+            </div>
+            <div class="input-box">
+              <input class="half-button" type="text" placeholder="Возраст" value={age} onChange={(e) => setAge(e.target.value)} required />
+              <i class='bx bx-calendar' ></i>
+            </div>
           </div>
           <div style={{display: "flex", margin: "0 7px 0 15px"}}>
             <p style={{width: "200px"}}>Выберите пол</p>
@@ -55,13 +57,13 @@ const Registration = ({ setShowLogin }) => {
                 className={gender === true ? 'selected' : ''}
                 onClick={(event) => handleButtonClick(true, event)}
               >
-                <i class='bx bx-male-sign' ></i>
+                <label>м</label>
               </button>
               <button
                 className={gender === false ? 'selected' : ''}
                 onClick={(event) => handleButtonClick(false, event)}
               >
-                <i class='bx bx-female-sign' ></i>
+                <label>ж</label>
               </button>
             </div>
           </div>
@@ -72,9 +74,6 @@ const Registration = ({ setShowLogin }) => {
           <div class="input-box">
             <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required />
             <i class='bx bxs-lock-alt' ></i>
-          </div>
-          <div class="remember-forgot">
-            <label><input type="checkbox" /> Запомнить меня</label>
           </div>
           <button type="submit" class="btn">Зарегистрироваться</button>
         </form>

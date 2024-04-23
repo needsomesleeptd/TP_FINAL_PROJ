@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
+import CreateModal from './CreateModal';
 import './Main.css';
 
 
-function Main() {
-  const [cookies, removeCookie] = useCookies(['AccessToken']);
-  const [participantsCount, setParticipantsCount] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const Main = () => {
+  const [cookies, _, removeCookie] = useCookies(['AccessToken']);
   const [focus, setFocus] = useState(0);
   const [sessionsData, setSessionsData] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  const openModal = () => {
+      setShowModal(true);
+  };
+
+  const closeModal = () => {
+      setShowModal(false);
+  };
 
   const handleFocus = (index) => {
     setFocus(index);
@@ -18,7 +25,7 @@ function Main() {
 
   const userProfile = {
     username: 'Meet Match',
-    avatar: 'https://cdn.icon-icons.com/icons2/38/PNG/512/search_4883.png'
+    avatar: 'https://w7.pngwing.com/pngs/665/132/png-transparent-user-defult-avatar-thumbnail.png'
   };
 
   const UserInfoRequest = async () => {
@@ -27,6 +34,7 @@ function Main() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
                 'Authorization': 'Bearer ' + cookies.AccessToken
             },
             body: JSON.stringify({
@@ -53,7 +61,7 @@ function Main() {
 
   }, [cookies]);
 
-  const createSession = async () => {
+  const createSession = async (title, desc, count) => {
     try {
       const response = await fetch('http://localhost:8080/sessions', {
           method: 'POST',
@@ -63,8 +71,8 @@ function Main() {
           },
           body: JSON.stringify({
               "sessionName" : title,
-              "sessionPeopleCap" : Number(participantsCount),
-              "description" : description
+              "sessionPeopleCap" : Number(count),
+              "description" : desc
           })
       });
       if (!response.ok) {
@@ -79,38 +87,18 @@ function Main() {
     }
   };
 
-  const handleTitleChange = (e) => {
-    setTitle(e.target.value);
-  };
-
-  const handleDescriptionChange = (e) => {
-    setDescription(e.target.value);
-  };
-
-  const handleParticipantsChange = (e) => {
-    if (/^\d{0,3}$/.test(e.target.value)) {
-      setParticipantsCount(e.target.value);
-    }
-  };
-
   const handleLogOut = () => {
     removeCookie("AccessToken");
+    removeCookie("UserId");
   }
-
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
 
   const joinSession = (sessionId) => {
     const sessionUrl = `http://localhost:3000/session/${sessionId}`;
     window.location.href = sessionUrl;
   };
   
-  const leaveSession = async (sessionId) => {
+  const leaveSession = async (e, sessionId) => {
+    e.stopPropagation();
     try {
         const response = await fetch(`http://localhost:8080/sessions/${sessionId}`, {
             method: 'DELETE',
@@ -130,86 +118,66 @@ function Main() {
       console.error('Error creating session:', error);
     }
   };
-
-  const CreateSessionModal = ({ onCloseModal }) => {
-    return (
-      <div className="modal" style={{ display: 'block' }}>
-        <div className="create-session-container modal-content">
-          <span className="close" onClick={onCloseModal}>&times;</span>
-          <h1>Создание встречи</h1>
-          <div className="input-group">
-            <input
-              className="session-input"
-              type="text"
-              value={title}
-              onChange={handleTitleChange}
-              placeholder="Название"
-              autoFocus={focus === 0}
-              onFocus={() => handleFocus(0)}
-            />
-            <input
-              className="session-input"
-              type="text"
-              value={description}
-              onChange={handleDescriptionChange}
-              placeholder="Описание"
-              autoFocus={focus === 1}
-              onFocus={() => handleFocus(1)}
-            />
-            <input
-              className="session-input"
-              type="text"
-              value={participantsCount}
-              onChange={handleParticipantsChange}
-              placeholder="Количество участников"
-              autoFocus={focus === 2}
-              onFocus={() => handleFocus(2)}
-            />
-          </div>
-          <button className="profile-button" onClick={createSession}>Создать</button>
-        </div>
-      </div>
-    )
-  }
   
-  const ProfileHeader = ({ username, avatar, onOpenModal }) => {
+  const ProfileHeader = () => {
     return (
       <div className="profile-header">
-        <div className="profile-user">
-          <img src={avatar} alt="User Avatar" className="profile-avatar" />
-          <span className="profile-username">{username}</span>
-        </div>
-        {console.log("ff")}
-        <div style={{display: "flex", gap: "10px"}}>
-          <button className="profile-button" onClick={onOpenModal}>Создать встречу</button>
-          <button className="profile-button" style={{marginRight: "50px"}} onClick={handleLogOut}>Выйти</button>
-        </div>
+        <Link to="/">Главная</Link>
+        <Link to="/profile">Профиль</Link>
+        <Link to="/about">О нас</Link>
+      </div>
+    );
+  };
+
+  const ProfileButtons = ({ onOpenModal }) => {
+    return (
+      <div className="profile-buttons">
+        <button className="profile-button" onClick={onOpenModal}>Создать встречу</button>
+        <button className="profile-button" onClick={handleLogOut}>Выйти</button>
       </div>
     );
   };
   
   const ProfileSession = ({ id, title, description, maxParticipants, participants, status }) => {
     return (
-      <div className="profile-sessions session">
-        <h3>{title}</h3>
-        <p>{description}</p>
+      <button className="profile-sessions session" onClick={() => joinSession(id)}>
+        <div className="profile-posttitle">
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
         <div>
-          <span>{`Участники: ${participants}/${maxParticipants}`}</span>
-          <span>{`Статус: ${status}`}</span>
-        </div> 
-        <button onClick={() => joinSession(id)}>Войти</button>
-        <button onClick={() => leaveSession(id)}>Удалить</button>
-      </div>
+          <p>{`Участники: ${participants}/${maxParticipants}`}</p>
+          <p>{`Статус: ${status}`}</p>
+          <p>{`Дата создания: 01.01.2000`}</p>
+        </div>
+        <button class="leave-button" onClick={(e) => leaveSession(e, id)}>
+          X
+        </button>
+      </button>
     );
   };
 
+  const VerticalScrollBlock = ({ children }) => {
+    return (
+      <div className="vertical-scroll-block">
+        <div className="inner-scroll-content">{children}</div>
+      </div>
+    );
+  }
+
+  const handleUpload = (sessionName, sessionDesc, sessionCount) => {
+      createSession(sessionName, sessionDesc, sessionCount);
+      closeModal();
+  };
+
   return (
-    <div className="app">
-      {console.log("fff")}
-      <ProfileHeader username={userProfile.username} avatar={userProfile.avatar} onOpenModal={openModal} />
+    <div className="create-session-container-mega">
+      <ProfileHeader />
+      <ProfileButtons onOpenModal={openModal} />
       <div className="profile-content">
-        <p className="profile-title">Ваши встречи</p>
-        {sessionsData.length > 0 ? ( <div className="profile-sessions">
+        {sessionsData.length > 0 ? (
+          <div className="profile-sessions">
+          <VerticalScrollBlock>
           {sessionsData.map((session, index) => (
             <ProfileSession
               key={index}
@@ -222,9 +190,11 @@ function Main() {
                   (session.status == 1 ? "Просмотр карточек" : "Завершен")}
             />
           ))}
-        </div> ) : (<p style={{marginLeft: "20px"}}>Нет встреч</p>)}
+        </VerticalScrollBlock>
+        </div>
+        ) : (<p style={{marginLeft: "20px"}}>Нет встреч</p>)}
       </div>
-      {isModalOpen && <CreateSessionModal onCloseModal={closeModal} />}
+      <CreateModal showModal={showModal} closeModal={closeModal} handleUpload={handleUpload} />
     </div>
   );
 }

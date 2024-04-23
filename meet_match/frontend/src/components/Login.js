@@ -40,10 +40,10 @@ const Login = ({ setShowLogin }) => {
             <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required />
             <i class='bx bxs-lock-alt' ></i>
           </div>
-          <div class="remember-forgot">
-            <label><input type="checkbox" /> Запомнить меня</label>
+          {/* <div class="remember-forgot">
+            <label></label>
             <a href="#">Забыли пароль?</a>
-          </div>
+          </div> */}
           <button type="submit" class="btn">Войти</button>
         </form>
         <div class="register-link">

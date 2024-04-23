@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
+import ConnectModal from './ConnectModal';
 import './Session.css'
+import './Main.css'
 
 
 const Session = (props) => {
@@ -14,6 +17,15 @@ const Session = (props) => {
   const [inputValue, setInputValue] = useState('');
   const [ready, setReady] = useState(false);
   const sessionId = id;
+  const [showModal, setShowModal] = useState(false);
+
+  const openModal = () => {
+      setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+};
 
   const handleSubmit = () => {
     patchSession(cookies.UserId);
@@ -37,10 +49,23 @@ const Session = (props) => {
         setSessionDesc(data.description);
         setMaxParticipants(data.maxPeople);
         const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
-        if (participant.Request !== '') {
+        console.log(participant);
+        
+        if (participant && participant.Request !== '') {
           setInputValue(participant.Request);
           setReady(true);
         }
+
+
+        if (data.users.length > 0 && !participant)
+        {
+          openModal();
+        }
+        else
+        {
+          closeModal();
+        }
+
         if (data.status === 1)
         {
           window.location.reload();
@@ -50,7 +75,9 @@ const Session = (props) => {
       }
     };
 
-    const pollingInterval = setInterval(getSession, 100);
+    getSession();
+
+    const pollingInterval = setInterval(getSession, 1000);
 
     return () => clearInterval(pollingInterval);
   }, [cookies, sessionId]);
@@ -115,63 +142,68 @@ const Session = (props) => {
     setReady(!ready);
   };
 
-  console.log()
-  if (participants.length > 0 && !participants.find(participant => participant.ID === Number(cookies.UserId))) {
+  const ProfileHeader = () => {
     return (
-      <div className="create-session-container">
-      <h1>Вы присоединяетесь к встрече "{sessionName}"</h1>
-      <p>{sessionDesc}</p>
-      <div class="input-container turbo-button">
-        <button class="session-button turbo-button" onClick={handleSubmit}>Продолжить</button>
-      </div>
+      <div className="profile-header">
+        <Link to="/">Главная</Link>
+        <Link to="/profile">Профиль</Link>
+        <Link to="/about">О нас</Link>
       </div>
     );
-  }
+  };
 
   return (
-    <div class="container">
-      <h2>{sessionName}</h2>
-      <p>{sessionDesc}</p>
-      <div class="input-container">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          placeholder="Введите ваши пожелания..."
-          disabled={ready}
-        />
-        <button onClick={handleReadyClick}>{ready ? "Не готов" : "Готов"}</button>
-      </div>
-      <p class="invite-link">Ссылка для приглашения: http://localhost:3000/session/{sessionId}</p>
-      {participants.length > 0 ? (
-        <div>
-          <p class="participants-count">Количество участников: {participants.length} / {maxParticipants}</p>
-          <table class="participants-table">
-            <thead>
-              <tr>
-                <th>Пользователь</th>
-                <th>Готов</th>
-              </tr>
-            </thead>
-            <tbody>
-              {participants.map((participant) => (
-                <tr key={participant.ID}>
-                  <td>{participant.Name}</td>
-                  <td>
-                    <label class="checkbox-container">
-                      <input type="checkbox" class="checkbox-input" disabled checked={participant.Request !== ''} />
-                      <span class="checkbox-custom"></span>
-                    </label>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div class="precontainer">
+      <ProfileHeader />
+      <div class="container">
+        <div class="container-info">
+          <h2>{sessionName}</h2>
+          <p>{sessionDesc}</p>
+        <div class="input-container">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder="Введите ваши пожелания..."
+            disabled={ready}
+            />
+          <button onClick={handleReadyClick} class="profile-button" style={{width: 150}}>{ready ? "Не готов" : "Готов"}</button>
         </div>
-      ) : (
-        <p class="no-participants">Нет участников</p>
-      )}
-    </div>
+        <p class="invite-link">Скопируйте ссылку из адресной строки браузера и скиньте своих друзьям</p>
+        </div>
+        {participants.length > 0 ? (
+          <div>
+            <p class="participants-count">Количество участников: {participants.length} / {maxParticipants}</p>
+            <table class="participants-table">
+              <thead>
+                <tr>
+                  <th>Пользователь</th>
+                  <th>Готов</th>
+                </tr>
+              </thead>
+              <tbody>
+                {participants.map((participant) => (
+                  <tr key={participant.ID}>
+                    <td>{participant.Name}</td>
+                    <td>
+                      <label class="checkbox-container">
+                        <input type="checkbox" class="checkbox-input" disabled checked={participant.Request !== ''} />
+                        <span class="checkbox-custom"></span>
+                      </label>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p class="no-participants">Нет участников</p>
+        )}
+      </div>
+
+      <ConnectModal showModal={showModal} sessionName={sessionName} sessionDesc={sessionDesc} handleUpload={handleSubmit} />
+
+      </div>
   );
 };
 
