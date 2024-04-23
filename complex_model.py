@@ -4,6 +4,9 @@
 пример работы:
 rec_sys =RecommendationSystem()
 rec_sys.get_rec(1,1,"яблоко", 10)
+
+rec_sys.get_rec(1,1,"японская кухня", 10, {"categories":['restaurants'])
+rec_sys.get_rec(1,1,"японская кухня", 10, {"categories":['restaurants'], "day":'Tuesday', 'time':'17:01'})
 '''
 
 
@@ -11,13 +14,16 @@ import torch
 import pandas as pd
 import torch.nn.functional as F
 import pickle
-import sqlite3
+import psycopg2 as pg
 import random
+import json
+import ast
 
 from torch import Tensor
 from transformers import AutoTokenizer, AutoModel
 from tqdm import tqdm_notebook
 from typing import List, Dict, Any, Tuple
+from datetime import datetime
 
 
 class RecommendationSystem:
@@ -26,8 +32,16 @@ class RecommendationSystem:
             'intfloat/multilingual-e5-large-instruct')
         self.model = AutoModel.from_pretrained(
             'intfloat/multilingual-e5-large-instruct')
-        self.db_path = 'prog_db.db'
         self.embed_dict = self._load_embeddings()
+        self.places_info = self._fetch_places_info()
+        # host=localhost user=any1 password=1 database=meetmatch_db port=5432
+        self.connection_info = {
+            "host": "localhost",
+            "database": "meetmatch_db",
+            "port": 5432,
+            "user": "any1",
+            "password": "1",
+        }
 
     def _get_swipes_for_session(self, user_id: int, session_id: int, for_group: bool = False) -> List[Tuple[int, bool]]:
         """
@@ -44,7 +58,7 @@ class RecommendationSystem:
                                   понравилось ли место пользователю (True - понравилось, False - не понравилось).
         """
 
-        conn = sqlite3.connect(self.db_path)
+        conn = pg.connect(**self.connection_info)
         cursor = conn.cursor()
         query = ''
 
@@ -82,7 +96,7 @@ class RecommendationSystem:
         - Dict[int, Any]: Словарь, где ключом является ID места (place_id), а значением - десериализованный эмбеддинг.
         """
 
-        conn = sqlite3.connect(self.db_path)
+        conn = pg.connect(**self.connection_info)
         cursor = conn.cursor()
 
         cursor.execute("SELECT place_id, embedding FROM embeddings")
@@ -92,6 +106,88 @@ class RecommendationSystem:
         embeddings = {place_id: pickle.loads(
             embedding) for place_id, embedding in embeddings_data}
         return embeddings
+
+    def _fetch_places_info(self):
+        """
+        Извлекает из базы данных SQLite и составляет словарь, где ключами являются ID мест,
+        а значениями - словари с категориями (как списком) и временем работы.
+
+        Параметры:
+        - db_path (str): Путь к файлу базы данных SQLite.
+
+        Возвращает:
+        - dict: Словарь с информацией о местах.
+        """
+        places_info = {}
+
+        conn = pg.connect(**self.connection_info)
+        cursor = conn.cursor()
+
+        query = "SELECT place_id, categories, working_hours FROM places"
+        cursor.execute(query)
+
+        for place_id, categories, working_hours in cursor.fetchall():
+
+            if categories:
+                try:
+                    categories = ast.literal_eval(categories)
+                except (SyntaxError, ValueError):
+                    categories = []  # Если есть ошибка в структуре, вернуть пустой список
+            else:
+                categories = []
+
+            if working_hours:
+                try:
+                    working_hours = ast.literal_eval(working_hours)
+                except (SyntaxError, ValueError):
+                    working_hours = {}  # Если есть ошибка в структуре, вернуть пустой словарь
+            else:
+                working_hours = {}
+
+            places_info[place_id] = {
+                "categories": categories,
+                "working_hours": working_hours
+            }
+
+        conn.close()
+        return places_info
+
+    def _is_open(self, working_hours, day, time_str):
+        hours = working_hours.get(day, "")
+
+        if hours == 'fulltime':
+            return True
+
+        if not hours or '-' not in hours:
+            return False
+
+        open_time_str, close_time_str = hours.split("-")
+        format_str = "%H:%M"  # Формат времени часы:минуты
+        open_time = datetime.strptime(open_time_str, format_str).time()
+        close_time = datetime.strptime(close_time_str, format_str).time()
+        current_time = datetime.strptime(time_str, format_str).time()
+
+        # Если время закрытия меньше времени открытия, возможно, заведение работает ночью.
+        if close_time < open_time:
+            return current_time >= open_time or current_time <= close_time
+        else:
+            return open_time <= current_time <= close_time
+
+    def _filter_place(self, place_idx,  criteria):
+
+        details = self.places_info[place_idx]
+
+        category_match = True
+        if "categories" in criteria:
+            category_match = any(
+                cat in details["categories"] for cat in criteria["categories"])
+
+        time_match = True
+        if "day" in criteria and "time" in criteria:
+            time_match = self._is_open(
+                details["working_hours"], criteria["day"], criteria["time"])
+
+        return category_match and time_match
 
     def _cosine_similarity(self, embeddings: Tensor, all_embeddings: Tensor) -> Tensor:
         """
@@ -137,7 +233,7 @@ class RecommendationSystem:
         embedding_normalized = F.normalize(pooled_embeddings, p=2, dim=1)
         return embedding_normalized
 
-    def _get_rec_on_query(self, query: str, used_ids: List[int], num_items: int = 20) -> List[int]:
+    def _get_rec_on_query(self, query: str, used_ids: List[int], criteria: Dict, num_items: int = 20) -> List[int]:
         """
         Получает рекомендации на основе текстового запроса, исключая уже использованные ID.
 
@@ -145,6 +241,7 @@ class RecommendationSystem:
         - query (str): Текстовый запрос для поиска.
         - embeddings (Dict[int, torch.Tensor]): Словарь с эмбеддингами мест, где ключ - это ID места.
         - used_ids (List[int]): Список ID мест, которые уже были использованы и должны быть исключены из результатов.
+        - criteria (Dict): словарь фильтров.
         - num_items (int): Количество возвращаемых рекомендаций.
 
         Возвращает:
@@ -168,7 +265,7 @@ class RecommendationSystem:
         while len(top_n_place_ids) < num_items and idx_iter < len(place_ids):
             current_idx = sorted_indices[idx_iter].item()
 
-            if place_ids[current_idx] not in used_ids:
+            if place_ids[current_idx] not in used_ids and self._filter_place(place_ids[current_idx], criteria):
                 top_n_place_ids.append(place_ids[current_idx])
 
             idx_iter += 1
@@ -181,6 +278,7 @@ class RecommendationSystem:
         session_id: int,
         swiped_places: List[Tuple[int, bool]],
         used_ids: List[int],
+        criteria,
         num_top_idx: int = 20,
         dislike_weight: float = 0.5
     ) -> List[int]:
@@ -236,7 +334,7 @@ class RecommendationSystem:
         idx_iter = 0
         while len(top_n_place_ids) < num_top_idx and idx_iter < len(indices):
             current_idx = indices[idx_iter].item()
-            if place_ids[current_idx] not in used_ids:
+            if place_ids[current_idx] not in used_ids and self._filter_place(place_ids[current_idx], criteria):
                 top_n_place_ids.append(place_ids[current_idx])
             idx_iter += 1
 
@@ -248,6 +346,7 @@ class RecommendationSystem:
         session_id: int,
         swiped_places: List[Tuple[int, bool]],
         used_ids: List[int],
+        criteria,
         num_top_idx: int = 20
     ) -> List[int]:
         """
@@ -287,36 +386,54 @@ class RecommendationSystem:
         idx_iter = 0
         while len(top_n_place_ids) < num_top_idx and idx_iter < len(indices):
             current_idx = indices[idx_iter].item()
-            if place_ids[current_idx] not in used_ids:
+            if place_ids[current_idx] not in used_ids and self._filter_place(place_ids[current_idx], criteria):
                 top_n_place_ids.append(place_ids[current_idx])
             idx_iter += 1
 
         return top_n_place_ids
 
-    def _get_random_places(self, all_place_ids, used_indices, num_places=10):
-        place_ids = []
-        idx_iter = 0
+    def _get_random_places(self, all_place_ids, used_indices, criteria, num_places=10):
+        """
+        Выбирает случайные места, не входящие в список использованных и соответствующие критериям фильтрации.
 
-        while len(place_ids) < num_places and idx_iter < len(all_place_ids):
-            idx = random.randint(0, len(all_place_ids))
-            if all_place_ids[idx] not in used_indices:
-                place_ids.append(all_place_ids[idx])
-            idx_iter += 1
+        Параметры:
+        - all_place_ids (list): Список всех идентификаторов мест.
+        - used_indices (list): Список уже использованных идентификаторов мест.
+        - criteria (dict): Словарь критериев для фильтрации мест.
+        - num_places (int): Количество мест для выборки.
+
+        Возвращает:
+        - list: Список идентификаторов мест, которые удовлетворяют критериям.
+        """
+        # Перемешиваем список индексов
+        shuffled_place_ids = all_place_ids[:]
+        random.shuffle(shuffled_place_ids)
+
+        place_ids = []
+        for idx in shuffled_place_ids:
+            if len(place_ids) >= num_places:
+                break
+            if idx not in used_indices and self._filter_place(idx, criteria):
+                place_ids.append(idx)
+
         return place_ids
 
-    def get_rec(self, user_id: int, session_id: int, query: str, num_idx=50) -> List[int]:
+    def get_rec(self, user_id: int, session_id: int, query: str, num_idx=50, criteria: dict = None) -> List[int]:
         """   
         Параметры:
         - user_id (int): Идентификатор пользователя.
         - session_id (int): Идентификатор сессии.
         - query (str): Текстовый запрос для поиска.
-        - num_idx (int) : Число индексов на выходе.
+        - criteria (dict): Фильтры к запросу 
+        - num_idx (int): Число индексов на выходе.
 
         Возвращает:
         - List[int]: Список ID рекомендованных мест.
         """
+        if not criteria:
+            criteria = {}
 
-        proportions = [0.3, 0.3, 0.3, 0.1]  # лучше динамически подбирать, пока так(
+        proportions = [0.4, 0.2, 0.3, 0.1]  # лучше динамически подбирать, пока так(
         parts = [int(num_idx * p) for p in proportions]
 
         recomendation_indices = []
@@ -324,32 +441,33 @@ class RecommendationSystem:
             user_id, session_id, for_group=False)
         used_indices = swipe_user_hist.copy()
 
-        query_rec_list = self._get_rec_on_query(query, used_indices, parts[0])
+        query_rec_list = self._get_rec_on_query(
+            query, used_indices, criteria, parts[0])
         if len(query_rec_list) < parts[0]:
-            query_rec_list = query_rec_list + self._get_random_places(
-                list(self.embed_dict.keys()), used_indices, len(query_rec_list) - parts[0])
+            query_rec_list = query_rec_list + self._get_random_places(list(
+                self.embed_dict.keys()), used_indices, criteria, len(query_rec_list) - parts[0])
 
         used_indices = used_indices + query_rec_list
 
         rec_user_hist = self._generate_rec_on_user_session_hist(
-            user_id, session_id, swipe_user_hist, used_indices, parts[1])
+            user_id, session_id, swipe_user_hist, used_indices, criteria, parts[1])
         if len(rec_user_hist) < parts[1]:
-            rec_user_hist = rec_user_hist + self._get_random_places(
-                list(self.embed_dict.keys()), used_indices, len(rec_user_hist) - parts[1])
+            rec_user_hist = rec_user_hist + self._get_random_places(list(
+                self.embed_dict.keys()), used_indices, criteria, len(rec_user_hist) - parts[1])
         used_indices = used_indices + rec_user_hist
 
         swipe_group_hist = self._get_swipes_for_session(
             user_id, session_id, for_group=True)
 
         rec_group_hist = self._generate_group_rec_on_likes(
-            user_id, session_id, swipe_group_hist, used_indices, parts[2])
+            user_id, session_id, swipe_group_hist, used_indices, criteria, parts[2])
         if len(rec_group_hist) < parts[2]:
-            rec_group_hist = rec_group_hist + self._get_random_places(
-                list(self.embed_dict.keys()), used_indices, len(rec_group_hist) - parts[2])
+            rec_group_hist = rec_group_hist + self._get_random_places(list(
+                self.embed_dict.keys()), used_indices, criteria, len(rec_group_hist) - parts[2])
         used_indices = used_indices + rec_group_hist
 
         random_rec = self._get_random_places(
-            list(self.embed_dict.keys()), used_indices, parts[3])
+            list(self.embed_dict.keys()), used_indices, criteria, parts[3])
         used_indices = used_indices + random_rec
 
         final_recomendation = query_rec_list + \
@@ -359,3 +477,6 @@ class RecommendationSystem:
 
     def update_embed_dict(self):
         self.embed_dict = self._load_embeddings()
+
+    def update_places_info(self):
+        self.places_info = self._fetch_places_info()
