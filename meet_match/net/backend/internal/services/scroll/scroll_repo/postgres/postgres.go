@@ -53,6 +53,7 @@ func (s scrollRepository) GetAllUsersIdsForSession(session_id uuid.UUID) ([]uint
 		Model(&models_da.FactScrolled{}).
 		Select("user_id").
 		Where("session_id = ?", session_id.String()).
+		Group("user_id").
 		Find(&ids)
 
 	if tx.Error != nil {
