@@ -1,6 +1,16 @@
 version: "3.8"
 
 services:
+  web:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - redis-go-server
+      - frontend
+    networks:
+      - postgres
+
   redis-db:
     image: redis:alpine
     container_name: redis-db
@@ -56,25 +66,25 @@ services:
     networks:
       - postgres
 
-  pgadmin:
-    container_name: pgadmin4_container
-    image: dpage/pgadmin4:7.2
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "ggwpez@amil.ru"
-      PGADMIN_DEFAULT_PASSWORD: "1"
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1G
-    networks:
-      - postgres
+#  pgadmin:
+#    container_name: pgadmin4_container
+#    image: dpage/pgadmin4:7.2
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: "ggwpez@amil.ru"
+#      PGADMIN_DEFAULT_PASSWORD: "1"
+#      PGADMIN_CONFIG_SERVER_MODE: "False"
+#    volumes:
+#      - pgadmin-data:/var/lib/pgadmin
+#    ports:
+#      - "5050:80"
+#    restart: unless-stopped
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '0.5'
+#          memory: 1G
+#    networks:
+#      - postgres
 
   redis-go-server:
     build:
