@@ -98,6 +98,7 @@ services:
     container_name: redis-go-server
     depends_on:
       - redis-db
+      - postgres
     networks:
       - postgres
 

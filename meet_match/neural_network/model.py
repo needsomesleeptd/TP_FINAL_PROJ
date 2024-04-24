@@ -22,7 +22,7 @@ class RecommendationSystem:
         )
         # host=localhost user=any1 password=1 database=meetmatch_db port=5432
         self.connection_info = {
-            "host": "localhost",
+            "host": "proj_bd",
             "database": "meetmatch_db",
             "port": 5432,
             "user": "any1",
