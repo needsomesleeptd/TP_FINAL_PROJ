@@ -84,7 +84,7 @@ function App() {
         />
         <Route
           path="/session/:id"
-          element={<DataFetcher />}
+          element={requireAuth(<DataFetcher />)}
         />
         <Route
           path="*"

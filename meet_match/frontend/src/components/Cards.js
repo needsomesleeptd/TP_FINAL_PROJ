@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
+import './Cards.css'
 
 const swipeVariants = {
   initial: { x: 0 },
@@ -120,17 +122,27 @@ const Cards = (props) => {
     cardsFeedback(cards[0].idx, direction);
     console.log(cards[0].idx, direction);
     setCards(cards.slice(1));
-    if (cards.length == 0) {
+    if (cards.length <= 1) {
       getCards();
     }
   };
 
+  const ProfileHeader = () => {
+    return (
+      <div className="profile-header">
+        <Link to="/">Главная</Link>
+        <Link to="/profile">Профиль</Link>
+        <Link to="/about">О нас</Link>
+      </div>
+    );
+  };
+
   return (
-    <div>
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <p style={{ fontSize: "24px", fontWeight: "bold" }}>Давай подберём подходящее место для вашей встречи</p>
-        <p style={{ fontSize: "24px", fontWeight: "bold" }}>Для этого просто листни карточку влево, если место тебе не нравится</p>
-        <p style={{ fontSize: "24px", fontWeight: "bold" }}>Или же листни карточку вправо, если место тебе понравилось</p>
+    <div class="cards-body">
+      <ProfileHeader />
+      <div class="cards-desc">
+        <p>Давай подберём подходящее место для вашей встречи. Для этого просто листни карточку</p>
+        <p>влево, если место тебе не нравится, или же вправо, если место тебе понравилось.</p>
       </div>
       <div style={{height: "80vh", display: "flex", alignItems: "center", justifyContent: "center"}}>
       {cards.slice().reverse().map((card, index) => (
@@ -145,34 +157,14 @@ const Cards = (props) => {
           animate={index + 1 !== cards.length ? "initial" : xOffset < -200 ? "dragLeft" : xOffset > 200 ? "dragRight" : "initial"}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
-          style={{
-            width: 300,
-            height: 400,
-            background: "lightblue",
-            borderRadius: 20,
-            border: "2px solid #000",
-            boxSizing: "border-box",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "absolute",
-          }}
+          class="cards-card"
         >
           <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-            <img src={card.image} alt="" style={{
-                marginTop: "30px",
-                width: "200px",
-                height: "200px",
-                border: "2px solid #000",
-                boxSizing: "border-box",
-                objectFit: "cover",
-                borderRadius: "10%",
-                pointerEvents: "none"
-                }} />
+            <img src={card.image} alt="" class="cards-img" />
             <p style={{textAlign: "center" }}>{card.title}</p>
           </div>
-          <p style={{ position: "absolute", top: 0, left: 20 }}>Не нравится</p>
-          <p style={{ position: "absolute", top: 0, right: 20 }}>Нравится</p>
+          {/* <p style={{ position: "absolute", top: 0, left: 20 }}>Не нравится</p> */}
+          {/* <p style={{ position: "absolute", top: 0, right: 20 }}>Нравится</p> */}
         </motion.div>
       ))}
       </div>
