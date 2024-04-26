@@ -9,7 +9,7 @@ import json
 
 model = RecommendationSystem()
 app = Flask(__name__)
-# model.build_embeddings()
+model.build_embeddings()
 
 
 @app.route("/rec", methods=["POST", "GET"])
