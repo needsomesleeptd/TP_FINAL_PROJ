@@ -23,7 +23,7 @@ function Main() {
 
   const UserInfoRequest = async () => {
     try {
-        const response = await fetch('http://localhost:8080/sessions/getUser', {
+        const response = await fetch('http://localhost/api/sessions/getUser', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ function Main() {
 
   const createSession = async () => {
     try {
-      const response = await fetch('http://localhost:8080/sessions', {
+      const response = await fetch('http://localhost/api/sessions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ function Main() {
       }
       const data = await response.json();
       const sessionId = data.sessionID;
-      const sessionUrl = `http://localhost:3000/session/${sessionId}`;
+      const sessionUrl = `http://localhost/session/${sessionId}`;
       window.location.href = sessionUrl;
     } catch (error) {
       console.error('Error creating session:', error);
@@ -107,13 +107,13 @@ function Main() {
   };
 
   const joinSession = (sessionId) => {
-    const sessionUrl = `http://localhost:3000/session/${sessionId}`;
+    const sessionUrl = `http://localhost/api/sessions/${sessionId}`;
     window.location.href = sessionUrl;
   };
   
   const leaveSession = async (sessionId) => {
     try {
-        const response = await fetch(`http://localhost:8080/sessions/${sessionId}`, {
+        const response = await fetch(`http://localhost/api/sessions/${sessionId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
