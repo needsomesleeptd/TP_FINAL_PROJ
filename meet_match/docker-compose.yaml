@@ -8,8 +8,8 @@ services:
     depends_on:
       - redis-go-server
       - frontend
-    networks:
-      - postgres
+    #networks:
+      #- postgres
 
   redis-db:
     image: redis:alpine
@@ -63,8 +63,8 @@ services:
         limits:
           cpus: '1'
           memory: 4G
-    networks:
-      - postgres
+    #networks:
+      #- postgres
 
 #  pgadmin:
 #    container_name: pgadmin4_container
@@ -96,10 +96,13 @@ services:
     ports:
       - "8080:8080"
     container_name: redis-go-server
+    links:
+     - redis-db
     depends_on:
       - redis-db
-    networks:
       - postgres
+    #networks:
+      #- postgres
 
   python-flask-app:
     build:
@@ -107,8 +110,8 @@ services:
     ports:
       - "5000:5000"
     container_name: python-flask-app
-    networks:
-      - postgres
+    #networks:
+     # - postgres
   
   frontend:
     build:
@@ -116,13 +119,14 @@ services:
     ports:
       - "3000:3000"
     container_name: frontend
-    networks:
-      - postgres
+   # networks:
+   #   - postgres
 
 volumes:
   pgadmin-data:
   redis-data:
 
-networks:
-  postgres:
-    driver: bridge
+#networks:
+#  postgres:
+#    driver: bridge
+    

@@ -22,7 +22,7 @@ const Session = (props) => {
   useEffect(() => {
     const getSession = async () => {
       try {
-        const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+        const response = await fetch('http://localhost/api/sessions/'+ sessionId, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${cookies.AccessToken}`
@@ -57,7 +57,7 @@ const Session = (props) => {
 
   const patchSession = async (id) => {
     try {
-      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+      const response = await fetch('http://localhost/api/sessions/'+ sessionId, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ const Session = (props) => {
   const putSession = async (id) => {
     const participant = participants.find(participant => participant.ID === Number(cookies.UserId));
     try {
-      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+      const response = await fetch('http:/localhost/api/sessions/'+ sessionId, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ const Session = (props) => {
         />
         <button onClick={handleReadyClick}>{ready ? "Не готов" : "Готов"}</button>
       </div>
-      <p class="invite-link">Ссылка для приглашения: http://localhost:3000/session/{sessionId}</p>
+      <p class="invite-link">Ссылка для приглашения: http://redis-go-server:3000/session/{sessionId}</p>
       {participants.length > 0 ? (
         <div>
           <p class="participants-count">Количество участников: {participants.length} / {maxParticipants}</p>

@@ -20,9 +20,9 @@ class RecommendationSystem:
         self.model = AutoModel.from_pretrained(
             "intfloat/multilingual-e5-large-instruct"
         )
-        # host=localhost user=any1 password=1 database=meetmatch_db port=5432
+        # host=redis-go-server user=any1 password=1 database=meetmatch_db port=5432
         self.connection_info = {
-            "host": "localhost",
+            "host": "proj_bd",
             "database": "meetmatch_db",
             "port": 5432,
             "user": "any1",

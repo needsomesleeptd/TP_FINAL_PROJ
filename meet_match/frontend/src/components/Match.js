@@ -11,7 +11,7 @@ const Match = (props) => {
  useEffect(() => {
   const cardsFeedback = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/check_match`, {
+      const response = await fetch(`http://localhost/api/sessions/${sessionId}/check_match`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
