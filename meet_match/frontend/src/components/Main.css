@@ -1,8 +1,11 @@
 .create-session-container-mega {
-  /* background-image: url('https://kartinki.pics/uploads/posts/2022-12/1669954445_1-kartinkin-net-p-belii-fon-dlya-saita-krasivo-1.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed; */
+  margin: 0;
+  padding: 0;
+  background-image: url('../../public/bg_main.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-attachment: fixed;
+  align-items: center;
 }
 
 .create-session-container {
@@ -37,14 +40,16 @@
 }
 
 .profile-button {
-  padding: 10px 20px;
+  padding: 15px 20px;
   font-size: 16px;
-  background-color: #007bff;
+  background: linear-gradient(to bottom right, #d483af, #7db592);
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 20px;
   cursor: pointer;
+  font-weight: bold;
   transition: background-color 0.3s ease;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.4);
 }
 
 .profile-button:hover {
@@ -52,20 +57,41 @@
 }
 
 .profile-header {
+  margin-right: 25px;
+  width: 280px;
+  margin-top: 140px;
   display: flex;
   justify-content: space-between;
+  color: rgb(255, 255, 255);
+  align-items: center;
+  z-index: 1000; 
+  font-size: 20px;
+  padding: 10px 20px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.profile-header a {
+  text-decoration: none;
+  color: #ededed;
+  font-weight: bold;
+}
+
+.profile-buttons {
+  width: 800px;
+  display: flex;
+  justify-content: space-between;
+  color: rgb(255, 255, 255);
   align-items: center;
   padding: 10px 20px;
-  background-color: #f2f2f2;
-  border-bottom: 1px solid #ddd;
-  position: fixed;
-  width: 100%;
-  background-color: #f2f2f2;
-  z-index: 1000; 
+  z-index: 1000;
 }
 
 .profile-content {
-  margin-top: 70px;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
 .profile-title {
@@ -95,34 +121,22 @@
 }
 
 .profile-sessions .session {
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-}
-
-.profile-sessions .session h3 {
-  margin-top: 0;
-}
-
-.profile-sessions .session p {
-  color: #666;
-  margin-bottom: 10px;
-}
-
-.profile-sessions .session div {
+  width: 100%;
+  height: 150px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 25px;
+  border-radius: 30px;
+  background-color: #323030;
+  color:rgb(255, 255, 255);
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.4);
 }
 
-.profile-sessions .session button {
-  padding: 8px 15px;
-  margin-right: 10px;
-  cursor: pointer;
+.profile-sessions .profile-posttitle{
+  width: 300px;
 }
-
-
 
 
 .modal {
@@ -138,11 +152,35 @@
 }
 
 .modal-content {
-  background-color: #fefefe;
+  background-color: rgba(87, 87, 87, 0.4);
   margin: 15% auto; /* 15% отступ сверху и снизу, центрирование по горизонтали */
   padding: 20px;
-  border: 1px solid #888;
-  width: 70%; /* Ширина модального окна */
+  border: 0px solid #4b4646;
+  width: 300px;
+  
+  margin: 40px auto;
+  text-align: center;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h1 {
+  color: rgb(255, 255, 255);
+}
+
+.modal-button {
+  width: 200px;
+  padding: 15px 20px;
+  font-size: 16px;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  background: linear-gradient(to bottom left, #5bd66f, #323232);
 }
 
 .close {
@@ -159,4 +197,51 @@
   cursor: pointer;
 }
 
+
+.vertical-scroll-block {
+  justify-content: center;
+  align-items: center;
+  width: 800px;
+  height: 420px;
+  padding: 20px;
+  margin: 10px;
+  background-color: #242222;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.vertical-scroll-block::-webkit-scrollbar {
+  width: 10px;
+}
+
+.vertical-scroll-block::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #b7b7b7, #323232);
+  border-radius: 5px;
+}
+
+.vertical-scroll-block::-webkit-scrollbar-track {
+  background-color: #f2f2f2;
+  border-radius: 10px;
+}
+
+.vertical-scroll-block::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #cccbcb, #6d6d6d);
+}
+
+
+.leave-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 30px;
+  background-color: #a3a7a9;
+  color: white;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.leave-button:hover {
+  background-color: #2980b9;
+}
 

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
+import './Cards.css'
+import './Main.css'
 
 const Match = (props) => {
  const { id } = useParams();
@@ -11,7 +14,7 @@ const Match = (props) => {
  useEffect(() => {
   const cardsFeedback = async () => {
     try {
-      const response = await fetch(`http://localhost/api/sessions/${sessionId}/check_match`, {
+      const response = await fetch(`/api/sessions/${sessionId}/check_match`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -39,48 +42,31 @@ const Match = (props) => {
 
 
  return (
-   <div>
-     <div style={{ textAlign: "center", marginBottom: 20 }}>
-       <p style={{ fontSize: "24px", fontWeight: "bold" }}>Мы нашли подходящее место для вас!</p>
+  <div class="cards-body">
+    <div class="spec">
+     <div style={{ textAlign: "center", marginTop: 100 }}>
+       <p style={{ fontSize: "30px", fontWeight: "bold", color: "white" }}>Мы нашли подходящее место для вас!</p>
      </div>
      <div style={{ height: "80vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
        {cards.slice().reverse().map((card, index) => (
          <div
            key={index}
-           style={{
-             width: 300,
-             height: 400,
-             background: "lightblue",
-             borderRadius: 20,
-             border: "2px solid #000",
-             boxSizing: "border-box",
-             display: "flex",
-             alignItems: "center",
-             justifyContent: "center",
-             position: "absolute",
-           }}
+           class="cards-card"
+           style={{marginTop: -20}}
          >
            <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-             <img src={card.image} alt="" style={{
-                 marginTop: "30px",
-                 width: "200px",
-                 height: "200px",
-                 border: "2px solid #000",
-                 boxSizing: "border-box",
-                 objectFit: "cover",
-                 borderRadius: "10%",
-                 pointerEvents: "none"
-                 }} />
+             <img src={card.image} alt="" class="cards-img" />
              <p style={{textAlign: "center" }}>{card.title}</p>
            </div>
          </div>
        ))}
      </div>
-     <div style={{ textAlign: "center", marginTop: 20 }}>
+     <div style={{ textAlign: "center", marginTop: -100 }}>
      <a href="/" style={{ textDecoration: "none" }}>
-        <button style={{ marginBottom: "40px", padding: "10px 20px", fontSize: "16px", backgroundColor: "lightblue", border: "2px solid #000", borderRadius: "5px", cursor: "pointer" }}>Вернуться на главную страницу</button>
+        <button class="modal-button" style={{marginBottom: "20px"}}>Вернуться</button>
       </a>
     </div>
+   </div>
    </div>
  );
 };

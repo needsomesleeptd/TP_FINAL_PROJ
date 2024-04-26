@@ -28,7 +28,7 @@ function App() {
     useEffect(() => {
       const CheckSession = async (sessionId) => {
         try {
-          const response = await fetch('http://localhost/api/sessions/'+ id, {
+          const response = await fetch('/api/sessions/'+ id, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${cookies.AccessToken}`
@@ -84,7 +84,7 @@ function App() {
         />
         <Route
           path="/session/:id"
-          element={<DataFetcher />}
+          element={requireAuth(<DataFetcher />)}
         />
         <Route
           path="*"
