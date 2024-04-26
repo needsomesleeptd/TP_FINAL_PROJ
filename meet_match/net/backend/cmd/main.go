@@ -30,17 +30,24 @@ import (
 )
 
 var (
-	CONN_POSTGRES_STR = "host=proj_bd user=any1 password=1 database=meetmatch_db port=5432" //TODO:: export through parameters
+	CONN_POSTGRES_STR = "host='postgres' user=any1 password='1' database='meetmatch_db' port=5432 sslmode=disable" //TODO:: export through parameters
 	POSTGRES_CFG      = postgres.Config{DSN: CONN_POSTGRES_STR}
 	MODEL_ROUTE       = "http://0.0.0.0:5000/rec"
-	SESSION_PATH      = "localhost:6379"
+	SESSION_PATH      = "redis-db:6379"
 )
 
 func main() {
 	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err.Error())
-		os.Exit(1)
+		//os.Exit(1)
+		time.Sleep(5 * time.Second)
+	}
+
+	db, err = gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err.Error())
+		time.Sleep(5 * time.Second)
 	}
 	cardRepo := postgres3.NewCardRepo(db)
 	model, err := model.New(MODEL_ROUTE, cardRepo)
