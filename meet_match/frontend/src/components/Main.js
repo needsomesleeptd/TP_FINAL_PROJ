@@ -80,7 +80,7 @@ const Main = () => {
       }
       const data = await response.json();
       const sessionId = data.sessionID;
-      const sessionUrl = `http://localhost/session/${sessionId}`;
+      const sessionUrl = `http://146.185.211.135/session/${sessionId}`;
       window.location.href = sessionUrl;
     } catch (error) {
       console.error('Error creating session:', error);
