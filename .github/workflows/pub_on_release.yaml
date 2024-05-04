@@ -24,7 +24,7 @@ jobs:
       - name: Build image
         run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11}_redis-go-server -f Dockerfile .
       - name: Push image to docker.io
-        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}
+        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}_redis-go-server
   
   push_python-flask-app:
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
       - name: Build image
         run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11}_python-flask-app -f Dockerfile .
       - name: Push image to docker.io
-        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}
+        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}_python-flask-app
     
   push_frontend:
     runs-on: ubuntu-latest
@@ -54,4 +54,19 @@ jobs:
       - name: Build image
         run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11}_frontend -f Dockerfile .
       - name: Push image to docker.io
-        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}
+        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}_frontend
+  
+  push_web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./meet_match/nginx
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to docker.io
+        run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+      - uses: actions/checkout@v2
+      - name: Build image
+        run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11}_net -f Dockerfile .
+      - name: Push image to docker.io
+        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}_net
