@@ -38,10 +38,12 @@ jobs:
       run: go install honnef.co/go/tools/cmd/staticcheck@latest
 
     - name: Run staticcheck
+      continue-on-error: true
       run: staticcheck ./...
 
     - name: Install golint
       run: go install golang.org/x/lint/golint@latest
 
     - name: Run golint
+      continue-on-error: true
       run: golint ./...

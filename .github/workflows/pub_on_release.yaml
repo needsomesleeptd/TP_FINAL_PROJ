@@ -19,6 +19,7 @@ jobs:
       run:
         working-directory: ./meet_match/net
     steps:
+      - uses: actions/checkout@v2
       - name: Login to docker.io
         run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
       - uses: actions/checkout@v2
