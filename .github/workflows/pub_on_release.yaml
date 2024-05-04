@@ -4,8 +4,6 @@ name: Run tests on any Push event
 on:
   push:
     branches:
-      - '*'
-    tags-ignore:
       - 'release-*'
 
 env:
@@ -13,7 +11,7 @@ env:
   NAME: ${{ secrets.DOCKER_NAME }}
 
 jobs:
-  push_docker_image:
+  push_redis-go-server:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,6 +22,36 @@ jobs:
         run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
       - uses: actions/checkout@v2
       - name: Build image
-        run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11} -f Dockerfile .
+        run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11}_redis-go-server -f Dockerfile .
+      - name: Push image to docker.io
+        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}
+  
+  push_python-flask-app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./meet_match/neural_network
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to docker.io
+        run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+      - uses: actions/checkout@v2
+      - name: Build image
+        run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11}_python-flask-app -f Dockerfile .
+      - name: Push image to docker.io
+        run: docker push $LOGIN/$NAME:${GITHUB_REF:11}
+    
+  push_frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./meet_match/frontend
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to docker.io
+        run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+      - uses: actions/checkout@v2
+      - name: Build image
+        run: docker build -t $LOGIN/$NAME:${GITHUB_REF:11}_frontend -f Dockerfile .
       - name: Push image to docker.io
         run: docker push $LOGIN/$NAME:${GITHUB_REF:11}
