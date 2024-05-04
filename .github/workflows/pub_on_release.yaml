@@ -20,6 +20,6 @@ jobs:
         run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
       - uses: actions/checkout@v2
       - name: Build image
-        run: docker build -t $LOGIN/$NAME:${{ github.sha:8}} -f Dockerfile .
+        run: docker build -t $LOGIN/$NAME:${{GITHUB_REF:11}} -f Dockerfile .
       - name: Push image to docker.io
-        run: docker push $LOGIN/$NAME:${{ github.sha:8}}
+        run: docker push $LOGIN/$NAME:${{GITHUB_REF:11}}
