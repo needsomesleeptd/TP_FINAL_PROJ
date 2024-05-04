@@ -19,10 +19,7 @@ services:
 
   postgres:
     container_name: proj_bd
-    image: postgres:13.3
-    volumes:
-      - ./docker-entrypoint-initdb.d/01-restore.sh:/docker-entrypoint-initdb.d/01-restore.sh
-      - ./docker-entrypoint-initdb.d/dump.pgdata:/docker-entrypoint-initdb.d/dump.pgdata
+    build: ./database
     command: 
       - "postgres"
       - "-c"
