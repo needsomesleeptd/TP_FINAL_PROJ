@@ -13,8 +13,11 @@ env:
   NAME: ${{ secrets.DOCKER_NAME }}
 
 jobs:
-  run_tests:
+  push_docker_image:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./meet_match/net
     steps:
       - name: Login to docker.io
         run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin

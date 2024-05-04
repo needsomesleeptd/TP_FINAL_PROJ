@@ -12,6 +12,9 @@ jobs:
 
   audit:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./meet_match/net/backend
     steps:
     - uses: actions/checkout@v2
 
@@ -21,8 +24,7 @@ jobs:
         go-version: 1.22.2
 
 
-    - name: Change to a working directory
-        run: ./meet_match/net/backend
+  
     - name: Verify dependencies
       run: go mod verify
 
