@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import CreateModal from './CreateModal';
 import './Main.css';
-
+import { useNavigate } from 'react-router-dom';
 
 const Main = () => {
   const [cookies, _, removeCookie] = useCookies(['AccessToken']);
   const [focus, setFocus] = useState(0);
   const [sessionsData, setSessionsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const openModal = () => {
       setShowModal(true);
@@ -17,10 +18,6 @@ const Main = () => {
 
   const closeModal = () => {
       setShowModal(false);
-  };
-
-  const handleFocus = (index) => {
-    setFocus(index);
   };
 
   const userProfile = {
@@ -80,8 +77,7 @@ const Main = () => {
       }
       const data = await response.json();
       const sessionId = data.sessionID;
-      const sessionUrl = `http://146.185.211.135/session/${sessionId}`;
-      window.location.href = sessionUrl;
+	navigate(`/session/${sessionId}`);
     } catch (error) {
       console.error('Error creating session:', error);
     }
@@ -93,8 +89,7 @@ const Main = () => {
   }
 
   const joinSession = (sessionId) => {
-    const sessionUrl = `http://localhost/sessions/${sessionId}`;
-    window.location.href = sessionUrl;
+    navigate(`/session/${sessionId}`);
   };
   
   const leaveSession = async (e, sessionId) => {
@@ -122,9 +117,9 @@ const Main = () => {
   const ProfileHeader = () => {
     return (
       <div className="profile-header">
-        <Link to="/">Главная</Link>
-        <Link to="/profile">Профиль</Link>
-        <Link to="/about">О нас</Link>
+        <NavLink to="/">Главная</NavLink>
+        <NavLink to="/profile">Профиль</NavLink>
+        <NavLink to="/about">О нас</NavLink>
       </div>
     );
   };
@@ -148,7 +143,7 @@ const Main = () => {
         <div>
           <p>{`Участники: ${participants}/${maxParticipants}`}</p>
           <p>{`Статус: ${status}`}</p>
-          <p>{`Дата создания: 01.01.2000`}</p>
+          <p>{`Дата встречи: 01.05.2024`}</p>
         </div>
         <button class="leave-button" onClick={(e) => leaveSession(e, id)}>
           X
@@ -192,7 +187,7 @@ const Main = () => {
           ))}
         </VerticalScrollBlock>
         </div>
-        ) : (<p style={{marginLeft: "20px"}}>Нет встреч</p>)}
+        ) : (<p style={{marginLeft: "20px"}}></p>)}
       </div>
       <CreateModal showModal={showModal} closeModal={closeModal} handleUpload={handleUpload} />
     </div>
