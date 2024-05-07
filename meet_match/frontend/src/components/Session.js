@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import ConnectModal from './ConnectModal';
 import './Session.css'
 import './Main.css'
-
+import InviteModal from './InviteModal';
 
 const Session = (props) => {
   const { id } = useParams();
@@ -18,6 +18,7 @@ const Session = (props) => {
   const [ready, setReady] = useState(false);
   const sessionId = id;
   const [showModal, setShowModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const openModal = () => {
       setShowModal(true);
@@ -25,11 +26,24 @@ const Session = (props) => {
 
   const closeModal = () => {
     setShowModal(false);
-};
+  };
+
+  const openInviteModal = () => {
+    setShowInviteModal(true);
+  };
+
+  const closeInviteModal = () => {
+    setShowInviteModal(false);
+  };
 
   const handleSubmit = () => {
     patchSession(cookies.UserId);
   };
+
+  const handleSubmit2 = () => {
+    closeInviteModal();
+  };
+
 
   useEffect(() => {
     const getSession = async () => {
@@ -77,7 +91,7 @@ const Session = (props) => {
 
     getSession();
 
-    const pollingInterval = setInterval(getSession, 1000);
+    const pollingInterval = setInterval(getSession, 500);
 
     return () => clearInterval(pollingInterval);
   }, [cookies, sessionId]);
@@ -138,19 +152,28 @@ const Session = (props) => {
   };
 
   const handleReadyClick = () => {
-    putSession(cookies.meetmatchid);
+	if (!inputValue.toString()) 
+	{
+   	return;
+	}
+	putSession(cookies.meetmatchid);
     setReady(!ready);
   };
 
   const ProfileHeader = () => {
     return (
       <div className="profile-header">
-        <Link to="/">Главная</Link>
-        <Link to="/profile">Профиль</Link>
-        <Link to="/about">О нас</Link>
+        <NavLink to="/">Главная</NavLink>
+        <NavLink to="/profile">Профиль</NavLink>
+        <NavLink to="/about">О нас</NavLink>
       </div>
     );
   };
+
+  const handleCopyClick = () => {
+    navigator.clipboard.writeText(window.location.href);
+    openInviteModal();
+  }
 
   return (
     <div class="precontainer">
@@ -168,8 +191,9 @@ const Session = (props) => {
             disabled={ready}
             />
           <button onClick={handleReadyClick} class="profile-button" style={{width: 150}}>{ready ? "Не готов" : "Готов"}</button>
+  
         </div>
-        <p class="invite-link">Скопируйте ссылку из адресной строки браузера и скиньте своих друзьям</p>
+        <p class="invite-link">Отправьте ссылку друзьям: {window.location.href}. Ждём других участников. Все должны ввести пожелания и нажать на "Готов".</p>
         </div>
         {participants.length > 0 ? (
           <div>
@@ -202,9 +226,11 @@ const Session = (props) => {
       </div>
 
       <ConnectModal showModal={showModal} sessionName={sessionName} sessionDesc={sessionDesc} handleUpload={handleSubmit} />
+      <InviteModal showModal={showInviteModal} handleUpload={handleSubmit2} />
 
       </div>
   );
+
 };
 
 export default Session;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './Cards.css'
 import './Main.css'
 
@@ -62,9 +62,9 @@ const Match = (props) => {
        ))}
      </div>
      <div style={{ textAlign: "center", marginTop: -100 }}>
-     <a href="/" style={{ textDecoration: "none" }}>
+     <NavLink to="/" style={{ textDecoration: "none" }}>
         <button class="modal-button" style={{marginBottom: "20px"}}>Вернуться</button>
-      </a>
+      </NavLink>
     </div>
    </div>
    </div>

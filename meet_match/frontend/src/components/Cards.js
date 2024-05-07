@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './Cards.css'
 
 const swipeVariants = {
@@ -130,9 +130,9 @@ const Cards = (props) => {
   const ProfileHeader = () => {
     return (
       <div className="profile-header">
-        <Link to="/">Главная</Link>
-        <Link to="/profile">Профиль</Link>
-        <Link to="/about">О нас</Link>
+        <NavLink to="/">Главная</NavLink>
+        <NavLink to="/profile">Профиль</NavLink>
+        <NavLink to="/about">О нас</NavLink>
       </div>
     );
   };
