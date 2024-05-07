@@ -15,13 +15,13 @@ import (
 )
 
 type Session struct {
-	SessionID    uuid.UUID            `json:"sessionID" redis:"SessionID"`
-	SessionName  string               `json:"sessionName" redis:"sessionName"`
-	Users        []models.UserReq     `json:"users" redis:"users"`
-	MaxPeople    int                  `json:"maxPeople"  redis:"maxPeople"`
-	Status       models.SessionStatus `json:"status" redis:"status"`
-	TimeDuration time.Duration        `json:"duration" redis:"duration"`
-	Description  string               `json:"description" redis:"description"`
+	SessionID   uuid.UUID            `json:"sessionID" redis:"SessionID"`
+	SessionName string               `json:"sessionName" redis:"sessionName"`
+	Users       []models.UserReq     `json:"users" redis:"users"`
+	MaxPeople   int                  `json:"maxPeople"  redis:"maxPeople"`
+	Status      models.SessionStatus `json:"status" redis:"status"`
+	TimeEnds    time.Time            `json:"timeEnds" redis:"timeEnds"`
+	Description string               `json:"description" redis:"description"`
 }
 
 type SessionManager struct {
@@ -44,18 +44,18 @@ func NewSessionManager(addr, password string, db int, tokenHandler auth_utils.IT
 	return &SessionManager{Client: client, Secret: secret, TokenHandler: tokenHandler}, nil
 }
 
-func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName string, peopleCap int, timeDur time.Duration, description string) (uuid.UUID, error) {
+func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName string, peopleCap int, timeEnds time.Time, description string) (uuid.UUID, error) {
 	newSessionID := uuid.New()
 
 	s.SessionIDs = append(s.SessionIDs, newSessionID)
 	session := Session{
-		SessionID:    newSessionID,
-		SessionName:  sessionName,
-		Users:        []models.UserReq{*creator},
-		MaxPeople:    peopleCap,
-		TimeDuration: timeDur,
-		Status:       models.Waiting,
-		Description:  description,
+		SessionID:   newSessionID,
+		SessionName: sessionName,
+		Users:       []models.UserReq{*creator},
+		MaxPeople:   peopleCap,
+		TimeEnds:    timeEnds,
+		Status:      models.Waiting,
+		Description: description,
 	}
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
@@ -126,6 +126,9 @@ func (s *SessionManager) GetSession(sessionID uuid.UUID) (*Session, error) {
 	err = json.Unmarshal([]byte(sessionMarshalled), &session)
 	if err != nil {
 		return nil, errors.Join(errors.New("get session error"), err)
+	}
+	if session.TimeEnds.UTC().Before(time.Now().UTC()) {
+		session.Status = models.Scrolling
 	}
 
 	return &session, nil

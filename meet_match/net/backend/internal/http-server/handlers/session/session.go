@@ -9,6 +9,7 @@ import (
 	session "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
 	"time"
+
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
 )
@@ -33,10 +34,11 @@ type RequestSession struct {
 }
 
 type RequestCreateSession struct {
-	SessionName      string `json:"sessionName"`
-	SessionPeopleCap int    `json:"sessionPeopleCap"`
-	SessionOwner     string `json:"sessonOwner"`
-	Description      string `json:"description"`
+	SessionName      string    `json:"sessionName"`
+	SessionPeopleCap int       `json:"sessionPeopleCap"`
+	SessionOwner     string    `json:"sessonOwner"`
+	Description      string    `json:"description"`
+	TimeEnds         time.Time `json:"timeEnds"`
 }
 
 type RequestAddUser struct {
@@ -78,8 +80,9 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 		}
 
 		userReq := models.UserReq{ID: payload.ID, Name: payload.Login, Request: ""}
-		var duration time.Duration = 1e9
-		sessionID, err := sessionManager.CreateSession(&userReq, req.SessionName, req.SessionPeopleCap, duration, req.Description)
+		//var duration time.Duration = 1e9
+
+		sessionID, err := sessionManager.CreateSession(&userReq, req.SessionName, req.SessionPeopleCap, req.TimeEnds, req.Description)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
 			return
