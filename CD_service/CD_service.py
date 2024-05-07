@@ -115,7 +115,7 @@ def deploy_new_container(image_name: str, container_name: str, ports: dict = Non
     log.info(f'Container deployed. container_name = {container_name}')
     return {'status': True}, 200
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/CD', methods=['GET', 'POST'])
 def MainHandler():
     """
     GET - Получение списка всех активных контейнеров
@@ -145,7 +145,7 @@ def main():
     if not MY_AUTH_TOKEN:
         log.error('There is no auth token in env')
         sys.exit(1)
-    app.run(host='0.0.0.0', port=6000)
+    app.run(host='0.0.0.0', port=6500)
 
 if __name__ == '__main__':
     main()
