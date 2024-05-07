@@ -1,13 +1,16 @@
-version: "3.8"
+version: "4.2"
 
 services:
   web:
+    #network_mode: "host"        
     build: ./nginx
     ports:
       - "80:80"
     depends_on:
       - redis-go-server
       - frontend
+    #extra_hosts:
+      #- "dockerhost:$DOCKERHOST"
     #networks:
       #- postgres
 
@@ -16,6 +19,8 @@ services:
     container_name: redis-db
     ports:
       - "6379:6379"
+
+    
 
   postgres:
     container_name: proj_bd
