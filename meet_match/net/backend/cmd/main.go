@@ -10,8 +10,8 @@ import (
 	"test_backend_frontend/internal/http-server/handlers/cards"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
 	"test_backend_frontend/internal/middleware/auth_middleware"
-	"test_backend_frontend/internal/model"
 	"test_backend_frontend/internal/models/models_da"
+	rec_model_client "test_backend_frontend/internal/rec-model-client"
 	auth_service "test_backend_frontend/internal/services/auth"
 	repo_adapter "test_backend_frontend/internal/services/auth/user_repo/user_repo_ad"
 	postgres3 "test_backend_frontend/internal/services/cards/repository/postgres"
@@ -50,7 +50,7 @@ func main() {
 		time.Sleep(5 * time.Second)
 	}
 	cardRepo := postgres3.NewCardRepo(db)
-	model, err := model.New(MODEL_ROUTE, cardRepo)
+	model, err := rec_model_client.New(MODEL_ROUTE, cardRepo)
 	if err != nil {
 		fmt.Println("Error with model")
 		os.Exit(1)
