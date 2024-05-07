@@ -19,7 +19,7 @@ services:
 
   postgres:
     container_name: proj_bd
-    image: postgres:13.3
+    build: ./database
     command: 
       - "postgres"
       - "-c"
