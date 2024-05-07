@@ -1,4 +1,4 @@
-package model
+package rec_model_client
 
 import (
 	"bytes"
@@ -55,7 +55,7 @@ func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]
 	buffer := bytes.NewBuffer(jsonReq)
 	json_resp, err := http.Post(r.Url, "application/json", buffer)
 	if err != nil {
-		return []Card{}, fmt.Errorf("%s", "Post to model failure")
+		return []Card{}, fmt.Errorf("%s", "Post to rec-model-client failure")
 	}
 	defer json_resp.Body.Close()
 
@@ -66,7 +66,7 @@ func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]
 	for _, v := range arr.Recs {
 		card, err := r.cardRep.GetCard(v)
 		if err != nil {
-			return []Card{}, fmt.Errorf("%s", "Post to model failure")
+			return []Card{}, fmt.Errorf("%s", "Post to rec-model-client failure")
 		}
 
 		cards = append(cards, Card{
