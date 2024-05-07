@@ -6,11 +6,11 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"test_backend_frontend/internal/models/models_dto"
 	auth_service "test_backend_frontend/internal/services/auth"
 	"test_backend_frontend/pkg/auth_utils"
 
 	resp "test_backend_frontend/internal/lib/api/response"
-	"test_backend_frontend/internal/model"
 )
 
 type Request struct {
@@ -20,7 +20,7 @@ type Request struct {
 
 type Response struct {
 	resp.Response
-	Cards []model.Card `json:"cards"`
+	Cards []*models_dto.Card `json:"cards"`
 }
 
 type TokenParser interface {
@@ -28,7 +28,7 @@ type TokenParser interface {
 }
 
 type CardsSearcher interface {
-	CardsSearch(prompt string, sessionId string, userId uint64) ([]model.Card, error)
+	CardsSearch(prompt string, sessionId string, userId uint64) ([]*models_dto.Card, error)
 }
 
 func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
@@ -68,7 +68,7 @@ func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
 	}
 }
 
-func responseOK(w http.ResponseWriter, r *http.Request, cards []model.Card) {
+func responseOK(w http.ResponseWriter, r *http.Request, cards []*models_dto.Card) {
 	render.JSON(w, r, Response{
 		Response: resp.OK(),
 		Cards:    cards,

@@ -15,17 +15,19 @@ func (Card) TableName() string {
 
 func ToModelCard(card *Card) *models.Card {
 	return &models.Card{
-		Id:       card.ID,
-		ImgUrl:   card.Url,
-		CardName: card.Title,
-		Rating:   0,
+		Id:          card.ID,
+		ImgUrl:      card.Url,
+		CardName:    card.Title,
+		Description: card.Description,
+		Rating:      0,
 	}
 }
 
 func ToPostgresCard(card *models.Card) *Card {
 	return &Card{
-		ID:    card.Id,
-		Url:   card.ImgUrl,
-		Title: card.CardName,
+		ID:          card.Id,
+		Url:         card.ImgUrl,
+		Title:       card.CardName,
+		Description: card.Description,
 	}
 }

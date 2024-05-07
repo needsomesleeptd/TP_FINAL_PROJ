@@ -5,17 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"test_backend_frontend/internal/models/models_dto"
 	"test_backend_frontend/internal/services/cards/repository"
 )
-
-// TODO: Remove card from here to dto + add Id to it
-
-type Card struct {
-	Idx      uint64 `json:"idx,omitempty"`
-	ImgUrl   string `json:"image"`
-	CardName string `json:"title,card_name"`
-	Rating   int    `json:"rating,omitempty"`
-}
 
 type ModelResponse struct {
 	Recs []uint64 `json:"recs"`
@@ -41,7 +33,7 @@ func New(urlRecSys string, cardRepository repository.CardRepository) (*RecSys, e
 }
 
 // TODO: refactor
-func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]Card, error) {
+func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]*models_dto.Card, error) {
 	req := ModelRequest{
 		Query:     prompt,
 		SessionID: sessionId,
@@ -55,26 +47,21 @@ func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]
 	buffer := bytes.NewBuffer(jsonReq)
 	json_resp, err := http.Post(r.Url, "application/json", buffer)
 	if err != nil {
-		return []Card{}, fmt.Errorf("%s", "Post to rec-model-client failure")
+		return nil, fmt.Errorf("%s", "Post to rec-model-client failure")
 	}
 	defer json_resp.Body.Close()
 
 	var arr ModelResponse
 	json.NewDecoder(json_resp.Body).Decode(&arr)
 
-	var cards []Card
+	var cards []*models_dto.Card
 	for _, v := range arr.Recs {
 		card, err := r.cardRep.GetCard(v)
 		if err != nil {
-			return []Card{}, fmt.Errorf("%s", "Post to rec-model-client failure")
+			return nil, fmt.Errorf("%s", "Post to rec-model-client failure")
 		}
 
-		cards = append(cards, Card{
-			Idx:      card.Id,
-			ImgUrl:   card.ImgUrl,
-			CardName: card.CardName,
-			Rating:   card.Rating,
-		})
+		cards = append(cards, models_dto.ToDTOCard(card))
 	}
 
 	return cards, nil
