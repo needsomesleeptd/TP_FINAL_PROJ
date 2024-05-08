@@ -47,7 +47,7 @@ func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]
 	buffer := bytes.NewBuffer(jsonReq)
 	json_resp, err := http.Post(r.Url, "application/json", buffer)
 	if err != nil {
-		return nil, fmt.Errorf("%s", "Post to rec-model-client failure")
+		return nil, fmt.Errorf("%s", "Post to rec-model-client failure "+err.Error())
 	}
 	defer json_resp.Body.Close()
 
@@ -58,7 +58,7 @@ func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]
 	for _, v := range arr.Recs {
 		card, err := r.cardRep.GetCard(v)
 		if err != nil {
-			return nil, fmt.Errorf("%s", "Post to rec-model-client failure")
+			return nil, fmt.Errorf("%s", "Get card failure")
 		}
 
 		cards = append(cards, models_dto.ToDTOCard(card))

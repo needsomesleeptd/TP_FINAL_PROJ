@@ -60,7 +60,7 @@ func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
 		cards, err := searcher.CardsSearch(req.Prompt, req.SessionID, payload.ID)
 
 		if err != nil {
-			render.JSON(w, r, resp.Error("failed to get cards"))
+			render.JSON(w, r, resp.Error("failed to get cards "+err.Error()))
 			return
 		}
 
