@@ -28,7 +28,7 @@ function App() {
     useEffect(() => {
       const CheckSession = async (sessionId) => {
         try {
-          const response = await fetch('/api/sessions/'+ id, {
+          const response = await fetch('http://localhost:8080/sessions/'+ id, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${cookies.AccessToken}`
@@ -77,14 +77,18 @@ function App() {
         <Route
           path="/auth"
           element={(isLoggedIn && hasUserId) ?
-                    <Navigate to="/" /> :
+                    <Navigate to='/' /> :
                     showLogin ?
                       <Login setShowLogin={setShowLogin} /> :
                       <Registration setShowLogin={setShowLogin} />}
         />
         <Route
           path="/session/:id"
-          element={requireAuth(<DataFetcher />)}
+          element={(isLoggedIn && hasUserId) ?
+            <DataFetcher /> :
+            showLogin ?
+              <Login setShowLogin={setShowLogin} /> :
+              <Registration setShowLogin={setShowLogin} />}
         />
         <Route
           path="*"

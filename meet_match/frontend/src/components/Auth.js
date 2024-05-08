@@ -1,6 +1,6 @@
 const RegisterRequest = async (name, age, gender, login, password) => {
     try {
-        const response = await fetch('/api/user/SignUp', {
+        const response = await fetch('http://localhost:8080/user/SignUp', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -30,7 +30,7 @@ const RegisterRequest = async (name, age, gender, login, password) => {
 
 const LoginRequest = async (login, password) => {
     try {
-        const response = await fetch('/api/user/SignIn', {
+        const response = await fetch('http://localhost:8080/user/SignIn', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

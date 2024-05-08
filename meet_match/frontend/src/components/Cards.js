@@ -19,7 +19,7 @@ const Cards = (props) => {
 
   const cardsFeedback = async (idx, direction) => {
     try {
-      const response = await fetch(`/api/sessions/${sessionId}/scroll`, {
+      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/scroll`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ const Cards = (props) => {
   };
 
   const getCards = async () => {
-    var response = await fetch('/api/sessions/'+ sessionId, {
+    var response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ const Cards = (props) => {
     });
     var data = (await response.json()).session;
     const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
-    response = await fetch('/api/cards', {
+    response = await fetch('http://localhost:8080/cards', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ const Cards = (props) => {
 
     const cardsFeedback = async () => {
       try {
-        const response = await fetch(`/api/sessions/${sessionId}/check_match`, {
+        const response = await fetch(`http://localhost:8080/sessions/${sessionId}/check_match`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -139,6 +139,7 @@ const Cards = (props) => {
 
   return (
     <div class="cards-body">
+      <img src="/logo.png" class="logo" alt="Your Logo"></img>
       <ProfileHeader />
       <div class="cards-desc">
         <p>Давай подберём подходящее место для вашей встречи. Для этого просто листни карточку</p>
@@ -148,23 +149,23 @@ const Cards = (props) => {
       {cards.slice().reverse().map((card, index) => (
         <motion.div
           key={index}
-          drag
+          drag="x"
           dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
           dragElastic={0.8}
           dragMomentum={false}
           variants={swipeVariants}
           initial="initial"
-          animate={index + 1 !== cards.length ? "initial" : xOffset < -200 ? "dragLeft" : xOffset > 200 ? "dragRight" : "initial"}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           class="cards-card"
+          whileTap={{ scale: 1.05 }}
+          transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
+          style={{ boxShadow: xOffset < -30 ? "0 0 20px red" : xOffset > 30 ? "0 0 20px green" : "none" }}
         >
           <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
             <img src={card.image} alt="" class="cards-img" />
             <p style={{textAlign: "center" }}>{card.title}</p>
           </div>
-          {/* <p style={{ position: "absolute", top: 0, left: 20 }}>Не нравится</p> */}
-          {/* <p style={{ position: "absolute", top: 0, right: 20 }}>Нравится</p> */}
         </motion.div>
       ))}
       </div>

@@ -1,8 +1,8 @@
 .precontainer {
     margin: 0;
     padding: 0;
-    background-image: url('../../public/bg_session.png');
-    background-size: 100% 100%;
+    background-image: url('../../public/bg_session2.png');
+    background-size: cover;
     background-position: center;
     background-attachment: fixed;
     display: flex;
@@ -13,7 +13,8 @@
 
 .container {
     margin-top: 150px;
-    width: 820px;
+    width: 80%;
+    max-width: 800px;
     max-height: 750px;
     margin: 20px auto;
     padding: 20px;

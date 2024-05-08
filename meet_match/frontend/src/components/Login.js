@@ -28,6 +28,7 @@ const Login = ({ setShowLogin }) => {
 
   return (
     <div class="container-auth">
+      <img src="/logo.png" class="logo" alt="Your Logo"></img>
       <div class="wrapper">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'></link>
         <h1>Авторизация</h1>
@@ -50,6 +51,7 @@ const Login = ({ setShowLogin }) => {
           <p>Нет аккаунта? <a href="" onClick={handleRegistrationRedirect}>Зарегистрироваться</a></p>
         </div>
       </div>
+      <p></p>
     </div>
   );
 };

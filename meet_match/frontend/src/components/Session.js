@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { NavLink } from 'react-router-dom';
 import ConnectModal from './ConnectModal';
+import InviteModal from './InviteModal';
+import { NavLink } from 'react-router-dom';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import './Session.css'
 import './Main.css'
-import InviteModal from './InviteModal';
+
 
 const Session = (props) => {
   const { id } = useParams();
@@ -20,13 +22,15 @@ const Session = (props) => {
   const [showModal, setShowModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
 
+  const link = window.location.href;
+
   const openModal = () => {
       setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-  };
+};
 
   const openInviteModal = () => {
     setShowInviteModal(true);
@@ -42,13 +46,12 @@ const Session = (props) => {
 
   const handleSubmit2 = () => {
     closeInviteModal();
-  };
-
+  }
 
   useEffect(() => {
     const getSession = async () => {
       try {
-        const response = await fetch('/api/sessions/'+ sessionId, {
+        const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${cookies.AccessToken}`
@@ -91,14 +94,14 @@ const Session = (props) => {
 
     getSession();
 
-    const pollingInterval = setInterval(getSession, 500);
+    const pollingInterval = setInterval(getSession, 1000);
 
     return () => clearInterval(pollingInterval);
   }, [cookies, sessionId]);
 
   const patchSession = async (id) => {
     try {
-      const response = await fetch('/api/sessions/'+ sessionId, {
+      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -123,7 +126,7 @@ const Session = (props) => {
   const putSession = async (id) => {
     const participant = participants.find(participant => participant.ID === Number(cookies.UserId));
     try {
-      const response = await fetch('/api/sessions/'+ sessionId, {
+      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -152,11 +155,11 @@ const Session = (props) => {
   };
 
   const handleReadyClick = () => {
-	if (!inputValue.toString()) 
-	{
-   	return;
-	}
-	putSession(cookies.meetmatchid);
+    if (!inputValue.toString())
+    {
+      return;
+    }
+    putSession(cookies.meetmatchid);
     setReady(!ready);
   };
 
@@ -171,12 +174,12 @@ const Session = (props) => {
   };
 
   const handleCopyClick = () => {
-    navigator.clipboard.writeText(window.location.href);
     openInviteModal();
   }
 
   return (
     <div class="precontainer">
+      <img src="/logo.png" class="logo" alt="Your Logo"></img>
       <ProfileHeader />
       <div class="container">
         <div class="container-info">
@@ -190,10 +193,12 @@ const Session = (props) => {
             placeholder="Введите ваши пожелания..."
             disabled={ready}
             />
-          <button onClick={handleReadyClick} class="profile-button" style={{width: 150}}>{ready ? "Не готов" : "Готов"}</button>
-  
+          <button onClick={handleReadyClick} class="profile-button" style={{width: 180}}>{ready ? "Не готов" : "Готов"}</button>
+          <CopyToClipboard text={link}>
+            <button onClick={handleCopyClick} class="profile-button" style={{width: 150}}>Пригласить</button>
+          </CopyToClipboard>
         </div>
-        <p class="invite-link">Отправьте ссылку друзьям: {window.location.href}. Ждём других участников. Все должны ввести пожелания и нажать на "Готов".</p>
+        <p class="invite-link">Ждём других участников. Все должны ввести пожелания и нажать на "Готов".</p>
         </div>
         {participants.length > 0 ? (
           <div>
@@ -230,7 +235,6 @@ const Session = (props) => {
 
       </div>
   );
-
 };
 
 export default Session;

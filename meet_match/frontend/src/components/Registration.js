@@ -5,7 +5,7 @@ import './Auth.css'
 
 const Registration = ({ setShowLogin }) => {
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [age, setAge] = useState();
   const [gender, setGender] = useState(true);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -34,9 +34,21 @@ const Registration = ({ setShowLogin }) => {
     setShowLogin(true);
   };
 
+  const handleAgeChange = (e) => {
+    const num = parseInt(e.target.value, 10);
+    if (num < 1) {
+      setAge(1);
+    } else if (num > 100) {
+      setAge(100);
+    } else {
+      setAge(num);
+    }
+  };
+
   return (
     <div class="container-auth">
-      <div class="wrapper" style={{marginTop: "120px"}}>
+      <img src="/logo.png" class="logo" alt="Your Logo"></img>
+      <div class="wrapper">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'></link>
         <h1>Регистрация</h1>
         <form onSubmit={handleRegistration}>
@@ -46,7 +58,7 @@ const Registration = ({ setShowLogin }) => {
               <i class='bx bx-text'></i>
             </div>
             <div class="input-box">
-              <input class="half-button" type="text" placeholder="Возраст" value={age} onChange={(e) => setAge(e.target.value)} required />
+              <input class="half-button" type="number" placeholder="Возраст" value={age} min={1} max={100} onChange={(e) => handleAgeChange(e)} required />
               <i class='bx bx-calendar' ></i>
             </div>
           </div>
@@ -81,6 +93,7 @@ const Registration = ({ setShowLogin }) => {
           <p>Уже есть аккаунт? <a href="" onClick={handleLoginRedirect}>Авторизоваться</a></p>
         </div>
       </div>
+      <p></p>
     </div>
   );
 };

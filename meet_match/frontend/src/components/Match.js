@@ -14,7 +14,7 @@ const Match = (props) => {
  useEffect(() => {
   const cardsFeedback = async () => {
     try {
-      const response = await fetch(`/api/sessions/${sessionId}/check_match`, {
+      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/check_match`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const Match = (props) => {
  return (
   <div class="cards-body">
     <div class="spec">
-     <div style={{ textAlign: "center", marginTop: 100 }}>
+     <div style={{ textAlign: "center", marginTop: 50 }}>
        <p style={{ fontSize: "30px", fontWeight: "bold", color: "white" }}>Мы нашли подходящее место для вас!</p>
      </div>
      <div style={{ height: "80vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
