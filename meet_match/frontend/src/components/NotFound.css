@@ -1,0 +1,15 @@
+.error404 {
+    margin: 0;
+    padding: 0;
+    background-image: url('../../public/bg_main.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    overflow: hidden;
+    color: white;
+    justify-content: center;
+    justify-items: center;
+}

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { NavLink } from 'react-router-dom';
 import CreateModal from './CreateModal';
-import './Main.css';
 import { useNavigate } from 'react-router-dom';
+import './Main.css';
+
 
 const Main = () => {
   const [cookies, _, removeCookie] = useCookies(['AccessToken']);
@@ -77,7 +78,7 @@ const Main = () => {
       }
       const data = await response.json();
       const sessionId = data.sessionID;
-	navigate(`/session/${sessionId}`);
+      navigate(`/session/${sessionId}`);
     } catch (error) {
       console.error('Error creating session:', error);
     }
@@ -143,7 +144,7 @@ const Main = () => {
         <div>
           <p>{`Участники: ${participants}/${maxParticipants}`}</p>
           <p>{`Статус: ${status}`}</p>
-          <p>{`Дата встречи: 01.05.2024`}</p>
+          <p>{`Дата встречи: 01.01.2000`}</p>
         </div>
         <button class="leave-button" onClick={(e) => leaveSession(e, id)}>
           X
@@ -154,7 +155,7 @@ const Main = () => {
 
   const VerticalScrollBlock = ({ children }) => {
     return (
-      <div className="vertical-scroll-block">
+      <div className="vertical-scroll-block profile-sessions" style={{height: window.innerHeight * 0.5}}>
         <div className="inner-scroll-content">{children}</div>
       </div>
     );
@@ -167,11 +168,12 @@ const Main = () => {
 
   return (
     <div className="create-session-container-mega">
+      <img src="logo.png" class="logo" alt="Your Logo"></img>
+      <div className="create-session-container">
       <ProfileHeader />
       <ProfileButtons onOpenModal={openModal} />
       <div className="profile-content">
         {sessionsData.length > 0 ? (
-          <div className="profile-sessions">
           <VerticalScrollBlock>
           {sessionsData.map((session, index) => (
             <ProfileSession
@@ -186,10 +188,14 @@ const Main = () => {
             />
           ))}
         </VerticalScrollBlock>
-        </div>
-        ) : (<p style={{marginLeft: "20px"}}></p>)}
+        ) : (
+          <div className="vertical-scroll-block profile-sessions" style={{height: window.innerHeight * 0.5, display: "flex"}}>
+            <div className="inner-scroll-content" style={{color: 'rgba(255, 255, 255, 0.7)', fontWeight: 'bold', }}>Пусто</div>
+          </div>
+        )}
       </div>
       <CreateModal showModal={showModal} closeModal={closeModal} handleUpload={handleUpload} />
+      </div>
     </div>
   );
 }

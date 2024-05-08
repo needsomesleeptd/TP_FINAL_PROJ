@@ -44,7 +44,7 @@ const Match = (props) => {
  return (
   <div class="cards-body">
     <div class="spec">
-     <div style={{ textAlign: "center", marginTop: 100 }}>
+     <div style={{ textAlign: "center", marginTop: 50 }}>
        <p style={{ fontSize: "30px", fontWeight: "bold", color: "white" }}>Мы нашли подходящее место для вас!</p>
      </div>
      <div style={{ height: "80vh", display: "flex", alignItems: "center", justifyContent: "center" }}>

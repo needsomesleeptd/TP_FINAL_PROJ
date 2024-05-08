@@ -57,7 +57,7 @@ func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName stri
 		Status:      models.Waiting,
 		Description: description,
 	}
-	session.TimeEnds = session.TimeEnds.Add(time.Hour * 200)
+	session.TimeEnds = time.Now().Add(time.Hour * 200) // TODO:: remove that when frontend can work with time
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
 		return uuid.Max, errors.New("failed to marshall Session")

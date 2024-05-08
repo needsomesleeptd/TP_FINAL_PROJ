@@ -77,14 +77,18 @@ function App() {
         <Route
           path="/auth"
           element={(isLoggedIn && hasUserId) ?
-                    <Navigate to="/" /> :
+                    <Navigate to='/' /> :
                     showLogin ?
                       <Login setShowLogin={setShowLogin} /> :
                       <Registration setShowLogin={setShowLogin} />}
         />
         <Route
           path="/session/:id"
-          element={requireAuth(<DataFetcher />)}
+          element={(isLoggedIn && hasUserId) ?
+            <DataFetcher /> :
+            showLogin ?
+              <Login setShowLogin={setShowLogin} /> :
+              <Registration setShowLogin={setShowLogin} />}
         />
         <Route
           path="*"

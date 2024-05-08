@@ -81,7 +81,6 @@ func SessionCreatePage(sessionManager *session.SessionManager) http.HandlerFunc 
 
 		userReq := models.UserReq{ID: payload.ID, Name: payload.Login, Request: ""}
 		//var duration time.Duration = 1e9
-
 		sessionID, err := sessionManager.CreateSession(&userReq, req.SessionName, req.SessionPeopleCap, req.TimeEnds, req.Description)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
