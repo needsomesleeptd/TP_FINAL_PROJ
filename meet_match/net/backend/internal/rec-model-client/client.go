@@ -58,11 +58,7 @@ func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]
 	for _, v := range arr.Recs {
 		card, err := r.cardRep.GetCard(v)
 		if err != nil {
-<<<<<<< HEAD
-			return nil, fmt.Errorf("%s", "Get card failure")
-=======
 			return nil, fmt.Errorf("%s-%w", "Post to rec-model-client failure", err)
->>>>>>> 2ae0382 (fixed model interaction)
 		}
 
 		cards = append(cards, models_dto.ToDTOCard(card))

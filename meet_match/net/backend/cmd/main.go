@@ -32,11 +32,7 @@ import (
 var (
 	CONN_POSTGRES_STR = "host='postgres' user=any1 password='1' database='meetmatch_db' port=5432 sslmode=disable" //TODO:: export through parameters
 	POSTGRES_CFG      = postgres.Config{DSN: CONN_POSTGRES_STR}
-<<<<<<< HEAD
-	MODEL_ROUTE       = "http://localhost/python/rec"
-=======
 	MODEL_ROUTE       = "http://python-flask-app:5000/rec"
->>>>>>> 2ae0382 (fixed model interaction)
 	SESSION_PATH      = "redis-db:6379"
 )
 

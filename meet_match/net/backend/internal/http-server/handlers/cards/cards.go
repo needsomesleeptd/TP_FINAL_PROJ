@@ -61,11 +61,7 @@ func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
 		cards, err := searcher.CardsSearch(req.Prompt, req.SessionID, payload.ID)
 
 		if err != nil {
-<<<<<<< HEAD
-			render.JSON(w, r, resp.Error("failed to get cards "+err.Error()))
-=======
 			render.JSON(w, r, resp.Error("failed to get cards\n"+err.Error()))
->>>>>>> 2ae0382 (fixed model interaction)
 			return
 		}
 
