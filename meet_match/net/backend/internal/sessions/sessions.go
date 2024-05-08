@@ -57,6 +57,7 @@ func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName stri
 		Status:      models.Waiting,
 		Description: description,
 	}
+	session.TimeEnds = session.TimeEnds.Add(time.Hour * 200)
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
 		return uuid.Max, errors.New("failed to marshall Session")
@@ -191,7 +192,8 @@ func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
 		}
 		err = json.Unmarshal([]byte(sessionMarshalled), &session)
 		if err != nil {
-			return nil, errors.Join(errors.New("getting session error"), err)
+			//return nil, errors.Join(errors.New("getting session error"), err)
+			continue
 		}
 		for _, user := range session.Users {
 			if userID == user.ID {

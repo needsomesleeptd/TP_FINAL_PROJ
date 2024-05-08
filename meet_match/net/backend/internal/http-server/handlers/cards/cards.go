@@ -2,13 +2,14 @@ package cards
 
 import (
 	"errors"
-	"github.com/go-chi/render"
 	"io"
 	"net/http"
 	"strings"
 	"test_backend_frontend/internal/models/models_dto"
 	auth_service "test_backend_frontend/internal/services/auth"
 	"test_backend_frontend/pkg/auth_utils"
+
+	"github.com/go-chi/render"
 
 	resp "test_backend_frontend/internal/lib/api/response"
 )
@@ -60,7 +61,11 @@ func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
 		cards, err := searcher.CardsSearch(req.Prompt, req.SessionID, payload.ID)
 
 		if err != nil {
+<<<<<<< HEAD
 			render.JSON(w, r, resp.Error("failed to get cards "+err.Error()))
+=======
+			render.JSON(w, r, resp.Error("failed to get cards\n"+err.Error()))
+>>>>>>> 2ae0382 (fixed model interaction)
 			return
 		}
 
