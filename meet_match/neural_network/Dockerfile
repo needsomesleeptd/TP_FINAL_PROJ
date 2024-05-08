@@ -6,7 +6,6 @@ WORKDIR /app
 
 # Copy the requirements file
 COPY requirements.txt .
-COPY database .
 
 # Install Python dependencies
 RUN pip install -r requirements.txt
