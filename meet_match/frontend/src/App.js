@@ -28,7 +28,7 @@ function App() {
     useEffect(() => {
       const CheckSession = async (sessionId) => {
         try {
-          const response = await fetch('http://localhost:8080/sessions/'+ id, {
+          const response = await fetch('/api/sessions/'+ id, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${cookies.AccessToken}`

@@ -28,7 +28,7 @@ const Main = () => {
 
   const UserInfoRequest = async () => {
     try {
-        const response = await fetch('http://localhost:8080/sessions/getUser', {
+        const response = await fetch('/api/sessions/getUser', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const Main = () => {
 
   const createSession = async (title, desc, count) => {
     try {
-      const response = await fetch('http://localhost:8080/sessions', {
+      const response = await fetch('/api/sessions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const Main = () => {
   const leaveSession = async (e, sessionId) => {
     e.stopPropagation();
     try {
-        const response = await fetch(`http://localhost:8080/sessions/${sessionId}`, {
+        const response = await fetch(`/api/sessions/${sessionId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',

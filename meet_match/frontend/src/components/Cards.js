@@ -19,7 +19,7 @@ const Cards = (props) => {
 
   const cardsFeedback = async (idx, direction) => {
     try {
-      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/scroll`, {
+      const response = await fetch(`/api/sessions/${sessionId}/scroll`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -41,7 +41,7 @@ const Cards = (props) => {
   };
 
   const getCards = async () => {
-    var response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+    var response = await fetch('/api/sessions/'+ sessionId, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ const Cards = (props) => {
     });
     var data = (await response.json()).session;
     const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
-    response = await fetch('http://localhost:8080/cards', {
+    response = await fetch('/api/cards', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ const Cards = (props) => {
 
     const cardsFeedback = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/sessions/${sessionId}/check_match`, {
+        const response = await fetch(`/api/sessions/${sessionId}/check_match`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
