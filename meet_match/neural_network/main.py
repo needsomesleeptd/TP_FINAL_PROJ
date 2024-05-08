@@ -15,7 +15,7 @@ app = Flask(__name__)
 @app.route("/rec", methods=["POST", "GET"])
 def image_post_request():
     query = request.json
-    recs = model.get_rec(query["user_id"], query["session_id"], query["query"])
+    recs = model.get_rec(query["user_id"], query["session_id"], query["query"], num_idx=10)
     return jsonify({"recs": recs})
 
 

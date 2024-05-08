@@ -1,4 +1,3 @@
-#!/bin/sh
 
 file="/docker-entrypoint-initdb.d/dump.pgdata"
 dbname=meetmatch_db
