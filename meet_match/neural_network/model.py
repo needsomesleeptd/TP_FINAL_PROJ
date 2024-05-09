@@ -9,6 +9,41 @@ rec_sys.get_rec(user_id = 1,session_id = 1,"японская кухня", num_id
 rec_sys.get_rec(user_id = 1,session_id = 1,"японская кухня", num_idx = 10, criteria = {"categories":['restaurants'], "day":'Tuesday', 'time':'17:01'})
 '''
 
+import logging
+import logging.config
+import logging.handlers
+
+log = logging.getLogger(__name__)
+
+def init_logging():
+    """
+    Инициализация логгера
+    :return:
+    """
+    log_format = f"[%(asctime)s] [ Python server ] [%(levelname)s]:%(name)s:%(message)s"
+    formatters = {'basic': {'format': log_format}}
+    handlers = {'stdout': {'class': 'logging.StreamHandler',
+                           'formatter': 'basic'}}
+    level = 'INFO'
+    handlers_names = ['stdout']
+    loggers = {
+        '': {
+            'level': level,
+            'propagate': False,
+            'handlers': handlers_names
+        },
+    }
+    logging.basicConfig(level='INFO', format=log_format)
+    log_config = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': formatters,
+        'handlers': handlers,
+        'loggers': loggers
+    }
+    logging.config.dictConfig(log_config)
+
+init_logging()
 
 import torch
 import pandas as pd
@@ -51,17 +86,17 @@ class DatabaseManager:
             query = """
             SELECT place_id, is_liked
             FROM fact_scrolled
-            WHERE user_id != ? AND session_id = ?
+            WHERE user_id != %s AND session_id = %s
             """
         else:
             query = """
             SELECT place_id, is_liked
             FROM fact_scrolled
-            WHERE user_id = ? AND session_id = ?
+            WHERE user_id = %s AND session_id = %s
             """
 
         result = self._execute_query(query, (user_id, session_id))
-        return [(place_id, bool(is_liked)) for place_id, is_liked in result]
+        return [(int(place_id), bool(is_liked)) for place_id, is_liked in result]
 
     def load_embeddings(self) -> Dict[int, Any]:
         query = "SELECT place_id, embedding FROM embeddings"
@@ -414,7 +449,9 @@ class RecommendationSystem:
         recomendation_indices = []
         swipe_user_hist = self._get_swipes_for_session(
             user_id, session_id, for_group=False)
+
         used_indices = swipe_user_hist.copy()
+        used_indices = [i[0] for i in used_indices]
 
         query_rec_list = self._get_rec_on_query(
             query, used_indices, criteria, rec_plan['query_based'])
