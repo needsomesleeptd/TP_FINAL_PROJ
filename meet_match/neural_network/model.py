@@ -502,7 +502,7 @@ class RecommendationSystem:
         return primary_rec + final_recomendation
 
     def build_embeddings(self):
-        places = db_manager.get_all_descriptions()
+        places = self.db_manager.get_all_descriptions()
 
         for place_id, title, description in places:
             title = title if title else ""
