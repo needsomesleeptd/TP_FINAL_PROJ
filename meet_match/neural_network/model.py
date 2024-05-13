@@ -98,6 +98,21 @@ class DatabaseManager:
         result = self._execute_query(query, (user_id, session_id))
         return [(int(place_id), bool(is_liked)) for place_id, is_liked in result]
 
+    def get_all_descriptions(self):
+        query = """
+            SELECT place_id, title, description
+            FROM places
+        """
+        result = self._execute_query(query)
+        return [(int(place_id), str(title), str(description)) for place_id, title, description in result]
+
+    def save_embedding(self, place_id, embedding):
+        query = """
+                    INSERT INTO embeddings (place_id, embedding) VALUES (%s,%s)
+                """
+        self._execute_query(query, (place_id, embedding))
+
+
     def load_embeddings(self) -> Dict[int, Any]:
         query = "SELECT place_id, embedding FROM embeddings"
         embeddings_data = self._execute_query(query)
@@ -126,12 +141,12 @@ class RecommendationSystem:
         self.embed_dict = self.db_manager.load_embeddings()
         self.places_info = self.db_manager.fetch_places_info()
 
-    def _generate_embedding(self, text: str) -> torch.Tensor:
-        inputs = self.tokenizer(text, return_tensors='pt',
-                                padding=True, truncation=True, max_length=512)
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-        return self._average_pool(outputs.last_hidden_state, inputs['attention_mask'])
+#     def _generate_embedding(self, text: str) -> torch.Tensor:
+#         inputs = self.tokenizer(text, return_tensors='pt',
+#                                 padding=True, truncation=True, max_length=512)
+#         with torch.no_grad():
+#             outputs = self.model(**inputs)
+#         return self._average_pool(outputs.last_hidden_state, inputs['attention_mask'])
 
     def _get_swipes_for_session(self, user_id: int, session_id: int, for_group: bool = False) -> List[Tuple[int, bool]]:
         """ Возвращает список пар (place_id, is_liked) для заданного пользователя и сессии, используя db_manager. """
@@ -485,3 +500,17 @@ class RecommendationSystem:
         random.shuffle(final_recomendation)
 
         return primary_rec + final_recomendation
+
+    def build_embeddings(self):
+        places = db_manager.get_all_descriptions()
+
+        for place_id, title, description in places:
+            title = title if title else ""
+            description = description if description else ""
+
+            text = "Название места: " + title + "   Описание: " + description
+            embedding = self._generate_embedding(text)
+            serialized_embedding = pickle.dumps(embedding)
+
+            # Insert the embedding into the database
+            self.db_manager.save_embedding(place_id, embedding)
