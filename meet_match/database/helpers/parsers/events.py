@@ -3,33 +3,35 @@ from bs4 import BeautifulSoup
 import csv
 
 
-url = "https://kudago.com/public-api/v1.4/places/?location=msk&categories=amusement,anticafe,animal-shelters,art-centers,art-space,attractions,bar,brewery,cats,cinema,clubs,concert-hall,comedy-club,dance-studio,dogs,homesteads,handmade,museums,park,questroom,restaurants,sights,theatre&fields=id,title,short_title,address,location,timetable,phone,images,description,body_text,foreign_url,subway,coords,favorites_count,comments_count,is_closed,tags,categories"
+url = "https://kudago.com/public-api/v1.4/events/?location=msk&categories=cinema,concert,education,entertainment,exhibition,fashion,festival,holiday,party,quest,recreation,theater,tour&fields=id,dates,title,short_title,slug,place,description,body_text,location,categories,tagline,age_restriction,price,is_free,images,favorites_count,comments_count,site_url,tags,participants&actual_since=1715621332&actual_until=1716215233"
 
 
 def collect_data(url):
     resp = requests.get(url)
     resp_json = resp.json()
 
-    with open("dist.csv", "w", encoding="utf-8") as dst:
+    with open("events.csv", "w", encoding="utf-8") as dst:
         fieldnames = [
             "id",
+            "dates",
             "title",
             "short_title",
-            "address",
-            "location",
-            "timetable",
-            "phone",
-            "images",
+            "slug",
+            "place",
             "description",
             "body_text",
-            "foreign_url",
-            "subway",
-            "coords",
+            "location",
+            "categories",
+            "tagline",
+            "age_restriction",
+            "price",
+            "is_free",
+            "images",
             "favorites_count",
             "comments_count",
-            "is_closed",
+            "site_url",
             "tags",
-            "categories",
+            "participants",
         ]
 
         writer = csv.DictWriter(dst, fieldnames=fieldnames)
@@ -42,23 +44,25 @@ def collect_data(url):
                 writer.writerow(
                     {
                         "id": i["id"],
+                        "dates": i["dates"],
                         "title": i["title"],
                         "short_title": i["short_title"],
-                        "address": i["address"],
-                        "location": i["location"],
-                        "timetable": i["timetable"],
-                        "phone": i["phone"],
-                        "images": i["images"],
+                        "slug": i["slug"],
+                        "place": i["place"],
                         "description": i["description"],
                         "body_text": i["body_text"],
-                        "foreign_url": i["foreign_url"],
-                        "subway": i["subway"],
-                        "coords": i["coords"],
+                        "location": i["location"],
+                        "categories": i["categories"],
+                        "tagline": i["tagline"],
+                        "age_restriction": i["age_restriction"],
+                        "price": i["price"],
+                        "is_free": i["is_free"],
+                        "images": i["images"],
                         "favorites_count": i["favorites_count"],
                         "comments_count": i["comments_count"],
-                        "is_closed": i["is_closed"],
+                        "site_url": i["site_url"],
                         "tags": i["tags"],
-                        "categories": i["categories"],
+                        "participants": i["participants"],
                     }
                 )
             resp = requests.get(resp_json["next"])
