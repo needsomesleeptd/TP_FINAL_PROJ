@@ -8,6 +8,7 @@ import (
 	"syscall"
 	auth_handler "test_backend_frontend/internal/http-server/handlers/auth"
 	"test_backend_frontend/internal/http-server/handlers/cards"
+	feedback_handler "test_backend_frontend/internal/http-server/handlers/feedback"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
 	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/models/models_da"
@@ -15,6 +16,8 @@ import (
 	auth_service "test_backend_frontend/internal/services/auth"
 	repo_adapter "test_backend_frontend/internal/services/auth/user_repo/user_repo_ad"
 	postgres3 "test_backend_frontend/internal/services/cards/repository/postgres"
+	feedback_service "test_backend_frontend/internal/services/feedback"
+	"test_backend_frontend/internal/services/feedback/feedback_repo"
 	"test_backend_frontend/internal/services/scroll"
 	sessions "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
@@ -80,6 +83,10 @@ func main() {
 	scrollRepo := postgres2.NewScrollRepository(db)
 	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo)
 
+	//	feedback service
+	feedbackRepo := feedback_repo.NewFeedbackRepo(db)
+	feedbackService := feedback_service.NewFeedbackService(feedbackRepo)
+
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
@@ -106,6 +113,8 @@ func main() {
 
 		r.Post("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
+
+		r.Post("/feedback/has_gone", feedback_handler.SaveFeedback(feedbackService))
 	})
 
 	//auth
