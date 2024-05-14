@@ -9,6 +9,7 @@ import (
 	auth_handler "test_backend_frontend/internal/http-server/handlers/auth"
 	"test_backend_frontend/internal/http-server/handlers/cards"
 	feedback_handler "test_backend_frontend/internal/http-server/handlers/feedback"
+	match_handler "test_backend_frontend/internal/http-server/handlers/match"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
 	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/models/models_da"
@@ -18,6 +19,7 @@ import (
 	postgres3 "test_backend_frontend/internal/services/cards/repository/postgres"
 	feedback_service "test_backend_frontend/internal/services/feedback"
 	"test_backend_frontend/internal/services/feedback/feedback_repo"
+	match_service "test_backend_frontend/internal/services/match"
 	match_repo_adap "test_backend_frontend/internal/services/match/matchRepo/matchRepoAd"
 	"test_backend_frontend/internal/services/scroll"
 	sessions "test_backend_frontend/internal/sessions"
@@ -80,7 +82,10 @@ func main() {
 	userService := auth_service.NewAuthService(userRepo, hasher, tokenHandler, auth_service.SECRET)
 	router := chi.NewRouter()
 
+	//match service
 	matchRepo := match_repo_adap.NewFeedbackRepo(db)
+	matchService := match_service.NewMatchService(matchRepo, *sessionManager, cardRepo)
+
 	//	Scroll service
 	scrollRepo := postgres2.NewScrollRepository(db)
 	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo, matchRepo)
@@ -105,6 +110,7 @@ func main() {
 	router.Group(func(r chi.Router) { //group for which auth middleware is required
 		r.Use(authMiddleware)
 		r.Post("/cards", cards.New(model, tokenHandler))
+		//sessions
 		r.Post("/sessions", sessions_handler.SessionCreatePage(sessionManager))
 		r.Post("/sessions/{id}", sessions_handler.SessionsGetSessionData(sessionManager))
 		r.Patch("/sessions/{id}", sessions_handler.SessionAdduser(sessionManager))
@@ -113,9 +119,16 @@ func main() {
 		r.Post("/sessions/getSessionUsers", sessions_handler.SessionGetData(sessionManager))
 		r.Delete("/sessions/{id}", sessions_handler.SessionDeleteUser(sessionManager))
 
+		//session status
+		r.Post("/sessions/{id}/continueScrolling", sessions_handler.SessionContinueScrolling(sessionManager))
+
+		//matches + scrolls
 		r.Post("/sessions/{id}/check_match", scroll2.NewCheckHandler(scrollManager))
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 
+		r.Post("/sessions/{id}/matches", match_handler.GetMatchedCards(matchService))
+
+		//feedback
 		r.Post("/feedback/has_gone", feedback_handler.SaveFeedback(feedbackService))
 
 	})

@@ -208,9 +208,29 @@ func SessionGetUserSessions(sessionManager *session.SessionManager) http.Handler
 	}
 }
 
-
-
-
+func SessionContinueScrolling(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestSession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		session, err := sessionManager.GetSession(req.SessionID)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		if session.Status == models.Ended {
+			err = sessionManager.ChangeSessionStatus(req.SessionID, models.Scrolling)
+			if err != nil {
+				render.JSON(w, r, response.Error(err.Error()))
+				return
+			}
+		}
+		render.JSON(w, r, resp.OK())
+	}
+}
 
 func SessionDeleteUser(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -27,6 +27,15 @@ func (r *MatchRepoAdapter) SaveMatch(match models.Match) error {
 	return err
 }
 
+func (r *MatchRepoAdapter) UpdateMatch(id uint64, match models.Match) error {
+	matchDa := models_da.TODaMatch(match)
+	err := r.db.Where("id = ?", id).Updates(matchDa).Error
+	if err != nil {
+		return errors.Wrap(err, "error updating")
+	}
+	return err
+}
+
 func (r *MatchRepoAdapter) GetMatchesNoFeedback(sessionID uuid.UUID) ([]models.Match, error) {
 	var matchDaSlice []models_da.Match
 

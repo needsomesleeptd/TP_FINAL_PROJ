@@ -10,4 +10,5 @@ type IMatchRepo interface {
 	GetMatchesBySession(sessionID uuid.UUID) ([]models.Match, error)
 	GetMatchesNoFeedback(sessionID uuid.UUID) ([]models.Match, error)
 	SaveMatch(match models.Match) error
+	UpdateMatch(id uint64, match models.Match) error
 }

@@ -1,14 +1,16 @@
 package scroll
 
 import (
-	"github.com/go-chi/render"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
+	"fmt"
 	"io"
 	"net/http"
 	resp "test_backend_frontend/internal/lib/api/response"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_dto"
+
+	"github.com/go-chi/render"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type CheckMatchRequest struct {
@@ -17,6 +19,7 @@ type CheckMatchRequest struct {
 
 type CardsMatchChecker interface {
 	GetMatchCards(session_id uuid.UUID) ([]*models.Card, error)
+	IsMatchHappened(scrolled *models.FactScrolled) (bool, error)
 }
 
 // TODO: one card
@@ -45,7 +48,7 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 			render.JSON(w, r, resp.Error("failed to parse uuid"))
 			return
 		}
-
+		//wasMatched,err := checker.IsMatchHappened()
 		cards, err := checker.GetMatchCards(uid)
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to get match"))
@@ -55,7 +58,7 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 		for _, v := range cards {
 			dtoCards = append(dtoCards, models_dto.ToDTOCard(v))
 		}
-
+		fmt.Print(dtoCards)
 		responseOK(w, r, dtoCards)
 	}
 }
