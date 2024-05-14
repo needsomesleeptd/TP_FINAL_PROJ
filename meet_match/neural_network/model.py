@@ -6,8 +6,30 @@ rec_sys = RecommendationSystem()
 rec_sys.get_rec(user_id = 1, session_id = 1,"яблоко", num_idx = 10)
 rec_sys.get_rec(user_id = 1,session_id = 1,"японская кухня", num_idx = 10, criteria = {"categories":['restaurants'])
 rec_sys.get_rec(user_id = 1,session_id = 1,"японская кухня", num_idx = 10, criteria = {"categories":['restaurants'], "day":'Tuesday', 'time':'17:01'})
+
+
+спустя некоторое время добавляем мвекторы новых мест в таблицу embeddings
+rec_sys.build_embeddings()
+
+и обновляем эмбеддинги и информацию о местах в самой модели
+
+rec_sys.update_model_places()
 """
 
+from datetime import datetime
+from typing import List, Dict, Any, Tuple
+from tqdm import tqdm_notebook
+from transformers import AutoTokenizer, AutoModel
+from torch import Tensor
+import numpy as np
+import ast
+import json
+import random
+import psycopg2 as pg
+import pickle
+import torch.nn.functional as F
+import pandas as pd
+import torch
 import logging
 import logging.config
 import logging.handlers
@@ -22,7 +44,8 @@ def init_logging():
     """
     log_format = f"[%(asctime)s] [ Python server ] [%(levelname)s]:%(name)s:%(message)s"
     formatters = {"basic": {"format": log_format}}
-    handlers = {"stdout": {"class": "logging.StreamHandler", "formatter": "basic"}}
+    handlers = {"stdout": {
+        "class": "logging.StreamHandler", "formatter": "basic"}}
     level = "INFO"
     handlers_names = ["stdout"]
     loggers = {
@@ -40,21 +63,6 @@ def init_logging():
 
 
 init_logging()
-
-import torch
-import pandas as pd
-import torch.nn.functional as F
-import pickle
-import psycopg2 as pg
-import random
-import json
-import ast
-
-from torch import Tensor
-from transformers import AutoTokenizer, AutoModel
-from tqdm import tqdm_notebook
-from typing import List, Dict, Any, Tuple
-from datetime import datetime
 
 
 class DatabaseManager:
@@ -130,17 +138,58 @@ class DatabaseManager:
             place_id: pickle.loads(embedding) for place_id, embedding in embeddings_data
         }
 
+    def parse_timetable(self, timetable: str) -> Dict[str, str]:
+        days_map = {
+            'пн': 'Monday',
+            'вт': 'Tuesday',
+            'ср': 'Wednesday',
+            'чт': 'Thursday',
+            'пт': 'Friday',
+            'сб': 'Saturday',
+            'вс': 'Sunday',
+            'ежедневно': 'Monday-Sunday'
+        }
+        timetable_dict = {}
+        parts = timetable.split(',')
+        for part in parts:
+            try:
+                days_part, *hours_part = part.strip().split(' ')
+                days = days_part.split('–')
+                hours = ' '.join(hours_part).strip()
+                if len(days) == 2:
+                    start_day, end_day = days_map[days[0]], days_map[days[1]]
+                    current_day = start_day
+                    while current_day != end_day:
+                        timetable_dict[current_day] = hours
+                        current_day = list(days_map.values())[
+                            (list(days_map.values()).index(current_day) + 1) % 7]
+                    timetable_dict[end_day] = hours
+                elif days_part == 'ежедневно':
+                    for day in days_map.values():
+                        timetable_dict[day] = hours
+                else:
+                    timetable_dict[days_map[days[0]]] = hours
+            except Exception as e:
+                print(f"Error parsing timetable part '{part}': {e}")
+                return {}
+
+        return timetable_dict
+
     def fetch_places_info(self) -> Dict[int, Dict[str, Any]]:
-        #         query = "SELECT place_id, categories, working_hours FROM places"
-        #         results = self._execute_query(query)
-        #         places_info = {}
-        #         for place_id, categories, working_hours in results:
-        #             places_info[place_id] = {
-        #                 "categories": ast.literal_eval(categories) if categories else [],
-        #                 "working_hours": ast.literal_eval(working_hours) if working_hours else {}
-        #             }
-        #         return places_info
-        return {}
+        query = "SELECT place_id, categories, timetable FROM places"
+        results = self._execute_query(query)
+        places_info = {}
+        for place_id, categories, working_hours in results:
+            try:
+                places_info[place_id] = {
+                    "categories": ast.literal_eval(categories) if categories else [],
+                    "working_hours": self.parse_timetable(working_hours) if working_hours else {}
+                }
+            except (ValueError, SyntaxError) as e:
+                print(
+                    f"Error parsing place info for place_id '{place_id}': {e}")
+                return {}
+        return places_info
 
 
 class RecommendationSystem:
@@ -168,24 +217,17 @@ class RecommendationSystem:
         self.embed_dict = self.db_manager.load_embeddings()
         self.places_info = self.db_manager.fetch_places_info()
 
-    #     def _generate_embedding(self, text: str) -> torch.Tensor:
-    #         inputs = self.tokenizer(text, return_tensors='pt',
-    #                                 padding=True, truncation=True, max_length=512)
-    #         with torch.no_grad():
-    #             outputs = self.model(**inputs)
-    #         return self._average_pool(outputs.last_hidden_state, inputs['attention_mask'])
-
     def _get_swipes_for_session(
         self, user_id: int, session_id: int, for_group: bool = False
     ) -> List[Tuple[int, bool]]:
         """Возвращает список пар (place_id, is_liked) для заданного пользователя и сессии, используя db_manager."""
         return self.db_manager.get_swipes_for_session(user_id, session_id, for_group)
 
-    def update_embed_dict(self):
+    def load_embed_dict(self):
         """Обновляет словарь эмбеддингов, загружая данные через db_manager."""
         self.embed_dict = self.db_manager.load_embeddings()
 
-    def update_places_info(self):
+    def load_places_info(self):
         """Обновляет информацию о местах, загружая данные через db_manager."""
         self.places_info = self.db_manager.fetch_places_info()
 
@@ -307,7 +349,8 @@ class RecommendationSystem:
         similarities = self._cosine_similarity(
             query_embedding, embedding_matrix
         ).squeeze(0)
-        sorted_scores, sorted_indices = torch.sort(similarities, descending=True)
+        sorted_scores, sorted_indices = torch.sort(
+            similarities, descending=True)
 
         top_n_place_ids = []
         idx_iter = 0
@@ -325,8 +368,6 @@ class RecommendationSystem:
 
     def _generate_rec_on_user_session_hist(
         self,
-        user_id: int,
-        session_id: int,
         swiped_places: List[Tuple[int, bool]],
         used_ids: List[int],
         criteria,
@@ -337,8 +378,6 @@ class RecommendationSystem:
         Генерирует рекомендации на основе истории лайков и дизлайков пользователя в данной сессии.
 
         Параметры:
-        - user_id (int): Идентификатор пользователя.
-        - session_id (int): Идентификатор сессии.
         - text_embeddings (Dict[int, torch.Tensor]): Словарь с эмбеддингами мест.
         - swiped_places: List[Tuple[int, bool]] : Список просвайпанных id, где свайп влево это 1.
         - used_ids (List[int]): Список ID мест, которые уже были использованы.
@@ -352,8 +391,10 @@ class RecommendationSystem:
             return []
 
         # Получение ID мест, которые пользователь лайкнул и дизлайкнул в текущей сессии
-        liked_place_ids = [idx for (idx, is_liked) in swiped_places if is_liked == 1]
-        disliked_place_ids = [idx for (idx, is_liked) in swiped_places if is_liked == 0]
+        liked_place_ids = [idx for (idx, is_liked)
+                           in swiped_places if is_liked == 1]
+        disliked_place_ids = [
+            idx for (idx, is_liked) in swiped_places if is_liked == 0]
 
         # Извлечение эмбеддингов для лайкнутых мест
         if liked_place_ids:
@@ -384,7 +425,8 @@ class RecommendationSystem:
         place_ids = list(self.embed_dict.keys())
 
         # Расчёт косинусного сходства для лайкнутых и дизлайкнутых мест
-        liked_similarities = self._cosine_similarity(liked_embeddings, all_embeddings)
+        liked_similarities = self._cosine_similarity(
+            liked_embeddings, all_embeddings)
         disliked_similarities = self._cosine_similarity(
             disliked_embeddings, all_embeddings
         )
@@ -491,10 +533,16 @@ class RecommendationSystem:
 
         return place_ids
 
-    def plan_recommendations(self, num_idx, rec_sources):
-        return {
-            key: int(num_idx * proportion) for key, proportion in rec_sources.items()
-        }
+    # сохраняет распределение вероятностей
+
+    def _plan_recommendations(self, num_idx, rec_sources):
+        probabilities = np.array(list(rec_sources.values()))
+
+        probabilities /= probabilities.sum()
+
+        counts = np.random.multinomial(num_idx, probabilities)
+
+        return dict(zip(rec_sources.keys(), counts))
 
     def get_rec(
         self,
@@ -518,18 +566,19 @@ class RecommendationSystem:
         if not criteria:
             criteria = {}
 
-        rec_sources = {
-            "query_based": 0.4,
-            "user_history_based": 0.2,
-            "group_based": 0.3,
-            "random": 0.1,
-        }
-        rec_plan = self.plan_recommendations(num_idx, rec_sources)
-
-        recomendation_indices = []
         swipe_user_hist = self._get_swipes_for_session(
             user_id, session_id, for_group=False
         )
+
+        swiped_places_count = len(swipe_user_hist)
+
+        rec_sources = {
+            'query_based': 0.4,  # поначалу только те, что по описанию
+            'user_history_based': 0.2 if swiped_places_count >= 10 else 0.0,
+            'group_based': 0.3 if swiped_places_count >= 10 else 0.0,
+            'random': 0.05 if swiped_places_count >= 20 else 0.0
+        }
+        rec_plan = self._plan_recommendations(num_idx, rec_sources)
 
         used_indices = swipe_user_hist.copy()
         used_indices = [i[0] for i in used_indices]
@@ -540,8 +589,6 @@ class RecommendationSystem:
         used_indices = used_indices + query_rec_list
 
         rec_user_hist = self._generate_rec_on_user_session_hist(
-            user_id,
-            session_id,
             swipe_user_hist,
             used_indices,
             criteria,
@@ -564,15 +611,15 @@ class RecommendationSystem:
         used_indices = used_indices + rec_group_hist
 
         random_rec = self._get_random_places(
-            list(self.embed_dict.keys()), used_indices, criteria, rec_plan["random"]
+            list(self.embed_dict.keys()
+                 ), used_indices, criteria, rec_plan["random"]
         )
         used_indices = used_indices + random_rec
 
-        primary_rec = query_rec_list
-        final_recomendation = rec_user_hist + rec_group_hist + random_rec
+        final_recomendation = query_rec_list + rec_group_hist + random_rec
 
-        if len(final_recomendation) + len(primary_rec) < num_idx:
-            additional_needed = num_idx - len(final_recomendation) - len(primary_rec)
+        if len(final_recomendation) < num_idx:
+            additional_needed = num_idx - len(final_recomendation)
             additional_recommendations = self._get_rec_on_query(
                 query, used_indices, criteria, additional_needed
             )
@@ -580,7 +627,7 @@ class RecommendationSystem:
 
         random.shuffle(final_recomendation)
 
-        return primary_rec + final_recomendation
+        return final_recomendation
 
     def build_embeddings(self):
         places = self.db_manager.get_all_descriptions()
@@ -595,3 +642,23 @@ class RecommendationSystem:
 
             # Insert the embedding into the database
             self.db_manager.save_embedding(place_id, embedding)
+
+    def build_embeddings(self):
+        places = self.db_manager.get_all_descriptions()
+
+        for place_id, title, description in places:
+            if place_id in self.embed_dict:
+                continue
+
+            title = title if title else ""
+            description = description if description else ""
+
+            text = "Название места: " + title + "   Описание: " + description
+            embedding = self._generate_embedding(text)
+
+            # Insert the embedding into the database
+            self.db_manager.save_embedding(place_id, embedding)
+
+    def update_model_places(self):
+        self.load_embed_dict()
+        self.load_places_info()
