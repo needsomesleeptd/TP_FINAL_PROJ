@@ -86,7 +86,7 @@ func main() {
 	//	feedback service
 	feedbackRepo := feedback_repo.NewFeedbackRepo(db)
 	feedbackService := feedback_service.NewFeedbackService(feedbackRepo)
-
+	scroll.NewScrollUseCase(scrollRepo, ses, cardRepo)
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
@@ -115,6 +115,7 @@ func main() {
 		r.Post("/sessions/{id}/scroll", scroll2.NewScrollFactRegistrateHandler(scrollManager, tokenHandler, cardRepo))
 
 		r.Post("/feedback/has_gone", feedback_handler.SaveFeedback(feedbackService))
+
 	})
 
 	//auth

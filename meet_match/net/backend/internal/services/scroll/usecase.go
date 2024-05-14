@@ -4,8 +4,10 @@ import (
 	"slices"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/services/cards/repository"
+	match_repo "test_backend_frontend/internal/services/match/matchRepo"
 	"test_backend_frontend/internal/services/scroll/scroll_repo"
 	session "test_backend_frontend/internal/sessions"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -21,10 +23,11 @@ type useсase struct {
 	repo        scroll_repo.ScrollRepository
 	sessionServ *session.SessionManager
 	cardRepo    repository.CardRepository
+	matchRepo   match_repo.IMatchRepo
 }
 
-func NewScrollUseCase(repository scroll_repo.ScrollRepository, sessMgr *session.SessionManager, cardRepo repository.CardRepository) ScrollUseCase {
-	return &useсase{repo: repository, sessionServ: sessMgr, cardRepo: cardRepo}
+func NewScrollUseCase(repository scroll_repo.ScrollRepository, sessMgr *session.SessionManager, cardRepo repository.CardRepository, matchRepo match_repo.IMatchRepo) ScrollUseCase {
+	return &useсase{repo: repository, sessionServ: sessMgr, cardRepo: cardRepo, matchRepo: matchRepo}
 }
 
 func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
@@ -32,7 +35,22 @@ func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
 	if err != nil {
 		return errors.Wrap(err, "scroll.RegisterFact error")
 	}
-
+	hasHappened, err := u.IsMatchHappened(scrolled)
+	if err != nil {
+		return errors.Wrap(err, "scroll.RegisterFact error")
+	}
+	match := models.Match{
+		SessionID:     scrolled.SessionId,
+		Datetime:      time.Now(),
+		GotFeedback:   false,
+		CardMatchedID: scrolled.PlacesId,
+	}
+	if hasHappened {
+		err := u.matchRepo.SaveMatch(match)
+		if err != nil {
+			return errors.Wrap(err, "scroll.RegisterFact error")
+		}
+	}
 	return nil
 }
 
@@ -66,7 +84,6 @@ func (u *useсase) IsMatchHappened(scrolled *models.FactScrolled) (bool, error) 
 	if len(userIds) < len(getUsers) {
 		return false, nil
 	}
-
 	if isMatched {
 		err := u.sessionServ.ChangeSessionStatus(scrolled.SessionId, models.Ended)
 		if err != nil {
@@ -77,7 +94,7 @@ func (u *useсase) IsMatchHappened(scrolled *models.FactScrolled) (bool, error) 
 	return isMatched, nil
 }
 
-func (u *useсase) GetMatchCards(session_id uuid.UUID) ([]*models.Card, error) {
+func (u *useсase) GetMatchCards(session_id uuid.UUID) ([]*models.Card, error) { // notive that the matched cards are sorted by 1 user in dsc order
 	userIds, err := u.repo.GetAllUsersIdsForSession(session_id)
 	if err != nil {
 		return nil, errors.Wrap(err, "scroll.GetMatchCards error")
