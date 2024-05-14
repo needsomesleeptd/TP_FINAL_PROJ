@@ -208,6 +208,10 @@ func SessionGetUserSessions(sessionManager *session.SessionManager) http.Handler
 	}
 }
 
+
+
+
+
 func SessionDeleteUser(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestSession

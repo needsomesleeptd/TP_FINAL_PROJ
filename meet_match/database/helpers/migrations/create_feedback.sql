@@ -5,4 +5,5 @@ CREATE TABLE IF NOT EXISTS feedbacks(
     hasgone BOOL NOT NULL,
     datetime timestamp NOT NULL,
     PRIMARY KEY (id)
+    
 );

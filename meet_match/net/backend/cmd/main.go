@@ -18,6 +18,7 @@ import (
 	postgres3 "test_backend_frontend/internal/services/cards/repository/postgres"
 	feedback_service "test_backend_frontend/internal/services/feedback"
 	"test_backend_frontend/internal/services/feedback/feedback_repo"
+	match_repo_adap "test_backend_frontend/internal/services/match/matchRepo/matchRepoAd"
 	"test_backend_frontend/internal/services/scroll"
 	sessions "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
@@ -79,14 +80,15 @@ func main() {
 	userService := auth_service.NewAuthService(userRepo, hasher, tokenHandler, auth_service.SECRET)
 	router := chi.NewRouter()
 
+	matchRepo := match_repo_adap.NewFeedbackRepo(db)
 	//	Scroll service
 	scrollRepo := postgres2.NewScrollRepository(db)
-	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo)
+	scrollManager := scroll.NewScrollUseCase(scrollRepo, sessionManager, cardRepo, matchRepo)
 
 	//	feedback service
 	feedbackRepo := feedback_repo.NewFeedbackRepo(db)
 	feedbackService := feedback_service.NewFeedbackService(feedbackRepo)
-	scroll.NewScrollUseCase(scrollRepo, ses, cardRepo)
+
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH"},

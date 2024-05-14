@@ -53,15 +53,6 @@ func (r *MatchRepoAdapter) GetMatchesBySession(sessionID uuid.UUID) ([]models.Ma
 	return matchSlice, nil
 }
 
-func (r *MatchRepoAdapter) GetSessionsNoFeedback(sessionID uuid.UUID) ([]models.Match, error) {
-	var sessionIDs []uuid.UUID
-	err := r.db.Model(&models_da.Match{}).Where("session_id = ?", sessionID).Select("session_id").Find(&sessionIDs).Error
-	if err != nil {
-		return nil, errors.Wrap(err, "error getting session IDs by session")
-	}
-	return sessionIDs, nil
-}
-
 func (r *MatchRepoAdapter) MarkMatchesAsGottenFeedback(sessionID uuid.UUID) error { // there might a race here with numerous users
 	var meetups []models.Match
 	if result := r.db.Model(&models.Match{}).Where("session_id = ?", sessionID).Find(&meetups); result.Error != nil {

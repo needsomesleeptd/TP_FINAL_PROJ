@@ -14,6 +14,3 @@ type Match struct {
 	CardMatchedID uint64
 }
 
-func TODaMatch() {
-
-}

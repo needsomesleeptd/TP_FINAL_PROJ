@@ -7,7 +7,6 @@ import (
 	match_repo "test_backend_frontend/internal/services/match/matchRepo"
 	"test_backend_frontend/internal/services/scroll/scroll_repo"
 	session "test_backend_frontend/internal/sessions"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -35,7 +34,7 @@ func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
 	if err != nil {
 		return errors.Wrap(err, "scroll.RegisterFact error")
 	}
-	hasHappened, err := u.IsMatchHappened(scrolled)
+	/*hasHappened, err := u.IsMatchHappened(scrolled)
 	if err != nil {
 		return errors.Wrap(err, "scroll.RegisterFact error")
 	}
@@ -44,13 +43,13 @@ func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
 		Datetime:      time.Now(),
 		GotFeedback:   false,
 		CardMatchedID: scrolled.PlacesId,
-	}
-	if hasHappened {
+	}*/
+	/*if hasHappened {
 		err := u.matchRepo.SaveMatch(match)
 		if err != nil {
 			return errors.Wrap(err, "scroll.RegisterFact error")
 		}
-	}
+	}*/
 	return nil
 }
 

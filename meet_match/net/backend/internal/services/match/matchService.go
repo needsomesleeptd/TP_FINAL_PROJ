@@ -16,7 +16,10 @@ type MatchService struct {
 
 func (m *MatchService) IsFeedBackRequired(userID uint64) (bool, error) {
 	sessions, err := m.sessionMan.GetUserSessions(userID)
-
+	if err != nil {
+		return false,err
+	}
+	
 	m.matchRepo.GetMatchesNoFeedback()
 
 }
