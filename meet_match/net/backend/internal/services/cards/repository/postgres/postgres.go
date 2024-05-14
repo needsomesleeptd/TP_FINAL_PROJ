@@ -23,5 +23,17 @@ func (c cardRepository) GetCard(id uint64) (*models.Card, error) {
 		return nil, errors.Wrap(tx.Error, "card.repository.GetCard error")
 	}
 
+	if pgCard.Subway == nil && pgCard.Place != nil {
+		var place *models_da.Card
+		tx := c.db.Limit(1).Find(&place, "place_id = ?", pgCard.Place)
+		if tx.Error != nil {
+			return nil, errors.Wrap(tx.Error, "card.repository.GetCard error")
+		}
+
+		if place.Subway != nil {
+			pgCard.Subway = place.Subway
+		}
+	}
+
 	return models_da.ToModelCard(pgCard), nil
 }
