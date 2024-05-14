@@ -81,6 +81,16 @@ class DatabaseManager:
             print(f"An error occurred: {e}")
             return []
 
+    def _execute_non_query(self, query: str, params: Tuple = ()):
+            try:
+                with pg.connect(**self.connection_info) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute(query, params)
+                    conn.commit()
+            except pg.Error as e:
+                print(f"An error occurred: {e}")
+
+
     def get_swipes_for_session(self, user_id: int, session_id: int, for_group: bool = False) -> List[Tuple[int, bool]]:
         if for_group:
             query = """
@@ -110,7 +120,8 @@ class DatabaseManager:
         query = """
                     INSERT INTO embeddings (place_id, embedding) VALUES (%s,%s)
                 """
-        self._execute_query(query, (place_id, embedding))
+        serialized_embedding = pickle.dumps(embedding)
+        self._execute_non_query(query, (place_id, serialized_embedding))
 
 
     def load_embeddings(self) -> Dict[int, Any]:
@@ -510,7 +521,7 @@ class RecommendationSystem:
 
             text = "Название места: " + title + "   Описание: " + description
             embedding = self._generate_embedding(text)
-            serialized_embedding = pickle.dumps(embedding)
+#             serialized_embedding = pickle.dumps(embedding)
 
             # Insert the embedding into the database
             self.db_manager.save_embedding(place_id, embedding)
