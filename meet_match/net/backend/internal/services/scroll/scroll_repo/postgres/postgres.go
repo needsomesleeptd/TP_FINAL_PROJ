@@ -7,6 +7,7 @@ import (
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_da"
 	"test_backend_frontend/internal/services/scroll/scroll_repo"
+	"time"
 )
 
 const MAX_LIMIT = 100
@@ -22,6 +23,7 @@ func NewScrollRepository(db *gorm.DB) scroll_repo.ScrollRepository {
 // TODO: add timestamp to table
 func (s scrollRepository) AddScrollFact(fact *models.FactScrolled) error {
 	pgFact := models_da.ToPostgresFactScrolled(fact)
+	pgFact.DateTime = time.Now()
 	tx := s.db.Create(&pgFact)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "scroll.repository.AddScrollFact error")
