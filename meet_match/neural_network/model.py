@@ -563,6 +563,9 @@ class RecommendationSystem:
         Возвращает:
         - List[int]: Список ID рекомендованных мест.
         """
+
+        log.info(f"{user_id=}, {session_id=}, {query=}, {criteria=}")
+
         if not criteria:
             criteria = {}
 
@@ -621,7 +624,7 @@ class RecommendationSystem:
         if len(final_recomendation) < num_idx:
             additional_needed = num_idx - len(final_recomendation)
             additional_recommendations = self._get_rec_on_query(
-                query, used_indices, criteria, additional_needed
+                query, used_indices, {}, additional_needed
             )
             final_recomendation.extend(additional_recommendations)
 
