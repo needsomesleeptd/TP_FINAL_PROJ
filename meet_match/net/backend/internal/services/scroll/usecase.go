@@ -1,6 +1,7 @@
 package scroll
 
 import (
+	"log"
 	"slices"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/services/cards/repository"
@@ -50,6 +51,7 @@ func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
 		if err != nil {
 			return errors.Wrap(err, "scroll.RegisterFact error")
 		}
+		log.Print("match happened")
 	}
 	return nil
 }
@@ -57,33 +59,32 @@ func (u *useсase) RegisterFact(scrolled *models.FactScrolled) error {
 func (u *useсase) IsMatchHappened(scrolled *models.FactScrolled) (bool, error) {
 	userIds, err := u.repo.GetAllUsersIdsForSession(scrolled.SessionId)
 	if err != nil {
-		return false, errors.Wrap(err, "scroll.IsMatchHappened error")
+		return false, errors.Wrap(err, "scroll.GetMatchCards error")
 	}
-
 	matches, err := u.matchRepo.GetMatchesBySession(scrolled.SessionId)
+
 	if err != nil {
-		return false, errors.Wrap(err, "scroll.IsMatchHappened error")
+		return false, errors.Wrap(err, "scroll.GetMatchCards error")
+	}
+	var likesForAll [][]uint64
+	for _, v := range userIds {
+		likes, err := u.repo.GetAllLikedPlaces(scrolled.SessionId, v)
+		if err != nil {
+			return false, errors.Wrap(err, "scroll.GetMatchCards error")
+		}
+
+		likesForAll = append(likesForAll, likes)
 	}
 
-	isMatched := true
-	for _, v := range userIds {
-		if v != scrolled.UserId {
-			likedPlaces, err := u.repo.GetAllLikedPlaces(scrolled.SessionId, v)
-			if err != nil {
-				return false, errors.Wrap(err, "scroll.IsMatchHappened error")
-			}
+	alreadyLiked := slices.ContainsFunc(matches, func(match models.Match) bool {
+		return scrolled.PlacesId == match.CardMatchedID
+	})
 
-			alreadyMatched := slices.ContainsFunc(matches, func(match models.Match) bool {
-				return match.CardMatchedID == scrolled.PlacesId
-			})
-
-			if !slices.Contains(likedPlaces, scrolled.PlacesId) || alreadyMatched {
-				//TODO: добавить мажоритарное голосование, для этого нужно знать сколько челов
-				// в сессии и заменить isMatched на int, считать количество матчей
-				isMatched = false
-				break
-			}
-		}
+	if alreadyLiked {
+		return false, nil
+	}
+	if len(likesForAll) <= 0 {
+		return false, nil
 	}
 
 	getUsers, err := u.sessionServ.GetUsers(scrolled.SessionId)
@@ -91,23 +92,32 @@ func (u *useсase) IsMatchHappened(scrolled *models.FactScrolled) (bool, error) 
 		return false, errors.Wrap(err, "scroll.GetMatchCards error")
 	}
 
-	if len(userIds) < len(getUsers) {
+	if len(likesForAll) < len(getUsers) {
 		return false, nil
 	}
-	if isMatched {
-		err := u.sessionServ.ChangeSessionStatus(scrolled.SessionId, models.Ended)
-		if err != nil {
-			return false, errors.Wrap(err, "scroll.GetMatchCards session status change error")
+
+	for i := 0; i < len(likesForAll[0]); i++ {
+		isMatched := true
+		for j := 1; j < len(likesForAll); j++ {
+			if !slices.Contains(likesForAll[j], likesForAll[0][i]) {
+				//TODO: добавить мажоритарное голосование, для этого нужно знать сколько челов
+				// в сессии и заменить isMatched на int, считать количество матчей
+				isMatched = false
+				break
+			}
+		}
+		if isMatched {
+			return true, nil
 		}
 	}
 
-	return isMatched, nil
+	return false, nil
 }
 
 func (u *useсase) GetMatchCards(session_id uuid.UUID) ([]*models.Card, error) { // notive that the matched cards are sorted by 1 user in dsc order
 	// We can use matchRepo now but it works so be it
 	matches, err := u.matchRepo.GetMatchesNoFeedback(session_id)
-
+	log.Print("matches", matches)
 	if err != nil {
 		return nil, errors.Wrap(err, "scroll.GetMatchCards error")
 	}
@@ -128,6 +138,6 @@ func (u *useсase) GetMatchCards(session_id uuid.UUID) ([]*models.Card, error) {
 
 		retCards = append(retCards, card)
 	}
-
+	log.Printf("returning cards %v", retCards)
 	return retCards, nil
 }

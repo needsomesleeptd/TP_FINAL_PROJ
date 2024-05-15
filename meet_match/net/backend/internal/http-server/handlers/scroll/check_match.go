@@ -1,8 +1,8 @@
 package scroll
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	resp "test_backend_frontend/internal/lib/api/response"
 	"test_backend_frontend/internal/models"
@@ -58,7 +58,7 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 		for _, v := range cards {
 			dtoCards = append(dtoCards, models_dto.ToDTOCard(v))
 		}
-		fmt.Print(dtoCards)
+		log.Printf("sending cards %v", dtoCards)
 		responseOK(w, r, dtoCards)
 	}
 }
@@ -66,7 +66,7 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 func responseOK(w http.ResponseWriter, r *http.Request, cards []*models_dto.Card) {
 	render.JSON(w, r, Response{
 		Response:  resp.OK(),
-		IsMatched: len(cards) != 0,
+		IsMatched: len(cards) > 0,
 		Cards:     cards,
 	})
 }

@@ -1,9 +1,6 @@
 package scroll
 
 import (
-	"github.com/go-chi/render"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"strings"
@@ -12,6 +9,10 @@ import (
 	"test_backend_frontend/internal/models/models_dto"
 	auth_service "test_backend_frontend/internal/services/auth"
 	"test_backend_frontend/pkg/auth_utils"
+
+	"github.com/go-chi/render"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type ScrollFactRegistrateRequest struct {
