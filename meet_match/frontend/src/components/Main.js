@@ -7,11 +7,39 @@ import './Main.css';
 
 
 const Main = () => {
-  const [cookies, _, removeCookie] = useCookies(['AccessToken']);
+  const [cookies, setCookie, removeCookie] = useCookies(['AccessToken', 'LoadedMain']);
   const [focus, setFocus] = useState(0);
   const [sessionsData, setSessionsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    var objects = document.getElementsByClassName('create-session-container-mega');
+    Array.from(objects).map((item) => {
+      const img = new Image();
+      img.src = item.getAttribute('data-src');
+      img.onload = () => {
+        setCookie("LoadedMain", true);
+        item.style.backgroundImage = `url(${item.getAttribute('data-src')})`;
+      };
+      img.onerror = () => {
+        setCookie("LoadedMain", false);
+        console.error(`Error loading image: ${item.getAttribute('data-src')}`);
+      };
+    });
+
+    objects = document.getElementsByClassName('logo');
+    Array.from(objects).map((item) => {
+      const img = new Image();
+      img.src = item.getAttribute('data-src');
+      img.onload = () => {
+        item.src = item.getAttribute('data-src');
+      };
+      img.onerror = () => {
+        console.error(`Error loading image: ${item.getAttribute('data-src')}`);
+      };
+    });
+  }, []);
 
   const openModal = () => {
       setShowModal(true);
@@ -28,7 +56,7 @@ const Main = () => {
 
   const UserInfoRequest = async () => {
     try {
-        const response = await fetch('/api/sessions/getUser', {
+        const response = await fetch('http://localhost:8080/sessions/getUser', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -46,6 +74,7 @@ const Main = () => {
         }
 
         const data = await response.json();
+        console.log(data);
         setSessionsData(data.sessions ?? []);
 
     } catch (error) {
@@ -59,9 +88,9 @@ const Main = () => {
 
   }, [cookies]);
 
-  const createSession = async (title, desc, count) => {
+  const createSession = async (title, desc, date, count) => {
     try {
-      const response = await fetch('/api/sessions', {
+      const response = await fetch('http://localhost:8080/sessions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -70,7 +99,8 @@ const Main = () => {
           body: JSON.stringify({
               "sessionName" : title,
               "sessionPeopleCap" : Number(count),
-              "description" : desc
+              "description" : desc,
+              "timeEnds" : `${date}T23:59:00Z`
           })
       });
       if (!response.ok) {
@@ -84,10 +114,12 @@ const Main = () => {
     }
   };
 
-  const handleLogOut = () => {
-    removeCookie("AccessToken");
-    removeCookie("UserId");
-  }
+  const handleLogOut = async () => {
+    await Promise.all([
+      removeCookie("UserId"),
+      removeCookie("AccessToken")
+    ]);
+  };
 
   const joinSession = (sessionId) => {
     navigate(`/session/${sessionId}`);
@@ -96,7 +128,7 @@ const Main = () => {
   const leaveSession = async (e, sessionId) => {
     e.stopPropagation();
     try {
-        const response = await fetch(`/api/sessions/${sessionId}`, {
+        const response = await fetch(`http://localhost:8080/sessions/${sessionId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
@@ -134,7 +166,7 @@ const Main = () => {
     );
   };
   
-  const ProfileSession = ({ id, title, description, maxParticipants, participants, status }) => {
+  const ProfileSession = ({ id, title, description, maxParticipants, participants, date, status }) => {
     return (
       <button className="profile-sessions session" onClick={() => joinSession(id)}>
         <div className="profile-posttitle">
@@ -144,7 +176,7 @@ const Main = () => {
         <div>
           <p>{`Участники: ${participants}/${maxParticipants}`}</p>
           <p>{`Статус: ${status}`}</p>
-          <p>{`Дата встречи: 01.01.2000`}</p>
+          <p>{`Дата встречи: ${date.split('-').reverse().join('.')}`}</p>
         </div>
         <button class="leave-button" onClick={(e) => leaveSession(e, id)}>
           X
@@ -161,14 +193,14 @@ const Main = () => {
     );
   }
 
-  const handleUpload = (sessionName, sessionDesc, sessionCount) => {
-      createSession(sessionName, sessionDesc, sessionCount);
+  const handleUpload = (sessionName, sessionDesc, sessionDate, sessionCount) => {
+      createSession(sessionName, sessionDesc, sessionDate, sessionCount);
       closeModal();
   };
 
   return (
-    <div className="create-session-container-mega">
-      <img src="logo.png" class="logo" alt="Your Logo"></img>
+    <div className={cookies.LoadedMain ? "create-session-container-mega loadedMain" : "create-session-container-mega"} data-src="/bg_main.png">
+      <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <div className="create-session-container">
       <ProfileHeader />
       <ProfileButtons onOpenModal={openModal} />
@@ -183,6 +215,7 @@ const Main = () => {
               description={session.description}
               maxParticipants={session.maxPeople}
               participants={session.users.length}
+              date={session.timeEnds.split('T')[0]}
               status={session.status === 0 ? "Ожидание участников" :
                   (session.status == 1 ? "Просмотр карточек" : "Завершен")}
             />

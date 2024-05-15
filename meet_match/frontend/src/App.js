@@ -23,12 +23,13 @@ function App() {
 
   const DataFetcher = ({ sessionId }) => {
     const { id } = useParams();
+    console.log(id);
     const [status, setStatus] = useState('');
 
     useEffect(() => {
       const CheckSession = async (sessionId) => {
         try {
-          const response = await fetch('/api/sessions/'+ id, {
+          const response = await fetch('http://localhost:8080/sessions/'+ id, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${cookies.AccessToken}`
@@ -38,6 +39,7 @@ function App() {
               })
           });
           const data = await response.json();
+          console.log(data);
           if (data.Response.status === "OK") {
             setStatus(data.session.status);
           }
@@ -52,6 +54,8 @@ function App() {
   
       CheckSession();
     }, [sessionId]);
+
+    console.log(`status: ${status}`);
   
     if (status === 0) {
       return <Session />;

@@ -14,7 +14,7 @@ const Match = (props) => {
  useEffect(() => {
   const cardsFeedback = async () => {
     try {
-      const response = await fetch(`/api/sessions/${sessionId}/check_match`, {
+      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/check_match`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -39,7 +39,6 @@ const Match = (props) => {
 
   cardsFeedback();
  }, [cookies, sessionId]);
-
 
  return (
   <div class="cards-body">

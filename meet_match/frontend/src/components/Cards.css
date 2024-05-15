@@ -1,7 +1,7 @@
 .cards-body {
     margin: 0;
     padding: 0;
-    background-image: url('../../public/bg_cards.png');
+    background-image: url('../../public/bg_cards-min.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -28,8 +28,8 @@
 
 .cards-card {
     margin-bottom: 70px;
-    width: 252px;
-    height: 400px;
+    width: 270px;
+    height: 430px;
     background: #3a3737;
     border-radius: 25px;
     border: 2px solid #000;
@@ -43,9 +43,9 @@
  }
  
  .cards-img {
-    margin-top: -10px;
-    width: 255px;
-    height: 255px;
+    margin-top: 5px;
+    width: 240px;
+    height: 240px;
     opacity: 0.9;
     border: 2px solid #000;
     box-sizing: border-box;

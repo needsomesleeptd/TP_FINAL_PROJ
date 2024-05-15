@@ -42,3 +42,15 @@ header {
   width: 300px;
   height: auto;
 }
+
+.loadedMain {
+  background-image: url('../public/bg_main.png');
+}
+
+.loadedSession {
+  background-image: url('../public/bg_session.png');
+}
+
+.loadedCards {
+  background-image: url('../public/bg_cards.png');
+}

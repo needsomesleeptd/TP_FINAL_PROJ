@@ -1,7 +1,7 @@
 .precontainer {
     margin: 0;
     padding: 0;
-    background-image: url('../../public/bg_session2.png');
+    background-image: url('../../public/bg_session-min.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -33,19 +33,12 @@
 
 .container h2 {
     font-size: 24px;
-    margin-left: 20px;
+    margin-left: 10px;
 }
 
 .container p {
     font-size: 16px;
-    margin-left: 20px;
-}
-
-.input-container {
-    width: 80%;
-    display: flex;
-    align-items: center;
-    margin-top: 20px;
+    margin-left: 10px;
 }
 
 .input-container input[type="text"] {
@@ -57,10 +50,9 @@
 }
 
 .input-container button {
-    width: 120px;
     margin-left: 10px;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #c4c4c4;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -74,9 +66,9 @@
   align-items: center;
 }
 
-.input-container button:hover {
+/* .input-container button:hover {
     background-color: #0056b3;
-}
+} */
 
 .invite-link {
     margin-bottom: 20px;
@@ -158,3 +150,129 @@
     border-color: #5cb85c;
     opacity: 1;
 }
+
+.input-container {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.super-btns {
+    display: flex;
+    flex-direction: row;
+}
+
+.super-input {
+    width: 50%;
+}
+
+@media (max-width: 700px) {
+    .input-container {
+        flex-direction: column;
+    }
+    .super-btns {
+        margin-top: 5%;
+    }
+    .super-btns button {
+        width: 33vw;
+        margin-right: 10px;
+    }
+}
+
+.tags-precontainer p {
+    margin-right: 10px;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 3px;
+}
+
+.tag {
+    display: flex;
+    align-items: center;
+    background-color: #36981b;
+    border-radius: 4px;
+    height: 3%;
+    margin-right: 10px;
+}
+
+.tags-p {
+    margin: 0px;
+}
+
+.tag button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    color: #999;
+    margin-left: -10px;
+    padding: 6px 14px;
+}
+
+.tags-button:hover {
+    color: #ffffff;
+}
+
+.tags-new {
+    position: relative;
+}
+
+.tag-list {
+    position: absolute;
+    left: 0;
+    top: 80%;
+    z-index: 1;
+    list-style-type: none; 
+    display: flex; 
+    flex-direction: column;
+    flex-wrap: wrap; 
+    gap: 8px; 
+    background-color: rgb(180, 178, 178);
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tag-list li {
+    padding: 5px 10px; 
+    background-color: #8f8e8e; 
+    border-radius: 5px; 
+    cursor: pointer; 
+}
+
+.tag-list li:hover {
+    background-color: #c8c7c7; 
+}
+
+.combobox-tag {
+    background-color: transparent;
+}
+
+.custom-select {
+    appearance: none; /* Удаление стандартного стрелочного индикатора */
+    background-color: #f7f7f7; /* Цвет фона */
+    border: 1px solid #ccc; /* Граница с тенью */
+    border-radius: 5px; /* Скругление углов */
+    font-size: 16px; /* Размер шрифта */
+    color: #333; /* Цвет текста */
+    width: 150px; /* Ширина */
+    cursor: pointer; /* Индикатор курсора */
+  }
+  
+  /* Стиль при фокусе */
+  .custom-select:focus {
+    outline: none; /* Удаление обводки фокуса */
+    box-shadow: 0 0 5px #719ece; /* Тень при фокусе */
+  }
+  
+  /* Стили для вариантов выпадающего списка */
+  .custom-select option {
+    background-color: #f7f7f7; /* Цвет фона для вариантов */
+    color: #333; /* Цвет текста для вариантов */
+  }
+
+
