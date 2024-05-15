@@ -15,8 +15,9 @@ import (
 )
 
 type Request struct {
-	Prompt    string `json:"prompt"`
-	SessionID string `json:"sessionID"`
+	Prompt     string   `json:"prompt"`
+	SessionID  string   `json:"sessionID"`
+	Categories []string `json:"categories"`
 }
 
 type Response struct {
@@ -29,7 +30,7 @@ type TokenParser interface {
 }
 
 type CardsSearcher interface {
-	CardsSearch(prompt string, sessionId string, userId uint64) ([]*models_dto.Card, error)
+	CardsSearch(prompt string, sessionId string, userId uint64, categories []string) ([]*models_dto.Card, error)
 }
 
 func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
@@ -58,7 +59,7 @@ func New(searcher CardsSearcher, tokenizer TokenParser) http.HandlerFunc {
 			return
 		}
 
-		cards, err := searcher.CardsSearch(req.Prompt, req.SessionID, payload.ID)
+		cards, err := searcher.CardsSearch(req.Prompt, req.SessionID, payload.ID, req.Categories)
 
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to get cards\n"+err.Error()))

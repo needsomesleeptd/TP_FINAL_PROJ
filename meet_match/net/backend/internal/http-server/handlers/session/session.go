@@ -51,6 +51,7 @@ type RequestModifyUser struct {
 	NewRequest     string    `json:"newRequest"`
 	SessionID      uuid.UUID `json:"sessionID"`
 	UserIDToModify uint64    `json:"userIDToModify"` //the id of user to modify
+	Categories     []string  `json:"newCategories"`
 }
 
 type RequestGetAllSessionsByUser struct {
@@ -175,7 +176,9 @@ func SessionModifyuser(sessionManager *session.SessionManager) http.HandlerFunc 
 			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
+
 		updateReq := models.NewUserReq(req.UserIDToModify, req.NewName, req.NewRequest)
+		updateReq.Categories = req.Categories
 		err = sessionManager.ModifyUser(req.SessionID, req.UserIDToModify, updateReq)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))

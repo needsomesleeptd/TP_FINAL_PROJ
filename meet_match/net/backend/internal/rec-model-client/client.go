@@ -14,9 +14,10 @@ type ModelResponse struct {
 }
 
 type ModelRequest struct {
-	Query     string `json:"query"`
-	SessionID string `json:"session_id"`
-	UserID    uint64 `json:"user_id"`
+	Query      string   `json:"query"`
+	SessionID  string   `json:"session_id"`
+	UserID     uint64   `json:"user_id"`
+	Categories []string `json:"categories"`
 }
 
 type RecSys struct {
@@ -33,11 +34,12 @@ func New(urlRecSys string, cardRepository repository.CardRepository) (*RecSys, e
 }
 
 // TODO: refactor
-func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64) ([]*models_dto.Card, error) {
+func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64, categories []string) ([]*models_dto.Card, error) {
 	req := ModelRequest{
-		Query:     prompt,
-		SessionID: sessionId,
-		UserID:    userId,
+		Query:      prompt,
+		SessionID:  sessionId,
+		UserID:     userId,
+		Categories: categories,
 	}
 	jsonReq, err := json.Marshal(req)
 	if err != nil {
