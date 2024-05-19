@@ -41,6 +41,14 @@ type RequestCreateSession struct {
 	TimeEnds         time.Time `json:"timeEnds"`
 }
 
+type RequestModifySession struct {
+	SessionID        uuid.UUID `json:"sessionID"`
+	SessionName      string    `json:"sessionName"`
+	SessionPeopleCap int       `json:"sessionPeopleCap"`
+	Description      string    `json:"description"`
+	TimeEnds         time.Time `json:"timeEnds"`
+}
+
 type RequestAddUser struct {
 	//Jwt       string    `json:"jwt"`
 	SessionID uuid.UUID `json:"sessionID"`
@@ -132,6 +140,30 @@ func SessionGetData(sessionManager *session.SessionManager) http.HandlerFunc {
 			Response:  resp.OK(),
 			UsersReqs: users,
 		})
+
+	}
+}
+
+func SessionModify(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestModifySession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error("broken json : "+err.Error()))
+			return
+		}
+		updatedSession := session.Session{
+			SessionName: req.SessionName,
+			MaxPeople:   req.SessionPeopleCap,
+			TimeEnds:    req.TimeEnds,
+			Description: req.Description,
+		}
+		err = sessionManager.UpdateSession(updatedSession, req.SessionID)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		render.JSON(w, r, resp.OK())
 
 	}
 }

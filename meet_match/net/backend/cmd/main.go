@@ -63,7 +63,7 @@ func main() {
 	}
 	tokenHandler := auth_utils.NewJWTTokenHandler()
 	var sessionManager *sessions.SessionManager
-	sessionManager, err = sessions.NewSessionManager(SESSION_PATH, "", 0, tokenHandler, auth_service.SECRET)
+	sessionManager, err = sessions.NewSessionManager(SESSION_PATH, "", 1, tokenHandler, auth_service.SECRET)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -119,6 +119,7 @@ func main() {
 		r.Post("/sessions/getSessionUsers", sessions_handler.SessionGetData(sessionManager))
 		r.Delete("/sessions/{id}", sessions_handler.SessionDeleteUser(sessionManager))
 
+		r.Post("/sessions/update/{id}", sessions_handler.SessionModify(sessionManager))
 		//session status
 		r.Post("/sessions/{id}/continueScrolling", sessions_handler.SessionContinueScrolling(sessionManager))
 
