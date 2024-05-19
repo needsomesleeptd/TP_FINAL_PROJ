@@ -18,6 +18,37 @@ func NewFeedbackRepo(db *gorm.DB) match_repo.IMatchRepo {
 	return &MatchRepoAdapter{db: db}
 }
 
+func (r *MatchRepoAdapter) GetUserMatchesBySession(sessionID uuid.UUID, userID uint64) ([]models.Match, error) {
+	var matchDaSlice []models_da.Match
+
+	err := r.db.Model(&models_da.Match{}).
+		Where("session_id = ?", sessionID).
+		Where("user_id = ?", userID).
+		Find(&matchDaSlice).Error
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting matches without feedback")
+	}
+	matchSlice := models_da.FromDaMatchSlice(matchDaSlice)
+	return matchSlice, nil
+}
+
+func (r *MatchRepoAdapter) GetMatchesNotViewedByUser(sessionID uuid.UUID, userID uint64) ([]models.Match, error) {
+	var matchDaSlice []models_da.Match
+
+	err := r.db.Model(&models_da.Match{}).
+		Where("session_id = ?", sessionID).
+		Where("user_id = ?", userID).
+		Where("match_viewed = ?", false).
+		Find(&matchDaSlice).Error
+
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting matches without feedback")
+	}
+	matchSlice := models_da.FromDaMatchSlice(matchDaSlice)
+	return matchSlice, nil
+}
+
 func (r *MatchRepoAdapter) SaveMatch(match models.Match) error {
 	matchDa := models_da.TODaMatch(match)
 	err := r.db.Create(&matchDa).Error

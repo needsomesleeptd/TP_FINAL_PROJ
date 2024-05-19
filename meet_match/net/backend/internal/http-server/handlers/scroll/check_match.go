@@ -4,7 +4,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"test_backend_frontend/internal/lib/api/response"
 	resp "test_backend_frontend/internal/lib/api/response"
+	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_dto"
 
@@ -18,7 +20,7 @@ type CheckMatchRequest struct {
 }
 
 type CardsMatchChecker interface {
-	GetMatchCards(session_id uuid.UUID) ([]*models.Card, error)
+	GetMatchCards(session_id uuid.UUID, userID uint64) ([]*models.Card, error)
 	IsMatchHappened(scrolled *models.FactScrolled) (bool, error)
 }
 
@@ -32,6 +34,11 @@ type Response struct {
 
 func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64) //terrible idea but i have no time
+		if !ok {
+			render.JSON(w, r, response.Error("unable to fetch userID to check the data"))
+			return
+		}
 		var req CheckMatchRequest
 		err := render.DecodeJSON(r.Body, &req)
 		if errors.Is(err, io.EOF) {
@@ -49,7 +56,7 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 			return
 		}
 		//wasMatched,err := checker.IsMatchHappened()
-		cards, err := checker.GetMatchCards(uid)
+		cards, err := checker.GetMatchCards(uid, userID)
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to get match"))
 			return

@@ -13,6 +13,8 @@ type Match struct {
 	Datetime      time.Time `gorm:"not null;column:datetime"`
 	GotFeedback   bool      `gorm:"not null;column:got_feedback"`
 	CardMatchedID uint64    `gorm:"not null;column:matched_card_id"`
+	UserID        uint64    `gorm:"not null;column:user_id"`
+	MatchViewed   bool      `gorm:"not null;column:match_viewed"`
 }
 
 func TODaMatch(match models.Match) Match {

@@ -2,6 +2,7 @@ package scroll
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	resp "test_backend_frontend/internal/lib/api/response"
@@ -77,20 +78,21 @@ func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer
 		err = registrator.RegisterFact(fact)
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to save fact"))
+			log.Println(err.Error())
 			return
 		}
 		is_match := false
 
-		if req.IsLiked {
+		/*if req.IsLiked {
 			is_match, err = registrator.IsMatchHappened(fact)
 			if err != nil {
 				render.JSON(w, r, resp.Error("match check issue"))
 				return
 			}
 		}
-
+		*/
 		var places []*models_dto.Card
-		if is_match {
+		/*if is_match {
 			place, err := cardProv.GetCard(fact.PlacesId)
 			if err != nil {
 				render.JSON(w, r, resp.Error("place get issue"))
@@ -98,7 +100,7 @@ func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer
 			}
 
 			places = append(places, models_dto.ToDTOCard(place))
-		}
+		}*/
 
 		render.JSON(w, r, Response{
 			Response:  resp.OK(),

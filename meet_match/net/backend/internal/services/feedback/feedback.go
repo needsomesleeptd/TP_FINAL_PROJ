@@ -37,7 +37,7 @@ func (s *FeedbackService) RequestFeedBackData(userID uint64) (*models.Card, erro
 		return nil, errors.Wrap(err, "error getting sessions for feedback")
 	}
 	idLastSession := sessions[len(sessions)-1].SessionID
-	matchedCards, err := s.scrollServ.GetMatchCards(idLastSession)
+	matchedCards, err := s.scrollServ.GetMatchCards(idLastSession, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting marchedCards for feedback")
 	}

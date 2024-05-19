@@ -12,5 +12,6 @@ type Match struct {
 	Datetime      time.Time
 	GotFeedback   bool
 	CardMatchedID uint64
+	UserID        uint64
+	MatchViewed   bool
 }
-
