@@ -8,6 +8,7 @@ import (
 	session "test_backend_frontend/internal/sessions"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type IMatchService interface {
@@ -30,11 +31,16 @@ type MatchService struct {
 }
 
 func (m *MatchService) GetMatchedCardsBySession(sessionID uuid.UUID) ([]*models.Card, error) {
-	matches, err := m.matchRepo.GetMatchesBySession(sessionID)
+	users, err := m.sessionMan.GetUsers(sessionID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error in matchService retriving users from session")
+	}
+	matches, err := m.matchRepo.GetUserMatchesBySession(sessionID, users[0].ID) // note that the first user can be any user from session
 	if err != nil {
 		return nil, err
 	}
 	matchedCards := make([]*models.Card, len(matches))
+
 	for i, match := range matches {
 		matchedCards[i], err = m.cardRepo.GetCard(match.CardMatchedID)
 		if err != nil {
