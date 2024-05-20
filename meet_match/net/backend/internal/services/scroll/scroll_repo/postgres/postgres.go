@@ -1,13 +1,14 @@
 package postgres
 
 import (
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	"gorm.io/gorm"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_da"
 	"test_backend_frontend/internal/services/scroll/scroll_repo"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
 )
 
 const MAX_LIMIT = 100
@@ -38,6 +39,7 @@ func (s scrollRepository) GetAllLikedPlaces(session_id uuid.UUID, user_id uint64
 		Model(&models_da.FactScrolled{}).
 		Select("place_id").
 		Where("session_id = ? AND user_id = ? AND is_liked = true", session_id.String(), user_id).
+		Order("datetime desc").
 		Find(&ids)
 
 	if tx.Error != nil {

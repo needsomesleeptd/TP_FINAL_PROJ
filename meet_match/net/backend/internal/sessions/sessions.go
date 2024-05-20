@@ -193,7 +193,7 @@ func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
 		err = json.Unmarshal([]byte(sessionMarshalled), &session)
 		if err != nil {
 			//return nil, errors.Join(errors.New("getting session error"), err)
-			continue
+			continue // yeah it is because of backups, probably that it fails to unmarshall
 		}
 		for _, user := range session.Users {
 			if userID == user.ID {
@@ -261,6 +261,28 @@ func (s *SessionManager) DeletePersonFromSession(sessionID uuid.UUID, userID uin
 	}
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (s *SessionManager) UpdateSession(sessionChanges Session, sessionID uuid.UUID) error {
+	session, err := s.GetSession(sessionID)
+	if err != nil {
+		return fmt.Errorf("error in updating session: %w", err)
+	}
+
+	session.Description = sessionChanges.Description
+	session.MaxPeople = sessionChanges.MaxPeople
+	session.TimeEnds = sessionChanges.TimeEnds
+	session.SessionName = sessionChanges.SessionName
+	marhsalledData, err := json.Marshal(session)
+
+	if err != nil {
+		return fmt.Errorf("error in marshalling updated changes: %w", err)
+	}
+	err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err()
+	if err != nil {
+		return fmt.Errorf("error in saving updated changes: %w", err)
 	}
 	return nil
 }

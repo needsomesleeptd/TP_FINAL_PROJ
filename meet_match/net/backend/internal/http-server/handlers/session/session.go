@@ -41,6 +41,14 @@ type RequestCreateSession struct {
 	TimeEnds         time.Time `json:"timeEnds"`
 }
 
+type RequestModifySession struct {
+	SessionID        uuid.UUID `json:"sessionID"`
+	SessionName      string    `json:"sessionName"`
+	SessionPeopleCap int       `json:"sessionPeopleCap"`
+	Description      string    `json:"description"`
+	TimeEnds         time.Time `json:"timeEnds"`
+}
+
 type RequestAddUser struct {
 	//Jwt       string    `json:"jwt"`
 	SessionID uuid.UUID `json:"sessionID"`
@@ -136,6 +144,30 @@ func SessionGetData(sessionManager *session.SessionManager) http.HandlerFunc {
 	}
 }
 
+func SessionModify(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestModifySession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error("broken json : "+err.Error()))
+			return
+		}
+		updatedSession := session.Session{
+			SessionName: req.SessionName,
+			MaxPeople:   req.SessionPeopleCap,
+			TimeEnds:    req.TimeEnds,
+			Description: req.Description,
+		}
+		err = sessionManager.UpdateSession(updatedSession, req.SessionID)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		render.JSON(w, r, resp.OK())
+
+	}
+}
+
 func SessionAdduser(sessionManager *session.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestAddUser
@@ -208,6 +240,30 @@ func SessionGetUserSessions(sessionManager *session.SessionManager) http.Handler
 			Response: resp.OK(),
 			Sessions: sessions,
 		})
+	}
+}
+
+func SessionContinueScrolling(sessionManager *session.SessionManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestSession
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		session, err := sessionManager.GetSession(req.SessionID)
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		if session.Status == models.Ended {
+			err = sessionManager.ChangeSessionStatus(req.SessionID, models.Scrolling)
+			if err != nil {
+				render.JSON(w, r, response.Error(err.Error()))
+				return
+			}
+		}
+		render.JSON(w, r, resp.OK())
 	}
 }
 

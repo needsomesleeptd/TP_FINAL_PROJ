@@ -99,7 +99,7 @@ const Cards = (props) => {
     };
 
     getCards();
-    const pollingInterval = setInterval(cardsFeedback, 500);
+    const pollingInterval = setInterval(cardsFeedback, 3000);
     return () => clearInterval(pollingInterval);
    }, [cookies, sessionId]);
 

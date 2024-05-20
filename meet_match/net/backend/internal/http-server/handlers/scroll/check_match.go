@@ -1,14 +1,18 @@
 package scroll
 
 import (
+	"io"
+	"log"
+	"net/http"
+	"test_backend_frontend/internal/lib/api/response"
+	resp "test_backend_frontend/internal/lib/api/response"
+	"test_backend_frontend/internal/middleware/auth_middleware"
+	"test_backend_frontend/internal/models"
+	"test_backend_frontend/internal/models/models_dto"
+
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"io"
-	"net/http"
-	resp "test_backend_frontend/internal/lib/api/response"
-	"test_backend_frontend/internal/models"
-	"test_backend_frontend/internal/models/models_dto"
 )
 
 type CheckMatchRequest struct {
@@ -16,7 +20,8 @@ type CheckMatchRequest struct {
 }
 
 type CardsMatchChecker interface {
-	GetMatchCards(session_id uuid.UUID) ([]*models.Card, error)
+	GetMatchCards(session_id uuid.UUID, userID uint64) ([]*models.Card, error)
+	IsMatchHappened(scrolled *models.FactScrolled) (bool, error)
 }
 
 // TODO: one card
@@ -29,6 +34,11 @@ type Response struct {
 
 func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64) //terrible idea but i have no time
+		if !ok {
+			render.JSON(w, r, response.Error("unable to fetch userID to check the data"))
+			return
+		}
 		var req CheckMatchRequest
 		err := render.DecodeJSON(r.Body, &req)
 		if errors.Is(err, io.EOF) {
@@ -45,8 +55,8 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 			render.JSON(w, r, resp.Error("failed to parse uuid"))
 			return
 		}
-
-		cards, err := checker.GetMatchCards(uid)
+		//wasMatched,err := checker.IsMatchHappened()
+		cards, err := checker.GetMatchCards(uid, userID)
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to get match"))
 			return
@@ -55,7 +65,7 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 		for _, v := range cards {
 			dtoCards = append(dtoCards, models_dto.ToDTOCard(v))
 		}
-
+		log.Printf("sending cards %v", dtoCards)
 		responseOK(w, r, dtoCards)
 	}
 }
@@ -63,7 +73,7 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 func responseOK(w http.ResponseWriter, r *http.Request, cards []*models_dto.Card) {
 	render.JSON(w, r, Response{
 		Response:  resp.OK(),
-		IsMatched: len(cards) != 0,
+		IsMatched: len(cards) > 0,
 		Cards:     cards,
 	})
 }

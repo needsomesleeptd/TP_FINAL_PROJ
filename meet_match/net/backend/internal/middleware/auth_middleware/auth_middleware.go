@@ -1,6 +1,7 @@
 package auth_middleware
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"test_backend_frontend/internal/lib/api/response"
@@ -8,6 +9,11 @@ import (
 	"test_backend_frontend/pkg/auth_utils"
 
 	"github.com/go-chi/render"
+)
+
+var (
+	UserIDContextKey = "contextKeyRole{}"
+	RoleContextKey   = "contextKeyID{}"
 )
 
 func JwtAuthMiddleware(next http.Handler, secret string, tokenHandler auth_utils.ITokenHandler) http.HandlerFunc {
@@ -21,7 +27,7 @@ func JwtAuthMiddleware(next http.Handler, secret string, tokenHandler auth_utils
 		}
 		token = strings.TrimPrefix(token, "Bearer ")
 
-		err := tokenHandler.ValidateToken(token, auth_service.SECRET)
+		payload, err := tokenHandler.ParseToken(token, auth_service.SECRET)
 		if err != nil {
 			if err == auth_utils.ErrParsingToken {
 				render.JSON(w, r, response.Error(err.Error()))
@@ -32,6 +38,10 @@ func JwtAuthMiddleware(next http.Handler, secret string, tokenHandler auth_utils
 			}
 			return
 		}
-		next.ServeHTTP(w, r)
+
+		ctx := context.WithValue(r.Context(), UserIDContextKey, payload.ID) // never do this
+		//ctx = r.Clone(ctx)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
