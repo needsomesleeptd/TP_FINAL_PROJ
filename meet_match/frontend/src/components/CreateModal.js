@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './CreateModal.css'
 
-const CreateModal = ({ showModal, closeModal, handleUpload }) => {
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [count, setCount] = useState(2);
-    const [date, setDate] = useState('');
+const CreateModal = ({ showModal, closeModal, handleUpload, modalName="Создание встречи", modalBtn="Создать", name_="", description_="", count_=2, date_="" }) => {
+    const [name, setName] = useState(name_);
+    const [description, setDescription] = useState(description_);
+    const [count, setCount] = useState(count_);
+    const [date, setDate] = useState(date_);
     const [minDate, setMinDate] = useState('');
+    const maxDate = '2100-01-01';
 
     useEffect(() => {
       let today = new Date();
@@ -62,7 +63,7 @@ const CreateModal = ({ showModal, closeModal, handleUpload }) => {
         <form onSubmit={createSession}>
         <div className="upload-modal-content">
           <span className="close" onClick={closeModal}>&times;</span>
-          <h1>Создание встречи</h1>
+          <h1>{modalName}</h1>
           <div className="input-group">
             <input
               className="session-input"
@@ -89,6 +90,7 @@ const CreateModal = ({ showModal, closeModal, handleUpload }) => {
               placeholder="Дата встречи"
               style={{ width: '50%' }}
               min={minDate}
+              max={maxDate}
               required
             />
             </div>
@@ -105,7 +107,7 @@ const CreateModal = ({ showModal, closeModal, handleUpload }) => {
                 required
               />
           </div>
-          <input
+          {/* <input
               type="range"
               id="participantRange"
               name="participantRange"
@@ -114,9 +116,9 @@ const CreateModal = ({ showModal, closeModal, handleUpload }) => {
               value={count}
               onChange={(e) => handleParticipantsChange(e)}
               style={{ width: '100%' }}
-              />
+              /> */}
           </div>
-          <button className="modal-button">Создать</button>
+          <button className="modal-button">{modalBtn}</button>
         </div>
         </form>
       </div>

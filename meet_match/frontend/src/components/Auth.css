@@ -108,6 +108,12 @@ input[type="number"]::-webkit-outer-spin-button {
     margin-bottom: -10px;
 }
 
+.error-message {
+    font-size: 12px;
+    text-align: center;
+    margin-top: -10px;
+}
+
 .register-link p a {
     color: #fff;
     text-decoration: none;

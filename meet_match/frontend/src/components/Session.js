@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import ConnectModal from './ConnectModal';
 import InviteModal from './InviteModal';
+import CreateModal from './CreateModal';
 import { NavLink } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -23,12 +24,15 @@ const Session = (props) => {
   const sessionId = id;
   const [showModal, setShowModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [date, setDate] = useState('');
   const navigate = useNavigate();
 
   const prevParticipants = useRef([]);
   const prevSessionName = useRef('');
   const prevSessionDesc = useRef('');
   const prevMaxParticipants = useRef(0);
+  const prevDate = useRef('');
 
   const [selectedTags, setSelectedTags] = useState([]);
   const [showTagList, setShowTagList] = useState(false);
@@ -85,6 +89,19 @@ const Session = (props) => {
     setShowInviteModal(false);
   };
 
+  const openEditModal = () => {
+    setShowEditModal(true);
+  };
+
+  const closeEditModal = () => {
+      setShowEditModal(false);
+  };
+
+  const handleEdit = (name, description, date, count) => {
+    sessionModify(name, description, date, count);
+    closeEditModal();
+  };
+
   const handleSubmit = () => {
     patchSession(cookies.UserId);
   };
@@ -127,6 +144,14 @@ const Session = (props) => {
         if (data.maxPeople !== prevMaxParticipants.current) {
             setMaxParticipants(data.maxPeople);
             prevMaxParticipants.current = data.maxPeople;
+        }
+
+        if (data.timeEnds) {
+          const dd = data.timeEnds.split('T')[0];
+          if (dd !== prevDate.current) {
+            setDate(dd);
+            prevDate.current = dd;
+          }
         }
 
         const participant = data.users.find(participant => participant.ID === Number(cookies.UserId));
@@ -188,6 +213,30 @@ const Session = (props) => {
     }
   };
 
+  const sessionModify = async (name, description, date, count) => {
+    try {
+      const response = await fetch('http://localhost/api/sessions/update/'+ sessionId, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cookies.AccessToken}`
+          },
+          body: JSON.stringify({
+            'sessionID': sessionId,
+            "sessionName": name,
+            "sessionPeopleCap": count,
+            "description": description,
+            "timeEnds": `${date}T23:59:00Z`
+          })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error creating session:', error);
+    }
+  };
+
   const putSession = async (id) => {
     const participant = participants.find(participant => participant.ID === Number(cookies.UserId));
     try {
@@ -224,6 +273,11 @@ const Session = (props) => {
     event.preventDefault();
     putSession(cookies.meetmatchid);
     setReady(!ready);
+  };
+
+  const handleEditClick = (event) => {
+    event.preventDefault();
+    openEditModal();
   };
 
   const ProfileHeader = () => {
@@ -288,7 +342,7 @@ const Session = (props) => {
     <div className={cookies.LoadedMain ? "precontainer loadedSession" : "precontainer"} data-src="/bg_session.png">
       <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <ProfileHeader />
-      <div class="container">
+      <div class="container vertical-scroll-block2" style={{ height: "15vh", width: "80%" }}>
         <div class="container-info">
           <h2>{sessionName}</h2>
           {sessionDesc.length == '' ? null : <p>{sessionDesc}</p>}
@@ -303,13 +357,14 @@ const Session = (props) => {
             required
             />
           <div className="super-btns">
-            <button class="profile-button" style={{width: "110px"}}>{ready ? "Не готов" : "Готов"}</button>
+            <button class="profile-button" style={{width: "120px"}}>{ready ? "Не готов" : "Готов"}</button>
             <CopyToClipboard text={link}>
-              <button onClick={(event) => handleCopyClick(event)} class="profile-button">Пригласить</button>
+              <button onClick={(event) => handleCopyClick(event)} class="profile-button" style={{width: "120px"}} >Пригласить</button>
             </CopyToClipboard>
+            <button onClick={(event) => handleEditClick(event)} class="profile-button" style={{width: "120px"}}>Изменить</button>
           </div>
         </form>
-        <div className="input-container tags-precontainer">
+        <div className="input-container">
           {/* <p>Теги:</p> */}
           <div className="tags-container">
            {selectedTags.map((tag, index) => (
@@ -345,12 +400,19 @@ const Session = (props) => {
         </div>
         {participants.length > 0 ? (
           <div>
-            <p class="participants-count">Количество участников: {participants.length} / {maxParticipants}. Ждём пока остальные зайдут и будут готовы.</p>
-            <table class="participants-table">
+            <p class="participants-count">Дата встречи: {date}</p>
+            {
+              participants.length < maxParticipants ?
+              <p class="participants-count">Количество участников: {participants.length} / {maxParticipants}. Ждём пока остальные зайдут и будут готовы.</p>
+              :
+              <p class="participants-count">Количество участников: {participants.length} / {maxParticipants}. Ждём пока все будут готовы.</p>
+            }
+            <div>
+            <table class="participants-table" style={{ width: "100%" }}>
               <thead>
                 <tr>
                   <th>Пользователь</th>
-                  <th>Готов</th>
+                  <th>Готовность</th>
                 </tr>
               </thead>
               <tbody>
@@ -367,6 +429,7 @@ const Session = (props) => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         ) : (
           <p class="no-participants">Нет участников</p>
@@ -375,6 +438,12 @@ const Session = (props) => {
 
       <ConnectModal showModal={showModal} sessionName={sessionName} sessionDesc={sessionDesc} handleUpload={handleSubmit} />
       <InviteModal showModal={showInviteModal} handleUpload={handleSubmit2} />
+      { sessionName && (
+        <CreateModal showModal={showEditModal} closeModal={closeEditModal} handleUpload={handleEdit}
+        modalName="Изменение встречи" modalBtn="Сохранить"
+        name_={sessionName} description_={sessionDesc} count_={maxParticipants} date_={date}
+        />
+      )}
 
       </div>
   );

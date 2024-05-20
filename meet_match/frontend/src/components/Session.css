@@ -29,6 +29,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 20px;
 }
 
 .container h2 {
@@ -66,10 +67,6 @@
   align-items: center;
 }
 
-/* .input-container button:hover {
-    background-color: #0056b3;
-} */
-
 .invite-link {
     margin-bottom: 20px;
     font-size: 16px;
@@ -83,10 +80,22 @@
 .participants-table td {
     padding: 10px;
     border-bottom: 1px solid #000000;
+}
+
+.participants-table td:nth-child(1),
+.participants-table th:nth-child(1) {
     text-align: left;
+    padding-left: 5%;
+}
+
+.participants-table td:nth-child(2),
+.participants-table th:nth-child(2) {
+    text-align: right;
+    padding-right: 5%;
 }
 
 .participants-table th {
+    border-radius: 5px;
     background-color: #3c3434;
 }
 
@@ -96,7 +105,8 @@
 }
 
 .participants-count {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    padding-left: 15px;
     font-size: 16px;
 }
 
@@ -167,12 +177,12 @@
     width: 50%;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
     .input-container {
         flex-direction: column;
     }
     .super-btns {
-        margin-top: 5%;
+        margin-top: 15px;
     }
     .super-btns button {
         width: 33vw;
@@ -274,5 +284,33 @@
     background-color: #f7f7f7; /* Цвет фона для вариантов */
     color: #333; /* Цвет текста для вариантов */
   }
+
+
+.vertical-scroll-block2 {
+align-items: center;
+padding: 10px;
+margin: 10px;
+border-radius: 20px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+overflow-y: auto;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar {
+width: 10px;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar-thumb {
+background: linear-gradient(to bottom, #b7b7b7, #323232);
+border-radius: 5px;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar-track {
+background-color: #cac8c8;
+border-radius: 10px;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar-thumb:hover {
+background: linear-gradient(to bottom, #cccbcb, #6d6d6d);
+}
 
 

@@ -7,11 +7,14 @@ import './Main.css';
 
 
 const Main = () => {
-  const [cookies, setCookie, removeCookie] = useCookies(['AccessToken', 'LoadedMain']);
-  const [focus, setFocus] = useState(0);
+  const [cookies, setCookie] = useCookies(['AccessToken', 'LoadedMain']);
   const [sessionsData, setSessionsData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+
+  function removeCookie(cookieName) {
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  }
 
   useEffect(() => {
     var objects = document.getElementsByClassName('create-session-container-mega');

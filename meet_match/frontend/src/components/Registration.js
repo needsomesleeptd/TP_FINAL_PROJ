@@ -10,6 +10,7 @@ const Registration = ({ setShowLogin }) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [cookies, setCookie] = useCookies(['AccessToken', 'LoadedMain']);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     var objects = document.getElementsByClassName('container-auth');
@@ -41,15 +42,19 @@ const Registration = ({ setShowLogin }) => {
 
   const handleRegistration = async (event) => {
     event.preventDefault();
-    const data = await RegisterRequest(name, Number(age), gender, login, password);
-    if (data.status === "Error") {
-      alert('Неверные данные');
+    try {
+      const data = await RegisterRequest(name, Number(age), gender, login, password);
+      if (data.status === "Error") {
+        setErrorMessage('Пользователь с таким логином уже существует.');
+      }
+      else {
+        const data2 = await LoginRequest(login, password);
+        setCookie('AccessToken', data2.jwt, { path: '/' });
+        setCookie('UserId', data2.userID, { path: '/' });
+      } 
+    } catch (error) {
+      setErrorMessage('Непредвиденная ошибка. Попробуйте зайти попозже.');
     }
-    else {
-      const data2 = await LoginRequest(login, password);
-      setCookie('AccessToken', data2.jwt, { path: '/' });
-      setCookie('UserId', data2.userID, { path: '/' });
-    } 
   };
 
   const handleButtonClick = (button, event) => {
@@ -115,6 +120,9 @@ const Registration = ({ setShowLogin }) => {
             <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required />
             <i class='bx bxs-lock-alt' ></i>
           </div>
+          {errorMessage && (
+          <p class="error-message" style={{ color: 'red' }}>{errorMessage}</p>
+          )}
           <button type="submit" class="btn">Зарегистрироваться</button>
         </form>
         <div class="register-link">

@@ -8,6 +8,7 @@ const Login = ({ setShowLogin }) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [cookies, setCookie] = useCookies(['AccessToken', 'LoadedMain']);
+  const [errorMessage, setErrorMessage] = useState('');
   
   useEffect(() => {
     var objects = document.getElementsByClassName('container-auth');
@@ -39,14 +40,18 @@ const Login = ({ setShowLogin }) => {
 
   const handleLogin = async (event) => {
     event.preventDefault();
+    try {
       const data = await LoginRequest(login, password);
       if (data.status === "Error") {
-        alert('Неверные данные');
+        setErrorMessage('Неправильно указан логин и/или пароль');
       }
       else {
         setCookie('AccessToken', data.jwt, { path: '/' });
         setCookie('UserId', data.userID, { path: '/' });
       }
+    } catch (error) {
+      setErrorMessage('Непредвиденная ошибка. Попробуйте зайти попозже.');
+    }
   };
 
   const handleRegistrationRedirect = (event) => {
@@ -73,6 +78,9 @@ const Login = ({ setShowLogin }) => {
             <label></label>
             <a href="#">Забыли пароль?</a>
           </div> */}
+          {errorMessage && (
+          <p class="error-message" style={{ color: 'red' }}>{errorMessage}</p>
+          )}
           <button type="submit" class="btn">Войти</button>
         </form>
         <div class="register-link">

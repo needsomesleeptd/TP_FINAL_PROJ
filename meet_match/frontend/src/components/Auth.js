@@ -24,7 +24,7 @@ const RegisterRequest = async (name, age, gender, login, password) => {
         return await response.json();
   
       } catch (error) {
-          alert(error.message);
+        console(error.message);
       }
 }
 
@@ -49,7 +49,7 @@ const LoginRequest = async (login, password) => {
         return await response.json();
 
     } catch (error) {
-        alert(error.message);
+        console(error.message);
     }
 }
 

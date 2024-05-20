@@ -120,8 +120,8 @@ const Cards = (props) => {
   };
 
   const swipeCard = (direction) => {
-    cardsFeedback(cards[0].idx, direction);
-    console.log(cards[0].idx, direction);
+    cardsFeedback(cards[0].id, direction);
+    console.log(cards[0].id, direction);
     setCards(cards.slice(1));
     if (cards.length <= 1) {
       getCards();
