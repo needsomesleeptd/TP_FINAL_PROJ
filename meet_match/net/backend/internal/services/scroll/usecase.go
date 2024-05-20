@@ -118,6 +118,10 @@ func (u *useсase) IsMatchHappened(scrolled *models.FactScrolled) (bool, error) 
 		log.Printf("already liked value for %v is %v", likesForAll[0][i], alreadyLiked)
 
 		if isMatched && !alreadyLiked {
+			err := u.sessionServ.ChangeSessionStatus(scrolled.SessionId, models.Ended)
+			if err != nil {
+				return false, err
+			}
 			return true, nil
 		}
 	}

@@ -33,7 +33,7 @@ func (r *MatchRepoAdapter) GetUserMatchesBySession(sessionID uuid.UUID, userID u
 	return matchSlice, nil
 }
 
-func (r *MatchRepoAdapter) GetMatchesNotViewedByUser(sessionID uuid.UUID, userID uint64) ([]models.Match, error) {
+	func (r *MatchRepoAdapter) GetMatchesNotViewedByUser(sessionID uuid.UUID, userID uint64) ([]models.Match, error) {
 	var matchDaSlice []models_da.Match
 
 	err := r.db.Model(&models_da.Match{}).
