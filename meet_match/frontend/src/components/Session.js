@@ -215,7 +215,7 @@ const Session = (props) => {
 
   const sessionModify = async (name, description, date, count) => {
     try {
-      const response = await fetch('http://localhost/api/sessions/update/'+ sessionId, {
+      const response = await fetch('http://localhost:8080/sessions/update/'+ sessionId, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

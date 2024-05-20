@@ -90,7 +90,7 @@ const Cards = (props) => {
   
         const data = await response.json();
         if (data.is_matched) {
-          window.location.reload();
+          // window.location.reload();
         }
     
       } catch (error) {
@@ -120,8 +120,8 @@ const Cards = (props) => {
   };
 
   const swipeCard = (direction) => {
-    cardsFeedback(cards[0].id, direction);
-    console.log(cards[0].id, direction);
+    cardsFeedback(cards[0].idx, direction);
+    console.log(cards[0].idx, direction);
     setCards(cards.slice(1));
     if (cards.length <= 1) {
       getCards();
