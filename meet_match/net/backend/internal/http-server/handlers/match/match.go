@@ -28,7 +28,7 @@ func GetMatchedCards(matchServ match_service.IMatchService) http.HandlerFunc {
 		}
 		cardsMatched, err := matchServ.GetMatchedCardsBySession(req.SessionID)
 		if err != nil {
-			render.JSON(w, r, err.Error())
+			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
 

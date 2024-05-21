@@ -10,6 +10,7 @@ import (
 	"test_backend_frontend/internal/http-server/handlers/cards"
 	feedback_handler "test_backend_frontend/internal/http-server/handlers/feedback"
 	match_handler "test_backend_frontend/internal/http-server/handlers/match"
+	scroll_stats_handler "test_backend_frontend/internal/http-server/handlers/scrollStats"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
 	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/models/models_da"
@@ -22,6 +23,8 @@ import (
 	match_service "test_backend_frontend/internal/services/match"
 	match_repo_adap "test_backend_frontend/internal/services/match/matchRepo/matchRepoAd"
 	"test_backend_frontend/internal/services/scroll"
+	scroll_stats_serv "test_backend_frontend/internal/services/scrollStats"
+	scroll_stats_repo "test_backend_frontend/internal/services/scrollStats/scrollStatsRepo"
 	sessions "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
 	"time"
@@ -94,6 +97,10 @@ func main() {
 	feedbackRepo := feedback_repo.NewFeedbackRepo(db)
 	feedbackService := feedback_service.NewFeedbackService(feedbackRepo)
 
+	//	scroll stats
+	scrollStatsRepo := scroll_stats_repo.NewScrollRepository(db)
+	scrollStatsServ := scroll_stats_serv.NewScrolledStatsService(scrollStatsRepo, cardRepo, sessionManager)
+
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
@@ -131,6 +138,9 @@ func main() {
 
 		//feedback
 		r.Post("/feedback/has_gone", feedback_handler.SaveFeedback(feedbackService))
+
+		//scroll stats
+		r.Get("/user/stats", scroll_stats_handler.GetUserStats(scrollStatsServ))
 
 	})
 
