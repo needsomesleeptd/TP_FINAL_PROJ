@@ -257,7 +257,7 @@ func SessionContinueScrolling(sessionManager *session.SessionManager) http.Handl
 			return
 		}
 		if session.Status == models.Ended {
-			err = sessionManager.ChangeSessionStatus(req.SessionID, models.Scrolling)
+			err = sessionManager.ChangeSessionStatus(req.SessionID, models.ScrollingWasMatched)
 			if err != nil {
 				render.JSON(w, r, response.Error(err.Error()))
 				return
