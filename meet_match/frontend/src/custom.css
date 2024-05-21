@@ -31,7 +31,6 @@ header {
 
 .container {
   flex: 1 1 auto;
-  display: grid;
   padding: 0;
 }
 
@@ -41,6 +40,12 @@ header {
   text-align: center;
   width: 300px;
   height: auto;
+}
+
+@media (max-width: 600px) {
+  .logo {
+    width: 200px;
+  }
 }
 
 .loadedMain {

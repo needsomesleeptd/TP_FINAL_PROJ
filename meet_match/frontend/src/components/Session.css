@@ -177,7 +177,7 @@
     width: 50%;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
     .input-container {
         flex-direction: column;
     }
@@ -186,7 +186,6 @@
     }
     .super-btns button {
         width: 33vw;
-        margin-right: 10px;
     }
 }
 

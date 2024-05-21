@@ -59,7 +59,7 @@ const Main = () => {
 
   const UserInfoRequest = async () => {
     try {
-        const response = await fetch('http://localhost:8080/sessions/getUser', {
+        const response = await fetch('/api/sessions/getUser', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ const Main = () => {
 
   const createSession = async (title, desc, date, count) => {
     try {
-      const response = await fetch('http://localhost:8080/sessions', {
+      const response = await fetch('/api/sessions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ const Main = () => {
   const leaveSession = async (e, sessionId) => {
     e.stopPropagation();
     try {
-        const response = await fetch(`http://localhost:8080/sessions/${sessionId}`, {
+        const response = await fetch(`/api/sessions/${sessionId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ const Main = () => {
       <button className="profile-sessions session" onClick={() => joinSession(id)}>
         <div className="profile-posttitle">
           <h3>{title}</h3>
-          <p>{description}</p>
+          {description && <p>{description}</p>}
         </div>
         <div>
           <p>{`Участники: ${participants}/${maxParticipants}`}</p>
@@ -190,7 +190,7 @@ const Main = () => {
 
   const VerticalScrollBlock = ({ children }) => {
     return (
-      <div className="vertical-scroll-block profile-sessions" style={{height: window.innerHeight * 0.5}}>
+      <div className="vertical-scroll-block profile-sessions">
         <div className="inner-scroll-content">{children}</div>
       </div>
     );
@@ -225,7 +225,7 @@ const Main = () => {
           ))}
         </VerticalScrollBlock>
         ) : (
-          <div className="vertical-scroll-block profile-sessions" style={{height: window.innerHeight * 0.5, display: "flex"}}>
+          <div className="vertical-scroll-block profile-sessions" style={{display: "flex"}}>
             <div className="inner-scroll-content" style={{color: 'rgba(255, 255, 255, 0.7)', fontWeight: 'bold', }}>Пусто</div>
           </div>
         )}

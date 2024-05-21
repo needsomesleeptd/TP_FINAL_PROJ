@@ -124,13 +124,13 @@
 }
 
 .profile-sessions .session {
+  position: relative;
   width: 100%;
-  height: 150px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 25px;
+  padding: 20px 60px;
   border-radius: 30px;
   background-color: #323030;
   color:rgb(255, 255, 255);
@@ -210,6 +210,21 @@
   border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  height: 400px;
+}
+
+@media (max-width: 600px) {
+  .vertical-scroll-block {
+    height: 460px;
+  }
+
+  .profile-sessions .session {
+    flex-direction: column;
+  }
+
+  .profile-posttitle h3 {
+    margin: 0;
+  }
 }
 
 .vertical-scroll-block::-webkit-scrollbar {
@@ -232,14 +247,18 @@
 
 
 .leave-button {
+  position: absolute;
   width: 50px;
   height: 50px;
   border-radius: 30px;
-  background-color: #a3a7a9;
+  background-color: #cf4f24;
   color: white;
   font-size: 20px;
   border: none;
   cursor: pointer;
+  right: 0;
+  top: 0;
+  transform: translateX(10px) translateY(-10px);
 }
 
 .leave-button:hover {
