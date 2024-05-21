@@ -108,6 +108,9 @@ services:
     ports:
       - "5000:5000"
     container_name: python-flask-app
+    depends_on: # if doesnt works delete
+      - postgres # if doesnt works delete
+    restart: always # if doesnt works delete
     #networks:
      # - postgres
   
