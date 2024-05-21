@@ -5,6 +5,7 @@ import (
 	"strings"
 	"test_backend_frontend/internal/lib/api/response"
 	resp "test_backend_frontend/internal/lib/api/response"
+	"test_backend_frontend/internal/middleware/auth_middleware"
 	"test_backend_frontend/internal/models"
 	session "test_backend_frontend/internal/sessions"
 	"test_backend_frontend/pkg/auth_utils"
@@ -206,6 +207,15 @@ func SessionModifyuser(sessionManager *session.SessionManager) http.HandlerFunc 
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.JSON(w, r, response.Error(err.Error()))
+			return
+		}
+		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64) //terrible idea but i have no time
+		if !ok {
+			render.JSON(w, r, response.Error("unable to fetch userID to get feedback"))
+			return
+		}
+		if req.UserIDToModify != userID {
+			render.JSON(w, r, response.Error("only user himself can change his data"))
 			return
 		}
 
