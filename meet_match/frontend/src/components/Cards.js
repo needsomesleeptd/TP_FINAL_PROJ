@@ -218,7 +218,7 @@ const Cards = (props) => {
       {windowWidth <= 700 && (<p>Листни карточку вправо, если место тебе понравилось, в противном случае - влево.</p>)}
       </div>
       <div style={{height: "80vh", display: "flex", alignItems: "center", justifyContent: "center"}}>
-        {windowWidth > 700 && (
+        {windowWidth > 700 && cards.length > 0 && (
           <>
         <button onClick={() => swipeCard('left')} className="profile-button" style={{marginRight: "200px", marginBottom: "200px"}}>
           Не нравится

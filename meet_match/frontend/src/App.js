@@ -8,6 +8,8 @@ import Main from './components/Main'
 import Session from './components/Session'
 import Cards from './components/Cards'
 import Match from './components/Match'
+import About from './components/About';
+import Profile from './components/Profile';
 import NotFound from './components/NotFound'
 import './custom.css'
 import { UserProvider, UserContext } from './components/MyContext';
@@ -89,6 +91,14 @@ function App() {
         <Route
           path="/"
           element={requireAuth(<Main />)}
+        />
+        <Route
+          path="/about"
+          element={requireAuth(<About />)}
+        />
+        <Route
+          path="/profile"
+          element={requireAuth(<Profile />)}
         />
         <Route
           path="/auth"
