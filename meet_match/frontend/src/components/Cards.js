@@ -15,6 +15,7 @@ const Cards = (props) => {
   const { id } = useParams();
   const [cookies, setCookie] = useCookies(['AccessToken', 'UserId', 'LoadedCards']);
   const [cards, setCards] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(-1);
   const sessionId = id;
 
   const cardsFeedback = async (idx, direction) => {
@@ -90,7 +91,7 @@ const Cards = (props) => {
   
         const data = await response.json();
         if (data.is_matched) {
-          // window.location.reload();
+          window.location.reload();
         }
     
       } catch (error) {
@@ -99,7 +100,7 @@ const Cards = (props) => {
     };
 
     getCards();
-    const pollingInterval = setInterval(cardsFeedback, 3000);
+    const pollingInterval = setInterval(cardsFeedback, 1000);
     return () => clearInterval(pollingInterval);
    }, [cookies, sessionId]);
 
@@ -110,18 +111,17 @@ const Cards = (props) => {
   };
 
   const handleDragEnd = () => {
-    setXOffset(0);
-
     if (xOffset < -200) {
       swipeCard('left');
     } else if (xOffset > 200) {
       swipeCard('right');
     }
+    setXOffset(0);
   };
 
   const swipeCard = (direction) => {
     cardsFeedback(cards[0].idx, direction);
-    console.log(cards[0].idx, direction);
+    console.log(cards[0].idx, cards[0].title, direction);
     setCards(cards.slice(1));
     if (cards.length <= 1) {
       getCards();
@@ -144,11 +144,11 @@ const Cards = (props) => {
       const img = new Image();
       img.src = item.getAttribute('data-src');
       img.onload = () => {
-        setCookie("LoadedCards", true);
+        sessionStorage.setItem("LoadedCards", true);
         item.style.backgroundImage = `url(${item.getAttribute('data-src')})`;
       };
       img.onerror = () => {
-        setCookie("LoadedCards", false);
+        sessionStorage.setItem("LoadedCards", false);
         console.error(`Error loading image: ${item.getAttribute('data-src')}`);
       };
     });
@@ -166,8 +166,19 @@ const Cards = (props) => {
     });
   }, []);
 
+  const handleSwipeOrClick = (index) => {
+    if (xOffset === 0) {
+      handleCardClick(index);
+    }
+  };
+
+  const handleCardClick = (index) => {
+    console.log(index);
+    setSelectedCard(selectedCard === index ? -1 : index);
+  };
+
   return (
-    <div className={cookies.LoadedMain ? "cards-body loadedCards" : "cards-body"} data-src="/bg_cards.png">
+    <div className={sessionStorage.getItem("LoadedCards")  ? "cards-body loadedCards" : "cards-body"} data-src="/bg_cards.png">
       <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <ProfileHeader />
       <div class="cards-desc">
@@ -177,6 +188,8 @@ const Cards = (props) => {
       {cards.slice().reverse().map((card, index) => (
         <motion.div
           key={index}
+          onClick={() => handleSwipeOrClick(index)}
+          animate={{ scale: selectedCard === index ? 1.15 : 1 }}
           drag="x"
           dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
           dragElastic={0.8}
@@ -190,11 +203,29 @@ const Cards = (props) => {
           transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
           style={{ boxShadow: xOffset < -30 ? "0 0 20px red" : xOffset > 30 ? "0 0 20px green" : "none" }}
         >
-          <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", }}>
+          <div style={{display: "flex", flexDirection: "column", justifyContent: "space-between", }}>
+            {selectedCard === index ? (
+              <>
+                <p style={{textAlign: "center", margin: "20px 10px", fontSize: "16px", fontWeight: "bold" }}>{card.title}</p>
+                <p className="cards-descr" dangerouslySetInnerHTML={{ __html: card.description }} />
+                {card.age_restriction && <p style={{marginLeft: "10px", textAlign: "left", marginBottom: "10px", fontSize: "14px" }}>Возраст: {card.age_restriction}</p>}
+                {card.cost && <p style={{marginLeft: "10px", textAlign: "left", marginBottom: "10px", fontSize: "14px" }}>Цена: {card.cost}</p>}
+                {card.timetable && <p style={{marginLeft: "10px", textAlign: "left", marginBottom: "10px", fontSize: "14px" }}>Расписание: {card.timetable}</p>}
+                {card.subway && <p style={{marginLeft: "10px", textAlign: "left", marginBottom: "10px", fontSize: "14px" }}>Метро: {card.subway}</p>}
+                {card.site_url && <p style={{marginLeft: "10px",  textAlign: "left", marginBottom: "10px", fontSize: "12px" }}>Сайт: <a href={card.site_url} target="_blank" rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                style={{color: "white"}}
+                >*Кликай*</a></p>}
+              </>
+            ) :
+            <>
             <img src={card.image} alt="" class="cards-img" />
-            <p style={{textAlign: "center", margin: "10px", fontSize: "13px" }}>{card.title}</p>
-            <p style={{textAlign: "center", margin: "5px", fontSize: "10px" }}>{card.description.substring(3, card.description.length - 5)}</p>
-            {card.subway && <p style={{textAlign: "center", marginBottom: "10px", fontSize: "10px" }}>Метро: {card.subway}</p>}
+            <p style={{textAlign: "center", margin: "10px", fontSize: "16px" }}>{card.title}</p>
+            <p style={{textAlign: "center", margin: "10px", fontSize: "12px" }}>*Нажмите, чтобы узнать подробнее*</p>
+            </>
+            }
           </div>
         </motion.div>
       ))}

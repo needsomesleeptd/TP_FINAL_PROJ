@@ -204,7 +204,8 @@
 .tag {
     display: flex;
     align-items: center;
-    background-color: #36981b;
+    transition: background-color 0.3s ease;
+    background: linear-gradient(to bottom, #5bd66f, #098035);
     border-radius: 4px;
     height: 3%;
     margin-right: 10px;
@@ -218,7 +219,7 @@
     border: none;
     background-color: transparent;
     cursor: pointer;
-    color: #999;
+    color: #847676;
     margin-left: -10px;
     padding: 6px 14px;
 }

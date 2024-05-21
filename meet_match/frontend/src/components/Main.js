@@ -22,11 +22,11 @@ const Main = () => {
       const img = new Image();
       img.src = item.getAttribute('data-src');
       img.onload = () => {
-        setCookie("LoadedMain", true);
+        sessionStorage.setItem("LoadedMain", true);
         item.style.backgroundImage = `url(${item.getAttribute('data-src')})`;
       };
       img.onerror = () => {
-        setCookie("LoadedMain", false);
+        sessionStorage.setItem("LoadedMain", false);
         console.error(`Error loading image: ${item.getAttribute('data-src')}`);
       };
     });
@@ -202,7 +202,7 @@ const Main = () => {
   };
 
   return (
-    <div className={cookies.LoadedMain ? "create-session-container-mega loadedMain" : "create-session-container-mega"} data-src="/bg_main.png">
+    <div className={sessionStorage.getItem("LoadedMain") ? "create-session-container-mega loadedMain" : "create-session-container-mega"} data-src="/bg_main.png">
       <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <div className="create-session-container">
       <ProfileHeader />

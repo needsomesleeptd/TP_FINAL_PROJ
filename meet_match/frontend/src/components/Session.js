@@ -301,11 +301,11 @@ const Session = (props) => {
       const img = new Image();
       img.src = item.getAttribute('data-src');
       img.onload = () => {
-        setCookie("LoadedSession", true);
+        sessionStorage.setItem("LoadedSession", true);
         item.style.backgroundImage = `url(${item.getAttribute('data-src')})`;
       };
       img.onerror = () => {
-        setCookie("LoadedSession", false);
+        sessionStorage.setItem("LoadedSession", false);
         console.error(`Error loading image: ${item.getAttribute('data-src')}`);
       };
     });
@@ -339,7 +339,7 @@ const Session = (props) => {
   };
 
   return (
-    <div className={cookies.LoadedMain ? "precontainer loadedSession" : "precontainer"} data-src="/bg_session.png">
+    <div className={sessionStorage.getItem("LoadedSession") ? "precontainer loadedSession" : "precontainer"} data-src="/bg_session.png">
       <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <ProfileHeader />
       <div class="container vertical-scroll-block2" style={{ height: "15vh", width: "80%" }}>
