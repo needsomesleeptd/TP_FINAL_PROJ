@@ -44,8 +44,7 @@ def init_logging():
     """
     log_format = f"[%(asctime)s] [ Python server ] [%(levelname)s]:%(name)s:%(message)s"
     formatters = {"basic": {"format": log_format}}
-    handlers = {"stdout": {
-        "class": "logging.StreamHandler", "formatter": "basic"}}
+    handlers = {"stdout": {"class": "logging.StreamHandler", "formatter": "basic"}}
     level = "INFO"
     handlers_names = ["stdout"]
     loggers = {
@@ -140,31 +139,32 @@ class DatabaseManager:
 
     def parse_timetable(self, timetable: str) -> Dict[str, str]:
         days_map = {
-            'пн': 'Monday',
-            'вт': 'Tuesday',
-            'ср': 'Wednesday',
-            'чт': 'Thursday',
-            'пт': 'Friday',
-            'сб': 'Saturday',
-            'вс': 'Sunday',
-            'ежедневно': 'Monday-Sunday'
+            "пн": "Monday",
+            "вт": "Tuesday",
+            "ср": "Wednesday",
+            "чт": "Thursday",
+            "пт": "Friday",
+            "сб": "Saturday",
+            "вс": "Sunday",
+            "ежедневно": "Monday-Sunday",
         }
         timetable_dict = {}
-        parts = timetable.split(',')
+        parts = timetable.split(",")
         for part in parts:
             try:
-                days_part, *hours_part = part.strip().split(' ')
-                days = days_part.split('–')
-                hours = ' '.join(hours_part).strip()
+                days_part, *hours_part = part.strip().split(" ")
+                days = days_part.split("–")
+                hours = " ".join(hours_part).strip()
                 if len(days) == 2:
                     start_day, end_day = days_map[days[0]], days_map[days[1]]
                     current_day = start_day
                     while current_day != end_day:
                         timetable_dict[current_day] = hours
                         current_day = list(days_map.values())[
-                            (list(days_map.values()).index(current_day) + 1) % 7]
+                            (list(days_map.values()).index(current_day) + 1) % 7
+                        ]
                     timetable_dict[end_day] = hours
-                elif days_part == 'ежедневно':
+                elif days_part == "ежедневно":
                     for day in days_map.values():
                         timetable_dict[day] = hours
                 else:
@@ -183,11 +183,12 @@ class DatabaseManager:
             try:
                 places_info[place_id] = {
                     "categories": ast.literal_eval(categories) if categories else [],
-                    "working_hours": self.parse_timetable(working_hours) if working_hours else {}
+                    "working_hours": (
+                        self.parse_timetable(working_hours) if working_hours else {}
+                    ),
                 }
             except (ValueError, SyntaxError) as e:
-                print(
-                    f"Error parsing place info for place_id '{place_id}': {e}")
+                print(f"Error parsing place info for place_id '{place_id}': {e}")
                 return {}
         return places_info
 
@@ -349,8 +350,7 @@ class RecommendationSystem:
         similarities = self._cosine_similarity(
             query_embedding, embedding_matrix
         ).squeeze(0)
-        sorted_scores, sorted_indices = torch.sort(
-            similarities, descending=True)
+        sorted_scores, sorted_indices = torch.sort(similarities, descending=True)
 
         top_n_place_ids = []
         idx_iter = 0
@@ -391,10 +391,8 @@ class RecommendationSystem:
             return []
 
         # Получение ID мест, которые пользователь лайкнул и дизлайкнул в текущей сессии
-        liked_place_ids = [idx for (idx, is_liked)
-                           in swiped_places if is_liked == 1]
-        disliked_place_ids = [
-            idx for (idx, is_liked) in swiped_places if is_liked == 0]
+        liked_place_ids = [idx for (idx, is_liked) in swiped_places if is_liked == 1]
+        disliked_place_ids = [idx for (idx, is_liked) in swiped_places if is_liked == 0]
 
         # Извлечение эмбеддингов для лайкнутых мест
         if liked_place_ids:
@@ -425,8 +423,7 @@ class RecommendationSystem:
         place_ids = list(self.embed_dict.keys())
 
         # Расчёт косинусного сходства для лайкнутых и дизлайкнутых мест
-        liked_similarities = self._cosine_similarity(
-            liked_embeddings, all_embeddings)
+        liked_similarities = self._cosine_similarity(liked_embeddings, all_embeddings)
         disliked_similarities = self._cosine_similarity(
             disliked_embeddings, all_embeddings
         )
@@ -544,6 +541,18 @@ class RecommendationSystem:
 
         return dict(zip(rec_sources.keys(), counts))
 
+    def _get_group_liked_unseen(self, swiped_places, used_idx):
+        """
+        Выделяет из скроллов места, которые лайкнуты, но не входят в список used_idx
+        """
+        group_liked_place_ids = [
+            idx
+            for (idx, is_liked) in swiped_places
+            if is_liked == 1 and idx not in used_idx
+        ]
+
+        return group_liked_place_ids
+
     def get_rec(
         self,
         user_id: int,
@@ -576,15 +585,17 @@ class RecommendationSystem:
         swiped_places_count = len(swipe_user_hist)
 
         rec_sources = {
-            'query_based': 0.4,  # поначалу только те, что по описанию
-            'user_history_based': 0.2 if swiped_places_count >= 10 else 0.0,
-            'group_based': 0.3 if swiped_places_count >= 10 else 0.0,
-            'random': 0.05 if swiped_places_count >= 20 else 0.0
+            "query_based": 0.4,  # поначалу только те, что по описанию
+            "user_history_based": 0.2 if swiped_places_count >= 10 else 0.0,
+            "group_based": 0.4 if swiped_places_count >= 10 else 0.0,
+            "random": 0.05 if swiped_places_count >= 20 else 0.0,
         }
         rec_plan = self._plan_recommendations(num_idx, rec_sources)
 
         used_indices = swipe_user_hist.copy()
         used_indices = [i[0] for i in used_indices]
+
+        log.info(f"{used_indices=}")
 
         query_rec_list = self._get_rec_on_query(
             query, used_indices, criteria, rec_plan["query_based"]
@@ -603,23 +614,32 @@ class RecommendationSystem:
             user_id, session_id, for_group=True
         )
 
-        rec_group_hist = self._generate_group_rec_on_likes(
-            user_id,
-            session_id,
-            swipe_group_hist,
-            used_indices,
-            criteria,
-            rec_plan["group_based"],
-        )
+        rec_group_hist = []
+
+        other_likes = self._get_group_liked_unseen(swipe_group_hist, used_indices)
+        rec_group_hist += other_likes[: min(rec_plan["group_based"], len(other_likes))]
+
+        if len(rec_group_hist) < rec_plan["group_based"]:
+            rec_group_hist_add = self._generate_group_rec_on_likes(
+                user_id,
+                session_id,
+                swipe_group_hist,
+                used_indices,
+                criteria,
+                rec_plan["group_based"] - len(rec_group_hist),
+            )
+            rec_group_hist += rec_group_hist_add
+
         used_indices = used_indices + rec_group_hist
 
         random_rec = self._get_random_places(
-            list(self.embed_dict.keys()
-                 ), used_indices, criteria, rec_plan["random"]
+            list(self.embed_dict.keys()), used_indices, criteria, rec_plan["random"]
         )
         used_indices = used_indices + random_rec
 
-        final_recomendation = query_rec_list + rec_group_hist + random_rec
+        final_recomendation = (
+            query_rec_list + rec_group_hist + random_rec + rec_user_hist
+        )
 
         if len(final_recomendation) < num_idx:
             additional_needed = num_idx - len(final_recomendation)
@@ -627,6 +647,10 @@ class RecommendationSystem:
                 query, used_indices, {}, additional_needed
             )
             final_recomendation.extend(additional_recommendations)
+
+        log.info(
+            f"{query_rec_list=}, {rec_group_hist=}, {random_rec=}, {rec_user_hist=}"
+        )
 
         random.shuffle(final_recomendation)
 
