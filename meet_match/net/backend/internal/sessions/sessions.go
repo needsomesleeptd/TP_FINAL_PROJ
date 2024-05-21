@@ -277,6 +277,10 @@ func (s *SessionManager) UpdateSession(sessionChanges Session, sessionID uuid.UU
 	session.SessionName = sessionChanges.SessionName
 	marhsalledData, err := json.Marshal(session)
 
+	if session.MaxPeople <= len(session.Users) && session.Status == models.Waiting {
+		session.Status = models.Scrolling
+	}
+
 	if err != nil {
 		return fmt.Errorf("error in marshalling updated changes: %w", err)
 	}

@@ -25,6 +25,7 @@ const (
 	Waiting SessionStatus = iota // Role check depends on the order
 	Scrolling
 	Ended
+	ScrollingWasMatched
 )
 
 func NewUserReq(id uint64, name string, text string) *UserReq {
