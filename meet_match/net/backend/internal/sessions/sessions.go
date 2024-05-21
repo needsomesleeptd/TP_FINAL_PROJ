@@ -275,11 +275,15 @@ func (s *SessionManager) UpdateSession(sessionChanges Session, sessionID uuid.UU
 	session.MaxPeople = sessionChanges.MaxPeople
 	session.TimeEnds = sessionChanges.TimeEnds
 	session.SessionName = sessionChanges.SessionName
-	marhsalledData, err := json.Marshal(session)
 
-	if session.MaxPeople <= len(session.Users) && session.Status == models.Waiting {
+	someoneNotEnteredReq := slices.ContainsFunc(session.Users, func(userInSession models.UserReq) bool {
+		return userInSession.Request == ""
+	})
+	if len(session.Users) >= session.MaxPeople && !someoneNotEnteredReq && session.Status == models.Waiting {
 		session.Status = models.Scrolling
 	}
+
+	marhsalledData, err := json.Marshal(session)
 
 	if err != nil {
 		return fmt.Errorf("error in marshalling updated changes: %w", err)
