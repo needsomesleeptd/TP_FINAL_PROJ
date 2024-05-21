@@ -171,12 +171,6 @@ const Session = (props) => {
           closeModal();
         }
 
-        if (data.status === 1)
-        {
-          console.log("fff");
-          window.location.reload();
-          // navigate(`/session/${sessionId}/`);
-        }
       } catch (error) {
         console.error('Error creating session:', error);
       }
@@ -224,7 +218,7 @@ const Session = (props) => {
           body: JSON.stringify({
             'sessionID': sessionId,
             "sessionName": name,
-            "sessionPeopleCap": count,
+            "sessionPeopleCap": count < participants.length ? participants.length : count,
             "description": description,
             "timeEnds": `${date}T23:59:00Z`
           })
@@ -436,7 +430,7 @@ const Session = (props) => {
         )}
       </div>
 
-      <ConnectModal showModal={showModal} sessionName={sessionName} sessionDesc={sessionDesc} handleUpload={handleSubmit} />
+      <ConnectModal showModal={showModal} sessionName={sessionName} sessionDesc={sessionDesc} sessionInfo={participants.length >= maxParticipants ? "Комната уже заполнена" : ""} handleUpload={handleSubmit} />
       <InviteModal showModal={showInviteModal} handleUpload={handleSubmit2} />
       { sessionName && (
         <CreateModal showModal={showEditModal} closeModal={closeEditModal} handleUpload={handleEdit}

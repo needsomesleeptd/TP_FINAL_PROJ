@@ -72,6 +72,7 @@ const CreateModal = ({ showModal, closeModal, handleUpload, modalName="Созд�
               onChange={(e) => handleTitleChange(e)}
               placeholder="Название"
               required
+              maxlength="100"
             />
             <input
               className="session-input"
@@ -79,6 +80,7 @@ const CreateModal = ({ showModal, closeModal, handleUpload, modalName="Созд�
               value={description}
               onChange={(e) => handleDescriptionChange(e)}
               placeholder="Сообщение для участников"
+              maxlength="100"
             />
             <div  style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: "space-between" }}>
               <p>Дата встречи:</p>

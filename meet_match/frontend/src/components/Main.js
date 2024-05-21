@@ -220,7 +220,7 @@ const Main = () => {
               participants={session.users.length}
               date={session.timeEnds.split('T')[0]}
               status={session.status === 0 ? "Ожидание участников" :
-                  (session.status == 1 ? "Просмотр карточек" : "Завершен")}
+                  (session.status == 1 ? "Просмотр карточек" : "Места найдены")}
             />
           ))}
         </VerticalScrollBlock>

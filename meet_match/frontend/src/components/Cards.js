@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { NavLink } from 'react-router-dom';
+import { UserContext } from './MyContext';
 import './Cards.css'
 
 const swipeVariants = {
@@ -16,6 +17,8 @@ const Cards = (props) => {
   const [cookies, setCookie] = useCookies(['AccessToken', 'UserId', 'LoadedCards']);
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(-1);
+  const {setLetsSwipe} = useContext(UserContext);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const sessionId = id;
 
   const cardsFeedback = async (idx, direction) => {
@@ -91,7 +94,7 @@ const Cards = (props) => {
   
         const data = await response.json();
         if (data.is_matched) {
-          window.location.reload();
+          setLetsSwipe(false);
         }
     
       } catch (error) {
@@ -99,7 +102,25 @@ const Cards = (props) => {
       }
     };
 
+    const firstCardsFeedback = async () => {
+      try {
+        const response = await fetch(`/api/sessions/${sessionId}/check_match`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${cookies.AccessToken}`
+            },
+            body: JSON.stringify({
+              'sessionID': sessionId
+            })
+        });
+      } catch (error) {
+        console.error('Error creating session:', error);
+      }
+    };
+
     getCards();
+    firstCardsFeedback();
     const pollingInterval = setInterval(cardsFeedback, 1000);
     return () => clearInterval(pollingInterval);
    }, [cookies, sessionId]);
@@ -177,20 +198,41 @@ const Cards = (props) => {
     setSelectedCard(selectedCard === index ? -1 : index);
   };
 
+  const handleResize = () => {
+    setWindowWidth(window.innerWidth);
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  
   return (
-    <div className={sessionStorage.getItem("LoadedCards")  ? "cards-body loadedCards" : "cards-body"} data-src="/bg_cards.png">
+    <div className={sessionStorage.getItem("LoadedCards")  ? "cards-body loadedCards" : "cards-body"} data-src="/bg_cards.png" >
       <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <ProfileHeader />
       <div class="cards-desc">
-        <p>Листни карточку вправо, если место тебе понравилось, в противном случае - влево.</p>
+      {windowWidth <= 700 && (<p>Листни карточку вправо, если место тебе понравилось, в противном случае - влево.</p>)}
       </div>
       <div style={{height: "80vh", display: "flex", alignItems: "center", justifyContent: "center"}}>
+        {windowWidth > 700 && (
+          <>
+        <button onClick={() => swipeCard('left')} className="profile-button" style={{marginRight: "200px", marginBottom: "200px"}}>
+          Не нравится
+        </button>
+        <button onClick={() => swipeCard('right')} className="profile-button" style={{marginLeft: "200px", marginBottom: "200px"}}>
+          Нравится
+        </button> </>)
+        }
       {cards.slice().reverse().map((card, index) => (
         <motion.div
           key={index}
           onClick={() => handleSwipeOrClick(index)}
           animate={{ scale: selectedCard === index ? 1.15 : 1 }}
-          drag="x"
+          drag={windowWidth > 700 ? false : "x"}
           dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
           dragElastic={0.8}
           dragMomentum={false}
@@ -199,7 +241,7 @@ const Cards = (props) => {
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           class="cards-card"
-          whileTap={{ scale: 1.05 }}
+          whileTap={() => ({ scale: windowWidth > 700 ? 1.00 : 1.05 })}
           transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
           style={{ boxShadow: xOffset < -30 ? "0 0 20px red" : xOffset > 30 ? "0 0 20px green" : "none" }}
         >
