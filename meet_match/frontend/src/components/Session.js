@@ -113,7 +113,7 @@ const Session = (props) => {
   useEffect(() => {
     const getSession = async () => {
       try {
-        const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+        const response = await fetch('/api/sessions/'+ sessionId, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${cookies.AccessToken}`
@@ -158,9 +158,9 @@ const Session = (props) => {
         
         if (participant && participant.Request !== '') {
           setInputValue(participant.Request);
+          setSelectedTags(participant.Categories.map(value => tagList.find(item => item.value === value)));
           setReady(true);
         }
-
 
         if (data.users.length > 0 && !participant)
         {
@@ -191,7 +191,7 @@ const Session = (props) => {
 
   const patchSession = async (id) => {
     try {
-      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+      const response = await fetch('/api/sessions/'+ sessionId, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -215,7 +215,7 @@ const Session = (props) => {
 
   const sessionModify = async (name, description, date, count) => {
     try {
-      const response = await fetch('http://localhost:8080/sessions/update/'+ sessionId, {
+      const response = await fetch('/api/sessions/update/'+ sessionId, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -240,7 +240,7 @@ const Session = (props) => {
   const putSession = async (id) => {
     const participant = participants.find(participant => participant.ID === Number(cookies.UserId));
     try {
-      const response = await fetch('http://localhost:8080/sessions/'+ sessionId, {
+      const response = await fetch('/api/sessions/'+ sessionId, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -342,7 +342,7 @@ const Session = (props) => {
     <div className={sessionStorage.getItem("LoadedSession") ? "precontainer loadedSession" : "precontainer"} data-src="/bg_session.png">
       <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <ProfileHeader />
-      <div class="container vertical-scroll-block2" style={{ height: "15vh", width: "80%" }}>
+      <div class="container vertical-scroll-block2" style={{ height: "15vh", width: "95%", maxWidth: "800px" }}>
         <div class="container-info">
           <h2>{sessionName}</h2>
           {sessionDesc.length == '' ? null : <p>{sessionDesc}</p>}

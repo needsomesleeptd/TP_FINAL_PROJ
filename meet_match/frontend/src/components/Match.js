@@ -16,7 +16,7 @@ const Match = (props) => {
  useEffect(() => {
   const cardsFeedback = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/sessions/${sessionId}/matches`, {
+      const response = await fetch(`/api/sessions/${sessionId}/matches`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const Match = (props) => {
 
  const cardsContinue = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/sessions/${sessionId}/continueScrolling`, {
+    const response = await fetch(`/api/sessions/${sessionId}/continueScrolling`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
