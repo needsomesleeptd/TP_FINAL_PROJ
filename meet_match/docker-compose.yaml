@@ -117,6 +117,9 @@ services:
     ports:
       - "3000:3000"
     container_name: frontend
+    volumes:
+      - "./frontend:/frontend"
+      - /frontend/node_modules
    # networks:
    #   - postgres
 

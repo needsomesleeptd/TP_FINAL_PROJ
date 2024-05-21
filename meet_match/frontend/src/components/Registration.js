@@ -9,19 +9,52 @@ const Registration = ({ setShowLogin }) => {
   const [gender, setGender] = useState(true);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [cookies, setCookie] = useCookies(['AccessToken']);
-  
+  const [cookies, setCookie] = useCookies(['AccessToken', 'LoadedMain']);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    var objects = document.getElementsByClassName('container-auth');
+    Array.from(objects).map((item) => {
+      const img = new Image();
+      img.src = item.getAttribute('data-src');
+      img.onload = () => {
+        sessionStorage.setItem("LoadedMain", true);
+        item.style.backgroundImage = `url(${item.getAttribute('data-src')})`;
+      };
+      img.onerror = () => {
+        sessionStorage.setItem("LoadedMain", false);
+        console.error(`Error loading image: ${item.getAttribute('data-src')}`);
+      };
+    });
+
+    objects = document.getElementsByClassName('logo');
+    Array.from(objects).map((item) => {
+      const img = new Image();
+      img.src = item.getAttribute('data-src');
+      img.onload = () => {
+        item.src = item.getAttribute('data-src');
+      };
+      img.onerror = () => {
+        console.error(`Error loading image: ${item.getAttribute('data-src')}`);
+      };
+    });
+  }, []);
+
   const handleRegistration = async (event) => {
     event.preventDefault();
-    const data = await RegisterRequest(name, Number(age), gender, login, password);
-    if (data.status === "Error") {
-      alert('Неверные данные');
+    try {
+      const data = await RegisterRequest(name, Number(age), gender, login, password);
+      if (data.status === "Error") {
+        setErrorMessage('Пользователь с таким логином уже существует.');
+      }
+      else {
+        const data2 = await LoginRequest(login, password);
+        setCookie('AccessToken', data2.jwt, { path: '/' });
+        setCookie('UserId', data2.userID, { path: '/' });
+      } 
+    } catch (error) {
+      setErrorMessage('Непредвиденная ошибка. Попробуйте зайти попозже.');
     }
-    else {
-      const data2 = await LoginRequest(login, password);
-      setCookie('AccessToken', data2.jwt, { path: '/' });
-      setCookie('UserId', data2.userID, { path: '/' });
-    } 
   };
 
   const handleButtonClick = (button, event) => {
@@ -46,8 +79,8 @@ const Registration = ({ setShowLogin }) => {
   };
 
   return (
-    <div class="container-auth">
-      <img src="/logo.png" class="logo" alt="Your Logo"></img>
+    <div className={sessionStorage.getItem("LoadedMain") ? "container-auth loadedMain" : "container-auth"} data-src="/bg_main.png">
+      <img src="data:image/gif;base64,R0lGODlhMgAbAIAAAP///wAAACH5BAEAAAEALAAAAAAyABsAAAIjjI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2zRUAOw==" data-src="/logo.png" class="logo" alt="Your Logo"></img>
       <div class="wrapper">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'></link>
         <h1>Регистрация</h1>
@@ -87,6 +120,9 @@ const Registration = ({ setShowLogin }) => {
             <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required />
             <i class='bx bxs-lock-alt' ></i>
           </div>
+          {errorMessage && (
+          <p class="error-message" style={{ color: 'red' }}>{errorMessage}</p>
+          )}
           <button type="submit" class="btn">Зарегистрироваться</button>
         </form>
         <div class="register-link">

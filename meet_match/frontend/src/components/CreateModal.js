@@ -1,20 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CreateModal.css'
 
-const CreateModal = ({ showModal, closeModal, handleUpload }) => {
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [count, setCount] = useState(2);
+const CreateModal = ({ showModal, closeModal, handleUpload, modalName="Создание встречи", modalBtn="Создать", name_="", description_="", count_=2, date_="" }) => {
+    const [name, setName] = useState(name_);
+    const [description, setDescription] = useState(description_);
+    const [count, setCount] = useState(count_);
+    const [date, setDate] = useState(date_);
+    const [minDate, setMinDate] = useState('');
+    const maxDate = '2100-01-01';
+
+    useEffect(() => {
+      let today = new Date();
+      let dd = String(today.getDate()).padStart(2, '0');
+      let mm = String(today.getMonth() + 1).padStart(2, '0');
+      let yyyy = today.getFullYear();
+
+      let currentDate = yyyy + '-' + mm + '-' + dd;
+      setMinDate(currentDate);
+    }, []);
 
     const createSession = (event) => {
         event.preventDefault();
         if (Number(count) <= 0)
         {
-          handleUpload(name, description, 1);
+          handleUpload(name, description, date, 1);
         }
         else
         {
-          handleUpload(name, description, count);
+          handleUpload(name, description, date, count);
         }
     }
 
@@ -28,6 +41,10 @@ const CreateModal = ({ showModal, closeModal, handleUpload }) => {
     
       const handleDescriptionChange = (e) => {
         setDescription(e.target.value);
+      };
+      
+      const handleDateChange = (e) => {
+        setDate(e.target.value);
       };
     
       const handleParticipantsChange = (e) => {
@@ -46,7 +63,7 @@ const CreateModal = ({ showModal, closeModal, handleUpload }) => {
         <form onSubmit={createSession}>
         <div className="upload-modal-content">
           <span className="close" onClick={closeModal}>&times;</span>
-          <h1>Создание встречи</h1>
+          <h1>{modalName}</h1>
           <div className="input-group">
             <input
               className="session-input"
@@ -63,31 +80,45 @@ const CreateModal = ({ showModal, closeModal, handleUpload }) => {
               onChange={(e) => handleDescriptionChange(e)}
               placeholder="Сообщение для участников"
             />
+            <div  style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: "space-between" }}>
+              <p>Дата встречи:</p>
+              <input
+              className="session-input"
+              type="date"
+              value={date}
+              onChange={handleDateChange}
+              placeholder="Дата встречи"
+              style={{ width: '50%' }}
+              min={minDate}
+              max={maxDate}
+              required
+            />
+            </div>
             <div className="input-group" style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: "space-between" }}>
             <p>Количество участников:</p>
               <input
-                  type="number"
-                  className="session-input"
-                  value={count}
-                  onChange={(e) => handleParticipantsChange(e)}
-                  min={1}
-                  max={100}
-                  style={{ width: '25%' }}
-                  required
+                type="number"
+                className="session-input"
+                value={count}
+                onChange={(e) => handleParticipantsChange(e)}
+                min={1}
+                max={100}
+                style={{ width: '25%' }}
+                required
               />
           </div>
-          <input
-                  type="range"
-                  id="participantRange"
-                  name="participantRange"
-                  min={1}
-                  max={100}
-                  value={count}
-                  onChange={(e) => handleParticipantsChange(e)}
-                  style={{ width: '100%' }}
-              />
+          {/* <input
+              type="range"
+              id="participantRange"
+              name="participantRange"
+              min={1}
+              max={100}
+              value={count}
+              onChange={(e) => handleParticipantsChange(e)}
+              style={{ width: '100%' }}
+              /> */}
           </div>
-          <button className="modal-button">Создать</button>
+          <button className="modal-button">{modalBtn}</button>
         </div>
         </form>
       </div>
