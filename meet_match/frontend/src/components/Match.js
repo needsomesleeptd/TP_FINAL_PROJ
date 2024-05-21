@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
 import './Cards.css'
 import './Main.css'
+import { UserContext } from './MyContext';
 
 const Match = (props) => {
  const { id } = useParams();
  const [cookies] = useCookies(['AccessToken', 'UserId']);
  const [cards, setCards] = useState([]);
  const [selectedCard, setSelectedCard] = useState(-1);
+ const {setLetsSwipe} = useContext(UserContext);
  const sessionId = id;
 
  useEffect(() => {
@@ -40,25 +41,31 @@ const Match = (props) => {
   };
 
   cardsFeedback();
+
+  const interval = setInterval(() => {
+    cardsFeedback();
+  }, 2000);
+
+  return () => clearInterval(interval);
  }, [cookies, sessionId]);
 
  const cardsContinue = async () => {
   try {
-    const response = await fetch(`/api/sessions/${sessionId}/continueScrolling`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cookies.AccessToken}`
-        },
-        body: JSON.stringify({
-          'sessionID': sessionId
-        })
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    // const response = await fetch(`/api/sessions/${sessionId}/continueScrolling`, {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       'Authorization': `Bearer ${cookies.AccessToken}`
+    //     },
+    //     body: JSON.stringify({
+    //       'sessionID': sessionId
+    //     })
+    // });
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! Status: ${response.status}`);
+    // }
 
-    window.location.reload();
+    setLetsSwipe(true);
 
   } catch (error) {
     console.error('Error creating session:', error);
@@ -76,12 +83,7 @@ const handleCardClick = (index) => {
   <div class="cards-body">
     <div class="spec">
      <div style={{ textAlign: "center", marginTop: 20 }}>
-      {
-        cards.length > 1 ?
-        <p style={{ fontSize: "30px", fontWeight: "bold", color: "white" }}>Мы нашли подходящие места для вас!</p>
-        :
-        <p style={{ fontSize: "30px", fontWeight: "bold", color: "white" }}>Мы нашли подходящее место для вас!</p>
-      }
+      <p style={{ fontSize: "30px", fontWeight: "bold", color: "white" }}>Найденные места:</p>
      </div>
      {
       cards.length > 2 ?

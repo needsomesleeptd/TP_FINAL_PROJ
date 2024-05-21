@@ -87,7 +87,7 @@ const Registration = ({ setShowLogin }) => {
         <form onSubmit={handleRegistration}>
           <div style={{display: "flex"}}>
             <div class="input-box">
-              <input class="half-button" type="text" placeholder="Имя" value={name} onChange={(e) => setName(e.target.value)} required />
+              <input class="half-button" type="text" placeholder="Имя" value={name} onChange={(e) => setName(e.target.value)} required maxlength="100" />
               <i class='bx bx-text'></i>
             </div>
             <div class="input-box">
@@ -113,11 +113,11 @@ const Registration = ({ setShowLogin }) => {
             </div>
           </div>
           <div class="input-box">
-            <input type="text" placeholder="Логин" value={login} onChange={(e) => setLogin(e.target.value)} required />
+            <input type="text" placeholder="Логин" value={login} onChange={(e) => setLogin(e.target.value)} required maxlength="100" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
-            <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required maxlength="100" />
             <i class='bx bxs-lock-alt' ></i>
           </div>
           {errorMessage && (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext  } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { useParams } from 'react-router-dom';
@@ -10,6 +10,7 @@ import Cards from './components/Cards'
 import Match from './components/Match'
 import NotFound from './components/NotFound'
 import './custom.css'
+import { UserProvider, UserContext } from './components/MyContext';
 
 function App() {
   const [cookies] = useCookies(['AccessToken', 'UserId']);
@@ -25,6 +26,7 @@ function App() {
     const { id } = useParams();
     console.log(id);
     const [status, setStatus] = useState('');
+    const {letsSwipe} = useContext(UserContext);
 
     useEffect(() => {
       const CheckSession = async (sessionId) => {
@@ -42,6 +44,9 @@ function App() {
           console.log(data);
           if (data.Response.status === "OK") {
             setStatus(data.session.status);
+            if (!data.session.users.map(u => u.ID).find(m => m === cookies.UserId)) {
+              setStatus(0);
+            }
           }
           else {
             setStatus(-1);
@@ -53,7 +58,13 @@ function App() {
       };
   
       CheckSession();
-    }, [sessionId]);
+
+      const interval = setInterval(() => {
+        CheckSession(); // Fetch the status at regular intervals
+      }, 1000); // Fetch every second
+  
+      return () => clearInterval(interval); // Clean up the interval on component unmount
+    }, [id]);
 
     console.log(`status: ${status}`);
   
@@ -61,8 +72,8 @@ function App() {
       return <Session />;
     } else if (status === 1) {
       return <Cards />;
-    } else if (status === 2) {
-      return <Match />;
+    } else if (status >= 2) {
+      return letsSwipe ? <Cards /> : <Match />;
     } else if (status === -1) {
       return <NotFound />;
     } else {
@@ -72,6 +83,7 @@ function App() {
 
 
   return (
+    <UserProvider>
     <Router>
       <Routes>
         <Route
@@ -81,25 +93,26 @@ function App() {
         <Route
           path="/auth"
           element={(isLoggedIn && hasUserId) ?
-                    <Navigate to='/' /> :
+            <Navigate to='/' /> :
                     showLogin ?
-                      <Login setShowLogin={setShowLogin} /> :
-                      <Registration setShowLogin={setShowLogin} />}
-        />
+                    <Login setShowLogin={setShowLogin} /> :
+                    <Registration setShowLogin={setShowLogin} />}
+                    />
         <Route
           path="/session/:id"
           element={(isLoggedIn && hasUserId) ?
             <DataFetcher /> :
             showLogin ?
-              <Login setShowLogin={setShowLogin} /> :
-              <Registration setShowLogin={setShowLogin} />}
-        />
+            <Login setShowLogin={setShowLogin} /> :
+            <Registration setShowLogin={setShowLogin} />}
+            />
         <Route
           path="*"
           element={requireAuth(<NotFound />)}
-        />
+          />
       </Routes>
     </Router>
+    </UserProvider>
   );
 }
 

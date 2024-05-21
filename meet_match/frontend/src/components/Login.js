@@ -67,11 +67,11 @@ const Login = ({ setShowLogin }) => {
         <h1>Авторизация</h1>
         <form onSubmit={handleLogin}>
           <div class="input-box">
-            <input type="text" placeholder="Логин" value={login} onChange={(e) => setLogin(e.target.value)} required />
+            <input type="text" placeholder="Логин" value={login} onChange={(e) => setLogin(e.target.value)} required maxlength="100" />
             <i class='bx bxs-user'></i>
           </div>
           <div class="input-box">
-            <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required maxlength="100" />
             <i class='bx bxs-lock-alt' ></i>
           </div>
           {/* <div class="remember-forgot">
