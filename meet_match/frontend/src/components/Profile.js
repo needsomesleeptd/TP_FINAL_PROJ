@@ -65,7 +65,7 @@ function Profile() {
         console.log(data);
 
         setInfo(data.peron_stats);
-        setCards([data.peron_stats.most_liked_place, data.peron_stats.most_disliked_place]);
+        setCards([data.peron_stats.most_disliked_place,data.peron_stats.most_liked_place,]);
     
       } catch (error) {
         console.error('Error creating session:', error);
@@ -96,7 +96,7 @@ function Profile() {
           <p style={{
             marginLeft: index === 1 ? "-20px" : "auto",
             marginRight: index === 1 ? "auto" : "-20px"
-          }}>{index === 0 ? `Самая любимая карта (${info.most_liked_scrolled_count}):` : `Самая нелюбимая карта (${info.most_disliked_scrolled_count}):`}</p>
+          }}>{index === 0 ? `Самая любимая карта (👍 ${info.most_liked_scrolled_count})` : `Самая нелюбимая карта (👎 ${info.most_disliked_scrolled_count})`}</p>
           <motion.div
           key={index}
           onClick={() => handleCardClick(index)}

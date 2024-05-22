@@ -1,6 +1,7 @@
 package scroll_stats_repo
 
 import (
+	"errors"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/models/models_da"
 
@@ -31,8 +32,11 @@ func (s *ScrollStatsRepository) GetMostLikedCardStats(userID uint64) (*models.Ca
 		Order("swiped_times DESC").
 		Limit(1).
 		Scan(&cardStats).Error
-	if err != nil {
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
+	}
+	if err == gorm.ErrRecordNotFound { //TODO::Fix this
+		cardStats.CardID = 0
 	}
 	return models_da.CardsStatsFromDa(cardStats), nil
 }
@@ -46,8 +50,11 @@ func (s *ScrollStatsRepository) GetMostDislikedCardStats(userID uint64) (*models
 		Order("swiped_times DESC").
 		Limit(1).
 		Scan(&cardStats).Error
-	if err != nil {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
+	}
+	if err == gorm.ErrRecordNotFound { //TODO::Fix this
+		cardStats.CardID = 0
 	}
 	return models_da.CardsStatsFromDa(cardStats), nil
 }

@@ -46,14 +46,14 @@ var (
 )
 
 func main() {
-	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
+	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{TranslateError: true})
 	if err != nil {
 		fmt.Println(err.Error())
 		//os.Exit(1)
 		time.Sleep(5 * time.Second)
 	}
 
-	db, err = gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{})
+	db, err = gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{TranslateError: true})
 	if err != nil {
 		fmt.Println(err.Error())
 		time.Sleep(5 * time.Second)

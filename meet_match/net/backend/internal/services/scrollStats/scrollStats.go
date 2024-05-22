@@ -33,8 +33,8 @@ func (serv *ScrolledStatsService) GetPersonStats(userID uint64) (*models.PersonS
 	var mostLikedCardStats *models.CardStats
 	var mostDislikedCardStats *models.CardStats
 
-	var mostDislikedCard *models.Card
-	var mostLikedCard *models.Card
+	mostDislikedCard := &models.Card{}
+	mostLikedCard := &models.Card{}
 
 	var sessions []session.Session
 
@@ -56,14 +56,18 @@ func (serv *ScrolledStatsService) GetPersonStats(userID uint64) (*models.PersonS
 	log.Printf("mostlikedCardStats %v", *mostLikedCardStats)
 	log.Printf("mostDislikedCardStats %v", *mostDislikedCardStats)
 
-	mostLikedCard, err = serv.repoCards.GetCard(mostLikedCardStats.CardID)
-	if err != nil {
-		return nil, errors.Wrap(err, "error in getting mostLiked card")
+	if mostLikedCardStats.CardID != 0 { // check that there is a card which was disliked
+		mostLikedCard, err = serv.repoCards.GetCard(mostLikedCardStats.CardID)
+		if err != nil {
+			return nil, errors.Wrap(err, "error in getting mostLiked card")
+		}
 	}
 
-	mostDislikedCard, err = serv.repoCards.GetCard(mostDislikedCardStats.CardID)
-	if err != nil {
-		return nil, errors.Wrap(err, "error in getting mostLiked card")
+	if mostDislikedCardStats.CardID != 0 {
+		mostDislikedCard, err = serv.repoCards.GetCard(mostDislikedCardStats.CardID)
+		if err != nil {
+			return nil, errors.Wrap(err, "error in getting mostDisliked card")
+		}
 	}
 	sessions, err = serv.sessionMan.GetUserSessions(userID)
 	if err != nil {
