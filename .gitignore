@@ -19,3 +19,8 @@
 
 # Go workspace file
 go.work
+**__pycache__
+.idea
+venv
+*_e5_large
+.vscode

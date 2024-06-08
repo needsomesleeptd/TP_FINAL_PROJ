@@ -1,0 +1,136 @@
+version: "3.8"
+
+services:
+  web:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - redis-go-server
+      - frontend
+    #networks:
+      #- postgres
+
+  redis-db:
+    image: redis:alpine
+    container_name: redis-db
+    ports:
+      - "6379:6379"
+
+  postgres:
+    container_name: proj_bd
+    build: ./database
+    command: 
+      - "postgres"
+      - "-c"
+      - "max_connections=50"
+      - "-c"
+      - "shared_buffers=1GB"
+      - "-c"
+      - "effective_cache_size=4GB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "maintenance_work_mem=512MB"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "temp_file_limit=10GB"
+      - "-c"
+      - "log_min_duration_statement=200ms"
+      - "-c"
+      - "idle_in_transaction_session_timeout=10s"
+      - "-c"
+      - "lock_timeout=1s"
+      - "-c"
+      - "statement_timeout=60s"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.max=10000"
+      - "-c"
+      - "pg_stat_statements.track=all"
+    environment:
+      POSTGRES_DB: "meetmatch_db"
+      POSTGRES_USER: "any1"
+      POSTGRES_PASSWORD: "1"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+    #networks:
+      #- postgres
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4:7.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "ggwpez@amil.ru"
+      PGADMIN_DEFAULT_PASSWORD: "1"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    expose:
+      - '80'
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+         cpus: '0.5'
+         memory: 1G
+
+  redis-go-server:
+    build:
+      context: ./net
+    environment:
+      - REDIS_DB_URL=redis-db:6379
+      - REDIS_DB_PASSWORD=
+      - REDIS_DB=0
+    ports:
+      - "8080:8080"
+    container_name: redis-go-server
+    links:
+     - redis-db
+    depends_on:
+      - redis-db
+      - postgres
+    #networks:
+      #- postgres
+
+  python-flask-app:
+    build:
+      context: ./neural_network
+    ports:
+      - "5000:5000"
+    container_name: python-flask-app
+    depends_on: # if doesnt works delete
+      - postgres # if doesnt works delete
+    restart: always # if doesnt works delete
+    #networks:
+     # - postgres
+  
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    container_name: frontend
+    volumes:
+      - "./frontend:/frontend"
+      - /frontend/node_modules
+   # networks:
+   #   - postgres
+
+volumes:
+  pgadmin-data:
+  redis-data:
+
+#networks:
+#  postgres:
+#    driver: bridge
+    

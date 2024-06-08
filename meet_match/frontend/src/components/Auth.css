@@ -1,0 +1,165 @@
+.container-auth {
+    margin: 0;
+    padding: 0;
+    background-image: url('../../public/bg_main-min.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.wrapper {
+    width: 320px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, .2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+    color: #fff;
+    border-radius: 10px;
+    padding: 30px 30px;
+}
+
+.wrapper h1 {
+    font-size: 26px;
+    text-align: center;
+}
+
+.half-button {
+    max-width: 110px;
+}
+
+.wrapper .input-box {
+    width: 100%;
+    height: 50px;
+    margin: 25px 0;
+}
+
+.input-box input {
+    width: 86%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, .2);
+    border-radius: 40px;
+    font-size: 14px;
+    color: #fff;
+    padding: 15px 20px 15px 20px;
+}
+
+.input-box input::placeholder {
+    color: #fff;
+}
+
+.input-box i {
+    position: absolute;
+    transform: translate(-180%, 70%);
+    font-size: 20px;
+}
+
+.wrapper .remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin: 0px 0 15px;
+}
+
+.remember-forgot label input {
+    accent-color: #fff;
+    margin-right: 3px;
+}
+
+.remember-forgot a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.remember-forgot a:hover {
+    text-decoration: underline;;
+}
+
+.wrapper .btn {
+    width: 100%;
+    height: 45px;
+    background: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+}
+
+.wrapper .register-link {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: -10px;
+}
+
+.error-message {
+    font-size: 12px;
+    text-align: center;
+    margin-top: -10px;
+}
+
+.register-link p a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link p a:hover {
+    text-decoration: underline;
+}
+
+
+
+.rounded-rectangular-block {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, .2);
+    border-radius: 40px;
+    overflow: hidden;
+}
+
+.rounded-rectangular-block label {
+    font-size: 20px;
+    color:rgba(108, 108, 108, 1)
+}
+
+.rounded-rectangular-block button {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.rounded-rectangular-block button img {
+    width: 100%;
+    max-width: 40px;
+    height: auto;
+}
+
+.rounded-rectangular-block button.selected {
+    background-color: #fcf2f2;
+}
+
+.rounded-rectangular-block button.selected i {
+    color: #191818;
+}

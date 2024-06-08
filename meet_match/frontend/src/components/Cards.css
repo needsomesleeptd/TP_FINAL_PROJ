@@ -1,0 +1,97 @@
+.cards-body {
+    margin: 0;
+    padding: 0;
+    background-image: url('../../public/bg_cards-min.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cards-descr {
+    text-align: left;
+    margin: 0 10px;
+    font-size: 14px;
+    color: white;
+    text-decoration: none;
+}
+
+.cards-descr a {
+    color: white;
+    text-decoration: none;
+    pointer-events: none;
+}
+
+.spec {
+    backdrop-filter: blur(10px);
+    width: 100%;
+    height: 100%;
+}
+
+.cards-desc {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 20px;
+    color: rgb(118, 109, 109);
+}
+
+.cards-card {
+    margin-bottom: 70px;
+    width: 270px;
+    height: 430px;
+    background: #3a3737;
+    border-radius: 25px;
+    border: 2px solid #000;
+    box-sizing: border-box;
+    position: absolute;
+    backdrop-filter: blur(10px);
+ }
+
+ .cards-card p {
+    color: rgb(255, 255, 255);
+ }
+ 
+ .cards-img {
+    height: 250px;
+    opacity: 0.9;
+    border: 2px solid #000;
+    box-sizing: border-box;
+    object-fit: cover;
+    border-radius: 20px;
+    pointer-events: none;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.5);
+ }
+ 
+
+.horizontal-scroll-block {
+    overflow-x: auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.horizontal-scroll-block::-webkit-scrollbar {
+  width: 10px;
+}
+
+.horizontal-scroll-block::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #b7b7b7, #323232);
+  border-radius: 5px;
+}
+
+.horizontal-scroll-block::-webkit-scrollbar-track {
+  background-color: #cac8c8;
+  border-radius: 10px;
+}
+
+.horizontal-scroll-block::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #cccbcb, #6d6d6d);
+}
+
+

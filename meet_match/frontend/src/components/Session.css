@@ -1,0 +1,316 @@
+.precontainer {
+    margin: 0;
+    padding: 0;
+    background-image: url('../../public/bg_session-min.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1 1 auto;
+}
+
+.container {
+    margin-top: 150px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 750px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(73, 67, 67, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: #ffffff;
+}
+
+.container-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.container h2 {
+    font-size: 24px;
+    margin-left: 10px;
+}
+
+.container p {
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.input-container input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.input-container button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    background-color: #c4c4c4;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.turbo-button {
+    display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.invite-link {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.participants-table {
+    width: 100%;
+}
+
+.participants-table th,
+.participants-table td {
+    padding: 10px;
+    border-bottom: 1px solid #000000;
+}
+
+.participants-table td:nth-child(1),
+.participants-table th:nth-child(1) {
+    text-align: left;
+    padding-left: 5%;
+}
+
+.participants-table td:nth-child(2),
+.participants-table th:nth-child(2) {
+    text-align: right;
+    padding-right: 5%;
+}
+
+.participants-table th {
+    border-radius: 5px;
+    background-color: #3c3434;
+}
+
+.participants-table td input[type="checkbox"] {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.participants-count {
+    margin-bottom: 10px;
+    padding-left: 15px;
+    font-size: 16px;
+}
+
+.no-participants {
+    font-size: 16px;
+    font-style: italic;
+    color: #888;
+}
+
+.checkbox-container {
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    cursor: pointer;
+}
+
+.checkbox-input {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.checkbox-custom {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #ffffff;
+    border: 2px solid #bbbbbb;
+    border-radius: 4px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.checkbox-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%) rotate(30deg);
+    width: 4px;
+    height: 10px;
+    background-color: transparent;
+    border-bottom: 2px solid #ffffff;
+    border-right: 2px solid #ffffff;
+    transition: opacity 0.3s;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+    background-color: #5cb85c;
+    border-color: #5cb85c;
+    opacity: 1;
+}
+
+.input-container {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.super-btns {
+    display: flex;
+    flex-direction: row;
+}
+
+.super-input {
+    width: 50%;
+}
+
+@media (max-width: 800px) {
+    .input-container {
+        flex-direction: column;
+    }
+    .super-btns {
+        margin-top: 15px;
+    }
+    .super-btns button {
+        width: 33vw;
+    }
+}
+
+.tags-precontainer p {
+    margin-right: 10px;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 3px;
+}
+
+.tag {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    background: linear-gradient(to bottom, #5bd66f, #098035);
+    border-radius: 4px;
+    height: 3%;
+    margin-right: 10px;
+}
+
+.tags-p {
+    margin: 0px;
+}
+
+.tag button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    color: #847676;
+    margin-left: -10px;
+    padding: 6px 14px;
+}
+
+.tags-button:hover {
+    color: #ffffff;
+}
+
+.tags-new {
+    position: relative;
+}
+
+.tag-list {
+    position: absolute;
+    left: 0;
+    top: 80%;
+    z-index: 1;
+    list-style-type: none; 
+    display: flex; 
+    flex-direction: column;
+    flex-wrap: wrap; 
+    gap: 8px; 
+    background-color: rgb(180, 178, 178);
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tag-list li {
+    padding: 5px 10px; 
+    background-color: #8f8e8e; 
+    border-radius: 5px; 
+    cursor: pointer; 
+}
+
+.tag-list li:hover {
+    background-color: #c8c7c7; 
+}
+
+.combobox-tag {
+    background-color: transparent;
+}
+
+.custom-select {
+    appearance: none; /* Удаление стандартного стрелочного индикатора */
+    background-color: #f7f7f7; /* Цвет фона */
+    border: 1px solid #ccc; /* Граница с тенью */
+    border-radius: 5px; /* Скругление углов */
+    font-size: 16px; /* Размер шрифта */
+    color: #333; /* Цвет текста */
+    width: 150px; /* Ширина */
+    cursor: pointer; /* Индикатор курсора */
+  }
+  
+  /* Стиль при фокусе */
+  .custom-select:focus {
+    outline: none; /* Удаление обводки фокуса */
+    box-shadow: 0 0 5px #719ece; /* Тень при фокусе */
+  }
+  
+  /* Стили для вариантов выпадающего списка */
+  .custom-select option {
+    background-color: #f7f7f7; /* Цвет фона для вариантов */
+    color: #333; /* Цвет текста для вариантов */
+  }
+
+
+.vertical-scroll-block2 {
+align-items: center;
+padding: 10px;
+margin: 10px;
+border-radius: 20px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+overflow-y: auto;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar {
+width: 10px;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar-thumb {
+background: linear-gradient(to bottom, #b7b7b7, #323232);
+border-radius: 5px;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar-track {
+background-color: #cac8c8;
+border-radius: 10px;
+}
+
+.vertical-scroll-block2::-webkit-scrollbar-thumb:hover {
+background: linear-gradient(to bottom, #cccbcb, #6d6d6d);
+}
+
+

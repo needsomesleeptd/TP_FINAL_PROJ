@@ -1,0 +1,267 @@
+.create-session-container-mega {
+  margin: 0;
+  padding: 0;
+  background-image: url('../../public/bg_main-min.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  align-items: center;
+  overflow: hidden;
+}
+
+.create-session-container {
+  text-align: center;
+  width: 80%;
+  height: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.session-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.session-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 5px;
+}
+
+.profile-button {
+  padding: 15px 20px;
+  font-size: 16px;
+  background: linear-gradient(to bottom right, #d483af, #7db592);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.4);
+}
+
+.profile-button:hover {
+  background-color: #0056b3;
+}
+
+.profile-header {
+  margin-left: 3px;
+  width: 280px;
+  display: flex;
+  justify-content: space-between;
+  color: rgb(255, 255, 255);
+  align-items: center;
+  z-index: 1000; 
+  font-size: 20px;
+  padding: 10px 20px;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.profile-header a {
+  text-decoration: none;
+  color: #ededed;
+  font-weight: bold;
+}
+
+.profile-buttons {
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  color: rgb(255, 255, 255);
+  align-items: center;
+  padding: 10px;
+}
+
+.profile-content {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.inner-scroll-content {
+  width: 100%;
+}
+
+.profile-title {
+  font-size: 1.5em;
+  color: #555;
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.profile-user {
+  display: flex;
+  align-items: center; /* добавляем выравнивание по центру */
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.profile-header .user-profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.profile-sessions .session {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px 60px;
+  border-radius: 30px;
+  background-color: #323030;
+  color:rgb(255, 255, 255);
+  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.4);
+}
+
+.profile-sessions .profile-posttitle{
+  width: 35%;
+}
+
+
+.modal {
+  display: none; /* Скрываем модальное окно по умолчанию */
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Добавляем прокрутку, если содержимое модального окна слишком большое */
+  background-color: rgba(0, 0, 0, 0.4); /* Прозрачный фон */
+}
+
+.modal-content {
+  background-color: rgba(87, 87, 87, 0.4);
+  margin: 15% auto; /* 15% отступ сверху и снизу, центрирование по горизонтали */
+  padding: 20px;
+  border: 0px solid #4b4646;
+  width: 300px;
+  
+  margin: 40px auto;
+  text-align: center;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h1 {
+  color: rgb(255, 255, 255);
+}
+
+.modal-button {
+  width: 200px;
+  padding: 15px 20px;
+  font-size: 16px;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  background: linear-gradient(to bottom left, #5bd66f, #323232);
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+.vertical-scroll-block {
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 10px;
+  background-color: #242222;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  height: 400px;
+}
+
+@media (max-width: 600px) {
+  .vertical-scroll-block {
+    height: 460px;
+  }
+
+  .profile-sessions .session {
+    flex-direction: column;
+  }
+
+  .profile-posttitle h3 {
+    margin: 0;
+  }
+}
+
+.vertical-scroll-block::-webkit-scrollbar {
+  width: 10px;
+}
+
+.vertical-scroll-block::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #b7b7b7, #323232);
+  border-radius: 5px;
+}
+
+.vertical-scroll-block::-webkit-scrollbar-track {
+  background-color: #cac8c8;
+  border-radius: 10px;
+}
+
+.vertical-scroll-block::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #cccbcb, #6d6d6d);
+}
+
+
+.leave-button {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 30px;
+  background-color: #cf4f24;
+  color: white;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  right: 0;
+  top: 0;
+  transform: translateX(10px) translateY(-10px);
+}
+
+.leave-button:hover {
+  background-color: #2980b9;
+}
+

@@ -1,0 +1,62 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: 'black';
+  overflow-x: hidden;
+}
+
+a {
+    color: #0366d6;
+  }
+  
+code {
+  color: #E01A76;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+#root > div:first-child {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  flex: 0 0 auto;
+}
+
+.container {
+  flex: 1 1 auto;
+  padding: 0;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: 300px;
+  height: auto;
+}
+
+@media (max-width: 600px) {
+  .logo {
+    width: 200px;
+  }
+}
+
+.loadedMain {
+  background-image: url('../public/bg_main.png');
+}
+
+.loadedSession {
+  background-image: url('../public/bg_session.png');
+}
+
+.loadedCards {
+  background-image: url('../public/bg_cards.png');
+}
