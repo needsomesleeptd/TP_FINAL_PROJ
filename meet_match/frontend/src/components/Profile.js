@@ -108,8 +108,10 @@ function Profile() {
           marginRight: index === 1 ? 0 : "-20px"
         }}
           >
-          <div style={{display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            {selectedCard === index ? (
+          <div style={{display: "flex", flexDirection: "column", justifyContent: "space-between", height: (index === 0 && info.most_liked_scrolled_count > 0) || (index === 1 && info.most_disliked_scrolled_count > 0) ? "auto" : "100%" }}>
+            {
+              index === 0 && info.most_liked_scrolled_count > 0 || index === 1 && info.most_disliked_scrolled_count > 0 ?
+            selectedCard === index ? (
               <>
                 <p style={{textAlign: "center", margin: "20px 10px", fontSize: "16px", fontWeight: "bold" }}>{card.title}</p>
                 <p className="cards-descr" dangerouslySetInnerHTML={{ __html: card.description }} />
@@ -130,7 +132,12 @@ function Profile() {
             <p style={{textAlign: "center", margin: "10px", fontSize: "16px" }}>{card.title}</p>
             <p style={{textAlign: "center", margin: "10px", fontSize: "12px" }}>*Нажмите, чтобы узнать подробнее*</p>
             </>
-            }
+            
+            :
+            <div style={{display: "flex", flexDirection: "column", height: "100%"}}>
+            <p style={{textAlign: "center", margin: "auto", fontSize: "12px" }}>Вы ещё не посмотрели достаточно карт для статистики</p>
+            </div>
+          }
           </div>
         </motion.div>
         </div>
