@@ -33,7 +33,6 @@ func New(urlRecSys string, cardRepository repository.CardRepository) (*RecSys, e
 	return &RecSys{Url: urlRecSys, cardRep: cardRepository}, nil
 }
 
-// TODO: refactor
 func (r *RecSys) CardsSearch(prompt string, sessionId string, userId uint64, categories []string) ([]*models_dto.Card, error) {
 	req := ModelRequest{
 		Query:      prompt,

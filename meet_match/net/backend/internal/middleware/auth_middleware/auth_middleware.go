@@ -39,8 +39,7 @@ func JwtAuthMiddleware(next http.Handler, secret string, tokenHandler auth_utils
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), UserIDContextKey, payload.ID) // never do this
-		//ctx = r.Clone(ctx)
+		ctx := context.WithValue(r.Context(), UserIDContextKey, payload.ID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

@@ -255,7 +255,6 @@ class RecommendationSystem:
 
     def _filter_place(self, place_idx, criteria):
 
-        # TODO: fix
         details = {}
         if self.places_info:
             details = self.places_info[place_idx]

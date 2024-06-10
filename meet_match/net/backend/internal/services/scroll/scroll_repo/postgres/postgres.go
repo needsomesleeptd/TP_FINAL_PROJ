@@ -21,7 +21,6 @@ func NewScrollRepository(db *gorm.DB) scroll_repo.ScrollRepository {
 	return &scrollRepository{db: db}
 }
 
-// TODO: add timestamp to table
 func (s scrollRepository) AddScrollFact(fact *models.FactScrolled) error {
 	pgFact := models_da.ToPostgresFactScrolled(fact)
 	pgFact.DateTime = time.Now()
@@ -66,9 +65,4 @@ func (s scrollRepository) GetAllUsersIdsForSession(session_id uuid.UUID) ([]uint
 	}
 
 	return ids, nil
-}
-
-func (s scrollRepository) GetAllPlaces(session_id uuid.UUID, user_id uint64) ([]uint64, error) {
-	//TODO implement me
-	panic("implement me")
 }

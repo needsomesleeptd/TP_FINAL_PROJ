@@ -1,7 +1,7 @@
 package match_service
 
 import (
-	"fmt"
+	"log"
 	"test_backend_frontend/internal/models"
 	"test_backend_frontend/internal/services/cards/repository"
 	match_repo "test_backend_frontend/internal/services/match/matchRepo"
@@ -44,7 +44,7 @@ func (m *MatchService) GetMatchedCardsBySession(sessionID uuid.UUID) ([]*models.
 	for i, match := range matches {
 		matchedCards[i], err = m.cardRepo.GetCard(match.CardMatchedID)
 		if err != nil {
-			fmt.Printf("error extracting matchedCards by session: %w\n", err) //TODO:: add logging
+			log.Printf("error extracting matchedCards by session: %w\n", err) //TODO:: add logging
 		}
 
 	}

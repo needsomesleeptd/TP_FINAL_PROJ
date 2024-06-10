@@ -24,8 +24,6 @@ type CardsMatchChecker interface {
 	IsMatchHappened(scrolled *models.FactScrolled) (bool, error)
 }
 
-// TODO: one card
-// TODO: jwt in header
 type Response struct {
 	resp.Response
 	IsMatched bool               `json:"is_matched"`
@@ -34,7 +32,7 @@ type Response struct {
 
 func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64) //terrible idea but i have no time
+		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
 		if !ok {
 			render.JSON(w, r, response.Error("unable to fetch userID to check the data"))
 			return
@@ -55,7 +53,6 @@ func NewCheckHandler(checker CardsMatchChecker) http.HandlerFunc {
 			render.JSON(w, r, resp.Error("failed to parse uuid"))
 			return
 		}
-		//wasMatched,err := checker.IsMatchHappened()
 		cards, err := checker.GetMatchCards(uid, userID)
 		if err != nil {
 			render.JSON(w, r, resp.Error("failed to get match"))

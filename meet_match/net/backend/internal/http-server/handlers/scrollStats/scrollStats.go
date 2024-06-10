@@ -18,7 +18,7 @@ type ResponseScrollStats struct {
 func GetUserStats(matchServ scroll_stats_serv.IScrolledStatsService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64) //terrible idea but i have no time
+		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
 		if !ok {
 			render.JSON(w, r, response.Error("unable to fetch userID to get feedback"))
 			return

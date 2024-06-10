@@ -13,7 +13,6 @@ import (
 	scroll_stats_handler "test_backend_frontend/internal/http-server/handlers/scrollStats"
 	sessions_handler "test_backend_frontend/internal/http-server/handlers/session"
 	"test_backend_frontend/internal/middleware/auth_middleware"
-	"test_backend_frontend/internal/models/models_da"
 	rec_model_client "test_backend_frontend/internal/rec-model-client"
 	auth_service "test_backend_frontend/internal/services/auth"
 	repo_adapter "test_backend_frontend/internal/services/auth/user_repo/user_repo_ad"
@@ -46,17 +45,11 @@ var (
 )
 
 func main() {
+
 	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{TranslateError: true})
 	if err != nil {
 		fmt.Println(err.Error())
-		//os.Exit(1)
-		time.Sleep(5 * time.Second)
-	}
-
-	db, err = gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{TranslateError: true})
-	if err != nil {
-		fmt.Println(err.Error())
-		time.Sleep(5 * time.Second)
+		os.Exit(1)
 	}
 	cardRepo := postgres3.NewCardRepo(db)
 	model, err := rec_model_client.New(MODEL_ROUTE, cardRepo)
@@ -71,12 +64,11 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	db.AutoMigrate(models_da.User{}) //TODO: this is a hack, fix this
+
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	// TODO: add config
 
 	//auth service
 	userRepo := repo_adapter.NewUserRepositoryAdapter(db)

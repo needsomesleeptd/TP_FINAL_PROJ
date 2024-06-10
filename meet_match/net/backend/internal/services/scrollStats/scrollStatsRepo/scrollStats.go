@@ -35,7 +35,7 @@ func (s *ScrollStatsRepository) GetMostLikedCardStats(userID uint64) (*models.Ca
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
-	if err == gorm.ErrRecordNotFound { //TODO::Fix this
+	if err == gorm.ErrRecordNotFound { //TODO::Fix this on frontend
 		cardStats.CardID = 0
 	}
 	return models_da.CardsStatsFromDa(cardStats), nil
@@ -53,7 +53,7 @@ func (s *ScrollStatsRepository) GetMostDislikedCardStats(userID uint64) (*models
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
-	if err == gorm.ErrRecordNotFound { //TODO::Fix this
+	if err == gorm.ErrRecordNotFound { //TODO::Fix this on frontend
 		cardStats.CardID = 0
 	}
 	return models_da.CardsStatsFromDa(cardStats), nil

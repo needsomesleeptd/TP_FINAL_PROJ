@@ -8,7 +8,6 @@ type User struct {
 	Surname  string
 	Age      int
 	Gender   bool // true is a man 0_0, false is women
-	//TODO:: think about adding a location
 }
 
 type UserReq struct {
@@ -16,13 +15,12 @@ type UserReq struct {
 	Name       string   `json:"Name" redis:"Name"`
 	Request    string   `json:"Request" redis:"Request"`
 	Categories []string `json:"Categories" redis:"Categories"`
-	//TODO:: add embeddings
 }
 
 type SessionStatus int
 
 const (
-	Waiting SessionStatus = iota // Role check depends on the order
+	Waiting SessionStatus = iota
 	Scrolling
 	Ended
 	ScrollingWasMatched

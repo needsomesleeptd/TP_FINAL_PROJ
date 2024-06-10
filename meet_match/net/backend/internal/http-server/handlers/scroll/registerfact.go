@@ -83,24 +83,7 @@ func NewScrollFactRegistrateHandler(registrator ScrollFactRegistrator, tokenizer
 		}
 		is_match := false
 
-		/*if req.IsLiked {
-			is_match, err = registrator.IsMatchHappened(fact)
-			if err != nil {
-				render.JSON(w, r, resp.Error("match check issue"))
-				return
-			}
-		}
-		*/
 		var places []*models_dto.Card
-		/*if is_match {
-			place, err := cardProv.GetCard(fact.PlacesId)
-			if err != nil {
-				render.JSON(w, r, resp.Error("place get issue"))
-				return
-			}
-
-			places = append(places, models_dto.ToDTOCard(place))
-		}*/
 
 		render.JSON(w, r, Response{
 			Response:  resp.OK(),

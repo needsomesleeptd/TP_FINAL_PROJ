@@ -57,7 +57,7 @@ func (s *SessionManager) CreateSession(creator *models.UserReq, sessionName stri
 		Status:      models.Waiting,
 		Description: description,
 	}
-	session.TimeEnds = time.Now().Add(time.Hour * 200) // TODO:: remove that when frontend can work with time
+
 	marhsalledData, err := json.Marshal(session)
 	if err != nil {
 		return uuid.Max, errors.New("failed to marshall Session")
@@ -192,8 +192,7 @@ func (s *SessionManager) GetUserSessions(userID uint64) ([]Session, error) {
 		}
 		err = json.Unmarshal([]byte(sessionMarshalled), &session)
 		if err != nil {
-			//return nil, errors.Join(errors.New("getting session error"), err)
-			continue // yeah it is because of backups, probably that it fails to unmarshall
+			return nil, errors.Join(errors.New("getting session error"), err)
 		}
 		for _, user := range session.Users {
 			if userID == user.ID {
@@ -222,7 +221,7 @@ func (s *SessionManager) ChangeSessionStatus(sessionID uuid.UUID, status models.
 	if err != nil {
 		return errors.New("failed to marshall Session")
 	}
-	err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err() //TODO:: add duration here
+	err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err()
 	if err != nil {
 		return errors.Join(errors.New("changing user status error"), err)
 	}
@@ -255,7 +254,7 @@ func (s *SessionManager) DeletePersonFromSession(sessionID uuid.UUID, userID uin
 		return errors.New("failed to marshall Session")
 	}
 	if len(session.Users) > 0 {
-		err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err() //TODO:: add duration here
+		err = s.Client.Set(context.TODO(), sessionID.String(), marhsalledData, 0).Err()
 	} else {
 		err = s.Client.Del(context.Background(), sessionID.String()).Err()
 	}

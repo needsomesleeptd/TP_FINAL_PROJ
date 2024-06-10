@@ -1,10 +1,11 @@
 package models_da
 
 import (
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"test_backend_frontend/internal/models"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type FactScrolled struct {
@@ -30,7 +31,6 @@ func ToPostgresFactScrolled(scrolled *models.FactScrolled) *FactScrolled {
 }
 
 func ToModelFactScrolled(scrolled *FactScrolled) (*models.FactScrolled, error) {
-	// TODO: ой-ой-ой подумать
 	session_id, err := uuid.Parse(scrolled.SessionID)
 	if err != nil {
 		return nil, errors.Wrap(err, "ToModelFactScrolled parse error")

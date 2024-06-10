@@ -209,7 +209,7 @@ func SessionModifyuser(sessionManager *session.SessionManager) http.HandlerFunc 
 			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
-		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64) //terrible idea but i have no time
+		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
 		if !ok {
 			render.JSON(w, r, response.Error("unable to fetch userID to get feedback"))
 			return
